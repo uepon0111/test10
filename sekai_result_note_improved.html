@@ -1,0 +1,1066 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f5f9fd">
+<title>セカイ リザルトノート — デザインプレビュー</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light;--bg:#f4f8fc;--surface:#fff;--surface-2:#f8fbff;--ink:#192f4b;--muted:#73859b;--line:#e3ebf4;--blue:#397bf6;--blue-2:#eaf2ff;--green:#18ad83;--green-2:#e5f8f1;--gold:#e8ae35;--gold-2:#fff5d8;--red:#d95769;--red-2:#fff0f1;--purple:#8160c9;--shadow:0 10px 32px rgba(32,76,124,.07);--shadow-sm:0 3px 12px rgba(32,76,124,.055);--sidebar:252px;--radius:18px;box-sizing:border-box;font-synthesis:none;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased}
+*,*::before,*::after{box-sizing:border-box;margin:0}
+html,body{height:100%;min-width:320px}
+body{overflow:hidden;background:var(--bg);color:var(--ink);font:14px/1.65 "Noto Sans JP",system-ui,-apple-system,"Segoe UI",sans-serif}
+button,input,select{font:inherit;color:inherit}
+button{border:0;background:none;cursor:pointer}
+button:disabled{cursor:not-allowed;opacity:.55}
+input,select{min-width:0}
+:focus-visible{outline:3px solid #397bf655;outline-offset:2px}
+svg.icon{width:19px;height:19px;display:block;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+#app{height:100%;display:flex;min-width:0}
+.sidebar{width:var(--sidebar);flex:none;display:flex;flex-direction:column;gap:7px;padding:18px 13px 14px;background:var(--surface);border-right:1px solid var(--line);z-index:25;overflow:hidden;transition:width .24s ease,transform .24s ease}
+.sidebar.collapsed{width:78px}
+.brand{height:54px;display:flex;align-items:center;gap:11px;padding:0 8px 11px;white-space:nowrap;flex:none}
+.brand-mark{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;color:#fff;background:linear-gradient(145deg,#477df4 0%,#3d95ed 48%,#34c3a0 100%);box-shadow:0 6px 14px #4288ef36;flex:none}
+.brand-mark .icon{width:21px;height:21px;stroke-width:2}
+.brand-name{font-size:14px;font-weight:700;letter-spacing:-.02em;line-height:1.35}
+.brand-name small{display:block;font-size:10px;font-weight:500;letter-spacing:.12em;color:var(--muted);margin-top:2px}
+.nav-label{font-size:10px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:#9baabc;padding:17px 12px 7px;white-space:nowrap}
+.nav-button{position:relative;min-height:44px;width:100%;display:flex;align-items:center;gap:13px;border-radius:12px;padding:10px 13px;color:#71839a;text-align:left;white-space:nowrap;transition:background .18s,color .18s,transform .18s;flex:none}
+.nav-button:hover{color:var(--ink);background:#f5f9fd}
+.nav-button.active{background:linear-gradient(105deg,#eaf2ff,#edf9f6);color:#2e72e9;font-weight:700}
+.nav-button.active:before{content:"";position:absolute;left:0;width:3px;height:24px;background:var(--blue);border-radius:0 3px 3px 0}
+.nav-button .icon{width:19px;height:19px}
+.nav-button span{overflow:hidden;text-overflow:ellipsis}
+.sidebar.collapsed .brand-name,.sidebar.collapsed .nav-label,.sidebar.collapsed .nav-button span,.sidebar.collapsed .sidebar-note span{display:none}
+.sidebar.collapsed .brand{padding-inline:8px}
+.sidebar.collapsed .nav-button{justify-content:center;padding-inline:0;position:relative}
+.sidebar .sidebar-spacer{flex:1;min-height:12px}
+.sidebar-note{padding:13px 11px;border:1px solid var(--line);border-radius:14px;background:#fbfdff;color:var(--muted);font-size:11px;line-height:1.55;white-space:normal}
+.sidebar-note strong{display:flex;align-items:center;gap:7px;color:#3778e7;font-size:11px;margin-bottom:4px;white-space:nowrap}
+.sidebar-note strong .icon{width:15px;height:15px}
+.sidebar.collapsed .sidebar-note{padding:12px 0;display:grid;place-items:center}
+.main-shell{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden}
+.topbar{position:relative;z-index:10;flex:none;min-height:76px;padding:14px clamp(16px,2.6vw,36px);display:flex;align-items:center;gap:15px;background:rgba(255,255,255,.93);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+.icon-button{height:40px;width:40px;border:1px solid var(--line);border-radius:12px;background:#fff;display:grid;place-items:center;color:#6d8098;transition:border-color .18s,color .18s,background .18s;flex:none}
+.icon-button:hover{border-color:#b8d0f6;color:var(--blue);background:#fbfdff}
+.page-heading{min-width:0;flex:1}
+.page-heading h1{font-size:19px;font-weight:700;line-height:1.35;letter-spacing:-.035em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.page-heading p{font-size:11px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top-actions{display:flex;align-items:center;gap:9px;flex:none}
+.top-select-wrap{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:11px;white-space:nowrap}
+select,.search-input,.number-input{height:40px;border:1px solid var(--line);border-radius:11px;background:#fff;padding:0 12px;box-shadow:0 1px 2px #1a426008;outline:none;transition:border .18s,box-shadow .18s}
+select:focus,.search-input:focus,.number-input:focus{border-color:#8eb8fb;box-shadow:0 0 0 3px #397bf61b}
+.metric-select{height:38px;font-size:12px;font-weight:600;padding-right:28px}
+.account-button{display:flex;align-items:center;gap:8px;height:40px;padding:0 12px;border:1px solid var(--line);border-radius:12px;background:#fff;white-space:nowrap;color:#506781;font-size:12px}
+.account-button:hover{border-color:#b8d0f6}
+.account-avatar{width:24px;height:24px;display:grid;place-items:center;border-radius:8px;background:linear-gradient(145deg,#4285f4,#34a853);color:white;font-size:12px;font-weight:700}
+.connection-dot{width:7px;height:7px;border-radius:99px;background:#19b987;box-shadow:0 0 0 3px #19b98717}
+.notification-button{position:relative}
+.notification-count{position:absolute;right:-5px;top:-5px;min-width:18px;height:18px;display:grid;place-items:center;padding:0 4px;border-radius:99px;background:#ed6274;color:#fff;font-size:10px;font-weight:700;border:2px solid #fff}
+#view{flex:1;min-height:0;overflow:auto;padding:clamp(17px,2.5vw,34px);scroll-behavior:smooth}
+.page{max-width:1500px;margin:0 auto;animation:fade-in .28s ease both}
+.eyebrow{display:flex;align-items:center;gap:8px;color:#5288e8;font-size:11px;font-weight:700;letter-spacing:.09em;margin-bottom:7px}
+.eyebrow .eyebrow-line{height:1px;width:22px;background:#91b5f1}
+.page-title{font-size:24px;line-height:1.35;letter-spacing:-.04em;font-weight:700}
+.page-subtitle{color:var(--muted);font-size:12px;margin-top:6px;line-height:1.8}
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:22px}
+.page-head-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.btn{min-height:40px;display:inline-flex;justify-content:center;align-items:center;gap:8px;padding:0 15px;border-radius:11px;background:linear-gradient(110deg,#397bf6,#34adbb);color:#fff;font-size:12px;font-weight:700;letter-spacing:.005em;box-shadow:0 5px 13px #397bf622;transition:transform .18s,box-shadow .18s,filter .18s;white-space:nowrap}
+.btn:hover{transform:translateY(-1px);box-shadow:0 7px 17px #397bf62b;filter:saturate(1.04)}
+.btn .icon{width:17px;height:17px}
+.btn.secondary{color:#45627f;background:#fff;border:1px solid var(--line);box-shadow:none}
+.btn.secondary:hover{border-color:#b8d0f6;color:var(--blue);box-shadow:0 4px 12px #397bf610}
+.btn.danger{color:#c7485d;background:#fff;border:1px solid #f4cbd1;box-shadow:none}
+.btn.danger:hover{background:#fff7f8;border-color:#e9a4af}
+.btn.small{min-height:34px;padding:0 11px;font-size:11px;border-radius:9px}
+.pill{display:inline-flex;align-items:center;gap:6px;min-height:26px;padding:3px 9px;border-radius:999px;background:#eef4fb;color:#5d7490;font-size:11px;font-weight:600;white-space:nowrap}
+.pill .icon{width:13px;height:13px}
+.pill.green{background:var(--green-2);color:#168d6c}
+.pill.blue{background:var(--blue-2);color:#3170db}
+.pill.gold{background:var(--gold-2);color:#a77714}
+.pill.red{background:var(--red-2);color:#c34b60}
+.pill.neutral{background:#eef1f5;color:#8795a5}
+.panel{border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);box-shadow:var(--shadow-sm)}
+.panel-pad{padding:clamp(16px,2vw,24px)}
+.section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:15px}
+.section-head h2{font-size:15px;letter-spacing:-.02em;font-weight:700}
+.section-head p{color:var(--muted);font-size:11px;margin-top:3px}
+.text-muted{color:var(--muted)}
+.small-text{font-size:11px;color:var(--muted)}
+.divider{height:1px;background:var(--line);margin:16px 0}
+.empty-state{min-height:210px;display:grid;place-items:center;text-align:center;border:1px dashed #d9e5f1;border-radius:16px;padding:28px;color:var(--muted);background:#fbfdff}
+.empty-state .icon{width:30px;height:30px;color:#92aed1;margin:0 auto 10px}
+.empty-state strong{display:block;color:var(--ink);font-size:14px;margin-bottom:5px}
+.empty-state p{font-size:12px;max-width:360px}
+/* Dashboard */
+.hero{position:relative;overflow:hidden;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(220px,.7fr);gap:22px;padding:clamp(22px,3.4vw,38px);border:1px solid #dceaf9;border-radius:22px;background:linear-gradient(112deg,#fff 0%,#f8fbff 54%,#edf9f6 100%);box-shadow:var(--shadow);margin-bottom:18px}
+.hero:before{content:"";position:absolute;right:-110px;top:-190px;width:430px;height:430px;border-radius:50%;background:radial-gradient(circle at 40% 45%,#80b5ff35,transparent 70%);pointer-events:none}
+.hero-copy,.hero-art{position:relative;z-index:1}
+.hero-copy .eyebrow{margin-bottom:13px}
+.hero-copy h2{font-size:clamp(25px,3vw,38px);letter-spacing:-.055em;line-height:1.36;max-width:560px}
+.hero-copy h2 span{color:var(--blue)}
+.hero-copy p{margin-top:11px;max-width:560px;color:var(--muted);font-size:12px;line-height:1.9}
+.hero-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:22px}
+.hero-art{min-height:180px;display:flex;align-items:center;justify-content:center}
+.hero-art-card{position:relative;width:min(100%,300px);height:182px;border:1px solid #d9e8f6;border-radius:18px;background:rgba(255,255,255,.84);box-shadow:0 20px 36px #3f79bb12;padding:17px;transform:rotate(2deg)}
+.hero-art-card:before{content:"";position:absolute;top:13px;left:15px;width:6px;height:6px;border-radius:99px;background:#6ab9a2;box-shadow:12px 0 0 #9dc5ee,24px 0 0 #edd18d}
+.art-line{height:7px;border-radius:10px;background:#eaf1f7;margin-top:10px;width:58%}
+.art-line.long{width:77%;height:9px;background:#dce9fc;margin-top:25px}
+.art-bars{display:flex;align-items:flex-end;gap:7px;height:65px;margin-top:12px;padding:0 5px}
+.art-bars i{display:block;flex:1;border-radius:5px 5px 2px 2px;background:linear-gradient(180deg,#5d9af8,#a4c7fd);animation:bar-rise .7s ease both;transform-origin:bottom}
+.art-bars i:nth-child(1){height:28%}.art-bars i:nth-child(2){height:43%;animation-delay:.06s}.art-bars i:nth-child(3){height:35%;animation-delay:.12s}.art-bars i:nth-child(4){height:62%;animation-delay:.18s}.art-bars i:nth-child(5){height:48%;animation-delay:.24s}.art-bars i:nth-child(6){height:77%;animation-delay:.3s}.art-bars i:nth-child(7){height:90%;background:linear-gradient(180deg,#55c9a2,#b1ead9);animation-delay:.36s}
+.hero-stamp{position:absolute;right:14px;top:28px;width:50px;height:50px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(145deg,#397bf6,#37bea4);color:#fff;box-shadow:0 7px 15px #397bf62c;transform:rotate(-7deg)}
+.hero-stamp .icon{width:25px;height:25px}
+.stats-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin-bottom:27px}
+.stat-card{padding:18px 19px;min-width:0;display:flex;gap:12px;align-items:flex-start}
+.stat-icon{width:40px;height:40px;display:grid;place-items:center;border-radius:13px;background:#eaf2ff;color:#3d7cf0;flex:none}
+.stat-icon.green{background:#e7f8f1;color:#1eab81}.stat-icon.gold{background:#fff5dc;color:#bc8a22}.stat-icon.purple{background:#f2edff;color:#8664cc}
+.stat-icon .icon{width:20px;height:20px}
+.stat-content{min-width:0}
+.stat-label{font-size:11px;color:var(--muted);white-space:nowrap}
+.stat-value{font-size:27px;font-weight:700;line-height:1.3;letter-spacing:-.05em;margin-top:2px;font-variant-numeric:tabular-nums}
+.stat-foot{font-size:10px;color:#91a0b3;margin-top:4px;white-space:nowrap}
+.dashboard-columns{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(280px,.75fr);gap:18px;align-items:start}
+.activity-list{display:grid;gap:0}
+.activity-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid #edf1f6;min-width:0}
+.activity-item:first-child{border-top:0;padding-top:0}
+.activity-info{min-width:0;flex:1}
+.activity-info strong{display:block;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.activity-info small{font-size:10px;color:var(--muted);display:block;margin-top:3px}
+.activity-score{text-align:right;white-space:nowrap}
+.activity-score strong{font-size:16px;letter-spacing:-.03em;display:block}
+.quick-actions{display:grid;gap:10px}
+.quick-action{display:flex;align-items:center;gap:12px;padding:14px;border:1px solid var(--line);border-radius:14px;background:#fff;text-align:left;transition:border-color .18s,transform .18s}
+.quick-action:hover{border-color:#b8d0f6;transform:translateY(-1px)}
+.quick-action .quick-icon{width:38px;height:38px;border-radius:12px;background:#edf4ff;color:var(--blue);display:grid;place-items:center;flex:none}
+.quick-action .quick-icon.green{background:#e9f8f2;color:var(--green)}
+.quick-action strong{display:block;font-size:12px}.quick-action small{display:block;color:var(--muted);font-size:10px;margin-top:2px}.quick-action>.icon{margin-left:auto;color:#a4b3c5}
+/* Toolbars / song browser */
+.toolbar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:13px}
+.search-box{position:relative;flex:1;min-width:230px}
+.search-box>.icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#9aabc0;width:17px;height:17px;pointer-events:none}
+.search-input{width:100%;padding-left:39px;height:42px;font-size:12px}
+.filter-row{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-bottom:17px}
+.filter-chip{min-height:32px;padding:4px 11px;border:1px solid var(--line);border-radius:99px;background:#fff;color:#74869b;font-size:11px;white-space:nowrap;transition:all .16s}
+.filter-chip:hover{border-color:#bdd2f1;color:#397bf6}
+.filter-chip.active{border-color:#397bf6;background:#eaf2ff;color:#3170dc;font-weight:700}
+.filter-chip .icon{width:14px;height:14px}
+.toolbar-spacer{flex:1}
+.toolbar-count{font-size:11px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.control-button{height:40px;padding:0 12px;display:inline-flex;align-items:center;justify-content:center;gap:7px;border-radius:11px;border:1px solid var(--line);background:#fff;color:#596f88;font-size:11px;white-space:nowrap;transition:all .18s}
+.control-button:hover{border-color:#b8d0f6;color:var(--blue)}
+.control-button .icon{width:16px;height:16px}
+.control-button.active{background:#eaf2ff;border-color:#d2e2fd;color:#3170dc}
+.view-toggle{font-weight:600}
+.view-toggle .icon{width:16px;height:16px}
+.virtual-scroll{height:min(66vh,780px);min-height:360px;overflow:auto;position:relative;border-radius:15px;scrollbar-gutter:stable;overscroll-behavior:contain;contain:layout paint style;background:transparent}
+.virtual-space{position:relative;width:100%;min-height:1px}
+.virtual-row{position:absolute;left:0;right:0;top:0;display:grid;align-items:stretch}
+.song-list-item{height:100%;min-width:0;width:100%;padding:10px 14px;border:1px solid var(--line);border-radius:14px;display:flex;align-items:center;gap:13px;background:#fff;text-align:left;transition:border-color .16s,box-shadow .16s,transform .16s;overflow:hidden}
+.song-list-item:hover,.song-jacket-card:hover{border-color:#bfd4f3;box-shadow:var(--shadow-sm);transform:translateY(-1px)}
+.jacket{position:relative;display:grid;place-items:center;overflow:hidden;isolation:isolate;background:linear-gradient(140deg,hsl(var(--hue,210) 80% 87%),hsl(calc(var(--hue,210) + 45) 72% 68%));flex:none;aspect-ratio:1;border-radius:12px}
+.jacket:before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(circle at 22% 17%,#ffffffbd,transparent 34%),linear-gradient(130deg,transparent 35%,#ffffff47 35% 38%,transparent 38% 62%,#ffffff38 62% 65%,transparent 65%)}
+.jacket:after{content:"";position:absolute;inset:19%;border:1px solid #ffffffb8;border-radius:50%;box-shadow:0 0 0 9px #ffffff2b,0 0 0 20px #ffffff18}
+.jacket-mark{width:39%;height:39%;display:grid;place-items:center;border-radius:50%;background:#ffffffad;color:#3a5e80;z-index:1;backdrop-filter:blur(3px)}
+.jacket-mark .icon{width:55%;height:55%;stroke-width:1.5}
+.song-list-item .jacket{width:58px}
+.song-main{min-width:0;flex:1}
+.song-main strong{display:block;font-size:12px;line-height:1.5;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.song-main small{display:block;font-size:10px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:3px}
+.song-tags{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:6px}
+.unit-tag{font-size:9px;font-weight:700;color:#5c7d93;background:#edf5f7;border-radius:5px;padding:2px 6px;white-space:nowrap}
+.difficulty-dots{display:flex;align-items:center;gap:7px;flex:none}
+.diff-dot{height:11px;width:11px;display:inline-block;border-radius:50%;background:var(--dot,#cbd5e1);box-shadow:0 0 0 2px #fff,0 0 0 3px #e8eef6;flex:none}
+.song-jacket-card{min-width:0;width:100%;height:100%;padding:9px;border:1px solid var(--line);border-radius:15px;background:#fff;text-align:left;display:flex;flex-direction:column;gap:8px;transition:border-color .16s,box-shadow .16s,transform .16s;overflow:hidden}
+.song-jacket-card .jacket{width:100%;border-radius:10px}
+.song-jacket-card strong{display:block;width:100%;font-size:11px;line-height:1.5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.song-jacket-card .song-card-sub{font-size:9px;color:var(--muted);line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.song-jacket-card .difficulty-dots{margin-top:auto;gap:7px;padding:0 1px 2px}
+/* Result cards */
+.result-card{min-width:0;width:100%;height:100%;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:15px;background:#fff;box-shadow:0 2px 7px #1b47750a;text-align:left;overflow:hidden;transition:transform .18s,border-color .18s,box-shadow .18s}
+.result-card:hover{transform:translateY(-2px);border-color:#c3d7f4;box-shadow:0 9px 22px #2e65a70e}
+.result-visual{width:100%;aspect-ratio:16/9;position:relative;overflow:hidden;display:block;background:linear-gradient(125deg,hsl(var(--hue,215) 78% 77%),hsl(calc(var(--hue,215) + 52) 70% 48%));isolation:isolate;flex:none}
+.result-visual:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,#0a1c3a17,transparent 55%),radial-gradient(circle at 75% 20%,#ffffff5e,transparent 30%);z-index:-1}
+.result-visual:after{content:"";position:absolute;right:8%;top:-21%;width:44%;aspect-ratio:1;border:1px solid #ffffff8c;border-radius:50%;box-shadow:0 0 0 15px #ffffff20,0 0 0 32px #ffffff13;z-index:-1}
+.mock-topline{position:absolute;left:12px;right:12px;top:10px;display:flex;align-items:center;justify-content:space-between;color:#fff;font-size:8px;letter-spacing:.12em;font-weight:700;text-shadow:0 1px 6px #122d4b50}
+.mock-mini-bars{display:flex;gap:3px;align-items:center}
+.mock-mini-bars i{display:block;width:3px;height:7px;background:#fff;border-radius:3px}.mock-mini-bars i:nth-child(2){height:11px}.mock-mini-bars i:nth-child(3){height:5px}
+.mock-result-center{position:absolute;left:9%;top:32%;width:48%;color:#fff;text-shadow:0 2px 9px #12325b38}
+.mock-result-center small{display:block;font-size:8px;letter-spacing:.18em;font-weight:700;opacity:.9}
+.mock-result-center strong{display:block;font-size:clamp(14px,1.3vw,20px);line-height:1.25;letter-spacing:.04em;margin-top:4px}
+.mock-result-center span{font-size:9px;display:block;margin-top:5px;opacity:.9}
+.mock-score{position:absolute;right:8%;top:33%;width:34%;height:45%;border-radius:8px;background:#ffffffcf;backdrop-filter:blur(4px);padding:9px 8px;box-shadow:0 4px 12px #152e471c;display:flex;flex-direction:column;justify-content:center;gap:5px}
+.mock-score i{display:block;height:4px;border-radius:99px;background:#abc4dd}.mock-score i:nth-child(1){width:87%;background:#5a8fe8}.mock-score i:nth-child(2){width:65%}.mock-score i:nth-child(3){width:76%}.mock-score i:nth-child(4){width:44%}
+.mock-clear{position:absolute;left:10px;bottom:9px;padding:3px 7px;border:1px solid #ffffffaa;border-radius:5px;background:#ffffff2f;color:#fff;font-size:8px;font-weight:700;letter-spacing:.09em}
+.actual-result-image{width:100%;height:100%;position:absolute;inset:0;object-fit:cover;display:block}
+.result-card-body{padding:12px 13px 13px;display:grid;gap:7px;min-width:0;flex:1}
+.result-title{display:block;font-size:12px;line-height:1.5;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.result-tags{display:flex;align-items:center;gap:6px;min-width:0;flex-wrap:wrap}
+.diff-label{display:inline-flex;align-items:center;gap:6px;padding:3px 7px;border-radius:6px;color:var(--diff-color,#4f83da);background:var(--diff-bg,#edf4ff);font-size:9px;font-weight:700;white-space:nowrap}
+.state-label{display:inline-flex;align-items:center;gap:4px;padding:3px 7px;border-radius:6px;font-size:9px;font-weight:700;white-space:nowrap;color:#7b8b9f;background:#edf1f5}
+.state-label.FC{color:#a17615;background:#fff3d2}.state-label.AP{color:#555783;background:linear-gradient(105deg,#e8efff 0%,#f0e8ff 28%,#ffe8f0 54%,#fff1d8 76%,#e1f8ef 100%);border:1px solid #e7e8f7}.state-label.CLEAR{color:#3472dc;background:#eaf2ff}
+.result-metrics{display:flex;align-items:baseline;gap:6px;min-width:0}
+.result-miss{font-size:24px;line-height:1.15;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.05em;color:#2e73e7}
+.result-miss-label{font-size:10px;color:var(--muted)}
+.result-combo{margin-left:auto;font-size:10px;color:#6e8199;white-space:nowrap}
+.result-combo strong{color:var(--ink);font-weight:700}
+.result-date{display:flex;align-items:center;gap:5px;color:#8796a9;font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.result-date .icon{width:13px;height:13px}
+.pb-mark{display:inline-flex;align-items:center;justify-content:center;width:19px;height:19px;border-radius:6px;background:#fff5da;color:#c18a19;flex:none}
+.pb-mark .icon{width:12px;height:12px}
+/* Song details / result selector */
+.breadcrumbs{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:17px;color:var(--muted);font-size:11px}
+.breadcrumbs button{color:#4c79bd;font-weight:600}.breadcrumbs button:hover{text-decoration:underline}
+.breadcrumbs .icon{width:13px;height:13px}
+.song-profile{display:flex;align-items:center;gap:17px;padding:18px 20px;border:1px solid var(--line);border-radius:17px;background:linear-gradient(100deg,#fff,#f8fbff);margin-bottom:22px}
+.song-profile .jacket{width:86px;border-radius:12px}
+.song-profile-main{min-width:0;flex:1}
+.song-profile h2{font-size:19px;line-height:1.45;letter-spacing:-.035em;white-space:normal;overflow-wrap:anywhere}
+.song-profile p{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.6}
+.song-profile-meta{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
+.difficulty-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:11px;margin-bottom:24px}
+.difficulty-card{min-width:0;padding:16px;border:1px solid var(--line);border-radius:14px;background:#fff;text-align:left;transition:border-color .18s,transform .18s,box-shadow .18s;position:relative;overflow:hidden}
+.difficulty-card:hover{border-color:#bed3f4;transform:translateY(-2px);box-shadow:var(--shadow-sm)}
+.difficulty-card:before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--diff-color,#9aafc4)}
+.difficulty-card .difficulty-name{font-size:11px;font-weight:700;color:var(--diff-color);letter-spacing:.06em}
+.difficulty-card .difficulty-level{display:block;font-size:27px;font-weight:700;letter-spacing:-.06em;line-height:1.25;margin-top:7px}
+.difficulty-card .difficulty-level small{font-size:10px;color:var(--muted);letter-spacing:0;margin-left:4px}
+.difficulty-card .difficulty-stat{font-size:10px;color:var(--muted);margin-top:6px;display:flex;align-items:center;gap:5px}
+.difficulty-card .difficulty-stat .icon{width:13px;height:13px}
+.subsection-title{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:23px 0 12px}
+.subsection-title h2{font-size:15px;font-weight:700;letter-spacing:-.02em}
+/* History / chart */
+.chart-wrap{padding:19px 20px 14px}
+.chart-legend{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:10px}
+.legend-dot{width:7px;height:7px;border-radius:50%;background:var(--blue)}
+.legend-dot.green{background:var(--green)}
+.history-chart{display:block;width:100%;height:auto;overflow:visible;margin-top:12px;min-height:175px}
+.history-chart text{font-family:inherit;fill:#8697aa;font-size:10px}
+.history-chart .grid-line{stroke:#e8eef5;stroke-width:1}
+.history-chart .trend-line{fill:none;stroke:#4b8bf0;stroke-width:2.7;stroke-linecap:round;stroke-linejoin:round}
+.history-chart .point{fill:#fff;stroke:#4b8bf0;stroke-width:2.5}
+.history-chart .point.pb{stroke:#20b58a;fill:#e5f8f1}
+.history-chart .point-label{fill:#3d73c7;font-size:9px;font-weight:700}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:14px;background:#fff}
+.data-table{width:100%;border-collapse:separate;border-spacing:0;font-variant-numeric:tabular-nums;white-space:nowrap}
+.data-table thead th{position:sticky;top:0;z-index:1;background:#f8fbff;color:#7b8da3;font-size:10px;font-weight:600;text-align:left;padding:12px 13px;border-bottom:1px solid var(--line)}
+.data-table tbody td{font-size:11px;padding:11px 13px;border-bottom:1px solid #edf2f7}
+.data-table tbody tr:last-child td{border-bottom:0}
+.data-table tbody tr[data-a]{cursor:pointer;transition:background .15s}
+.data-table tbody tr[data-a]:hover{background:#f8fbff}
+.num-good{color:#258f75;font-weight:700}.num-warn{color:#bd7b25;font-weight:700}
+.history-record-list{display:grid;gap:0}
+.history-row{display:flex;align-items:center;gap:10px;padding:11px 0;border-top:1px solid #eef2f7;min-width:0}
+.history-row:first-child{border-top:0}
+.history-row .history-date{font-size:10px;color:var(--muted);width:144px;flex:none}
+.history-row .history-val{font-size:11px;font-weight:700;white-space:nowrap}
+.history-row .history-combo{margin-left:auto;color:var(--muted);font-size:10px;white-space:nowrap}
+/* Upload / sync */
+.demo-banner{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:12px;border:1px solid #d6e7fb;background:#f1f7ff;color:#5b7595;font-size:11px;line-height:1.7;margin-bottom:17px}
+.demo-banner .icon{color:#4c85df;width:17px;height:17px;margin-top:1px}
+.upload-layout{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr);gap:17px;align-items:start}
+.upload-drop{display:grid;justify-items:center;text-align:center;gap:9px;min-height:250px;border:1.5px dashed #bbd1ef;border-radius:17px;background:linear-gradient(145deg,#fbfdff,#f4f9ff);padding:28px;cursor:pointer;transition:border-color .18s,background .18s}
+.upload-drop:hover,.upload-drop.dragover{border-color:#4e8bf0;background:#f0f7ff}
+.upload-drop .drop-icon{width:47px;height:47px;border:1px solid #d8e8fb;border-radius:15px;background:#fff;color:#397bf6;display:grid;place-items:center;margin-bottom:3px;box-shadow:0 4px 12px #397bf612}
+.upload-drop .drop-icon .icon{width:24px;height:24px}
+.upload-drop strong{font-size:14px}
+.upload-drop p{font-size:11px;color:var(--muted);max-width:350px}
+.upload-drop .file-note{font-size:10px;color:#90a0b2}
+.sync-step-list{display:grid;gap:0}
+.sync-step{display:flex;align-items:flex-start;gap:11px;padding:13px 0;border-top:1px solid #edf2f7}
+.sync-step:first-child{border-top:0;padding-top:0}
+.sync-step-icon{width:31px;height:31px;border-radius:10px;display:grid;place-items:center;background:#edf4ff;color:#447fe4;flex:none}
+.sync-step-icon .icon{width:16px;height:16px}
+.sync-step strong{display:block;font-size:11px}.sync-step small{display:block;color:var(--muted);font-size:10px;line-height:1.6;margin-top:3px}
+.log-list{display:grid;gap:8px}
+.log-item{display:flex;align-items:flex-start;gap:10px;padding:12px 13px;border:1px solid var(--line);border-radius:12px;background:#fff;min-width:0}
+.log-icon{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;flex:none;background:#e6f8f0;color:#168e6d}
+.log-icon.error{background:#fff0f1;color:#d25367}.log-icon.warning{background:#fff6dc;color:#af7d17}
+.log-icon .icon{width:15px;height:15px}
+.log-text{min-width:0;flex:1}.log-text strong{display:block;font-size:11px;overflow-wrap:anywhere}.log-text p{font-size:10px;color:var(--muted);margin-top:3px;line-height:1.6;overflow-wrap:anywhere}
+.log-time{font-size:9px;color:#9aa8b8;white-space:nowrap}
+.anomaly-card{padding:15px;border:1px solid #f1dfb7;border-radius:13px;background:#fffdf7;margin-top:9px}
+.anomaly-card strong{font-size:11px}.anomaly-card p{font-size:10px;color:var(--muted);margin:4px 0 11px;line-height:1.65}
+.anomaly-actions{display:flex;gap:7px;flex-wrap:wrap}
+/* Modal */
+#modal-root{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;padding:clamp(8px,2vw,24px);background:#142f4b66;backdrop-filter:blur(7px)}
+#modal-root.open{display:flex;animation:fade-in .18s ease both}
+.modal-panel{position:relative;width:min(1040px,100%);max-height:min(94vh,1000px);overflow:auto;border:1px solid #ffffffcc;border-radius:22px;background:#fff;box-shadow:0 24px 80px #122a4933;padding:clamp(18px,2.8vw,30px);animation:modal-in .22s ease both;overscroll-behavior:contain}
+.modal-panel.compact{width:min(660px,100%)}
+.modal-close{position:sticky;float:right;top:0;z-index:3;width:36px;height:36px;margin:-8px -8px 0 8px;border:1px solid var(--line);border-radius:11px;background:#fff;color:#72849a;display:grid;place-items:center}
+.modal-close:hover{color:var(--blue);border-color:#bdd3f4}
+.modal-header{padding-right:40px;margin-bottom:18px}
+.modal-header h2{font-size:21px;line-height:1.4;letter-spacing:-.035em}
+.modal-header p{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.7}
+.detail-top{display:grid;grid-template-columns:116px minmax(0,1fr);gap:18px;align-items:center;margin:2px 0 20px}
+.detail-top .jacket{width:116px;border-radius:15px}
+.detail-song-title{font-size:23px;font-weight:700;letter-spacing:-.045em;line-height:1.45;overflow-wrap:anywhere}
+.detail-meta{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:9px}
+.detail-release-short{color:var(--muted);font-size:10px;margin-top:8px}
+.detail-image-panel{padding:10px;border:1px solid var(--line);border-radius:16px;background:#f8fbff}
+.detail-result-visual{max-height:380px;aspect-ratio:16/7;width:100%;border-radius:10px}
+.detail-result-visual .mock-result-center strong{font-size:clamp(20px,3vw,32px)}
+.detail-result-visual .mock-result-center small{font-size:10px}.detail-result-visual .mock-result-center span{font-size:11px}
+.detail-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin-top:14px}
+.detail-stat{border:1px solid var(--line);background:#fff;border-radius:14px;padding:14px 16px;min-width:0}
+.detail-stat .label{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:10px}
+.detail-stat .label .icon{width:14px;height:14px}
+.detail-stat strong{display:block;font-size:27px;line-height:1.3;margin-top:3px;letter-spacing:-.045em;font-variant-numeric:tabular-nums}
+.detail-stat strong small{font-size:11px;color:var(--muted);font-weight:500;letter-spacing:0}
+.judgement-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.judgement{padding:12px 8px;border:1px solid var(--line);border-radius:12px;background:#fff;text-align:center;min-width:0}
+.judgement span{display:block;font-size:10px;color:var(--muted)}
+.judgement strong{display:block;font-size:18px;margin-top:3px;font-weight:700;font-variant-numeric:tabular-nums}
+.judgement.perfect{background:#f1f8ff;border-color:#dceaff}.judgement.perfect strong{color:#397bf6}
+.judgement.great strong{color:#e5ad32}.judgement.good strong{color:#28a981}.judgement.bad strong{color:#dc8c42}.judgement.miss strong{color:#da5c72}
+.detail-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:14px}
+.detail-info-list{display:grid;grid-template-columns:120px minmax(0,1fr);gap:0;margin-top:8px}
+.detail-info-row{display:contents}
+.detail-info-row dt,.detail-info-row dd{padding:11px 0;border-bottom:1px solid #edf2f7;font-size:11px}
+.detail-info-row dt{color:var(--muted)}.detail-info-row dd{min-width:0;overflow-wrap:anywhere}
+.detail-info-row:last-child dt,.detail-info-row:last-child dd{border-bottom:0}
+.edit-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}
+.form-field{display:grid;gap:5px;min-width:0}.form-field label{font-size:10px;color:var(--muted);font-weight:600}
+.form-field input{width:100%;height:40px;padding:0 10px;border-radius:10px;border:1px solid var(--line);background:#fff;font-variant-numeric:tabular-nums}
+.form-hint{font-size:10px;color:var(--muted);line-height:1.65;margin-top:9px}
+.notice-group{margin-top:20px}.notice-group h3{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;margin-bottom:9px}
+.notice-item{display:flex;align-items:center;gap:11px;padding:12px;border:1px solid var(--line);border-radius:13px;background:#fff;margin-top:7px;text-align:left;width:100%;min-width:0}
+.notice-item:hover{border-color:#bdd3f4;background:#fbfdff}.notice-item>.jacket{width:46px;border-radius:10px}
+.notice-item .notice-body{min-width:0;flex:1}.notice-item strong{display:block;font-size:11px;overflow-wrap:anywhere}.notice-item p{font-size:10px;color:var(--muted);margin-top:3px;line-height:1.6}
+.notice-item .notice-values{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}
+.notice-value{padding:2px 6px;background:#e6f8f0;color:#148c69;border-radius:5px;font-size:9px;font-weight:700}
+.choice-card{border:1px solid var(--line);border-radius:13px;padding:13px;display:flex;align-items:flex-start;gap:10px;margin-top:9px}
+.choice-card input{margin-top:4px;accent-color:var(--blue)}
+.choice-card strong{font-size:11px}.choice-card small{display:block;color:var(--muted);font-size:10px;line-height:1.6;margin-top:2px}
+/* Transaction overlay and toast */
+#lock-root{position:fixed;inset:0;z-index:100;display:none;place-items:center;background:#142f4b59;backdrop-filter:blur(6px);padding:15px}
+#lock-root.open{display:grid;animation:fade-in .15s ease both}
+.lock-card{width:min(440px,100%);padding:29px 27px 25px;border-radius:20px;background:#fff;box-shadow:0 22px 70px #18375c36;display:grid;justify-items:center;gap:13px;text-align:center}
+.lock-symbol{width:48px;height:48px;border-radius:15px;display:grid;place-items:center;color:#397bf6;background:#edf4ff}
+.lock-symbol .icon{width:23px;height:23px}
+.lock-card h2{font-size:16px}.lock-card p{font-size:11px;color:var(--muted);line-height:1.75}
+.progress-track{width:100%;height:7px;border-radius:99px;background:#eaf0f6;overflow:hidden;margin-top:3px}
+.progress-track span{display:block;height:100%;width:0;background:linear-gradient(90deg,#397bf6,#34c3a0);transition:width .25s ease;border-radius:99px}
+.lock-foot{font-size:10px!important;color:#93a1b1!important}
+.spinner{width:22px;height:22px;border:2px solid #cfe0f7;border-top-color:#397bf6;border-radius:50%;animation:spin .8s linear infinite}
+#toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));z-index:120;max-width:min(92vw,520px);padding:11px 16px;display:flex;align-items:center;gap:9px;border-radius:12px;background:#17324e;color:#fff;font-size:11px;box-shadow:0 9px 28px #14304a30;opacity:0;transform:translate(-50%,12px);pointer-events:none;transition:opacity .2s,transform .2s}
+#toast.visible{opacity:1;transform:translate(-50%,0)}#toast .icon{width:16px;height:16px;color:#8ee0c1}
+.mobile-scrim{display:none}
+@keyframes fade-in{from{opacity:0}to{opacity:1}}
+@keyframes modal-in{from{opacity:0;transform:translateY(8px) scale(.99)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes bar-rise{from{transform:scaleY(.25);opacity:.4}to{transform:scaleY(1);opacity:1}}
+@media(min-width:1440px){.result-card-body{padding:13px 15px 14px}.result-title{font-size:13px}}
+@media(max-width:1120px){.sidebar{width:220px}.stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.hero{grid-template-columns:minmax(0,1.1fr) minmax(190px,.8fr)}.dashboard-columns{grid-template-columns:minmax(0,1fr)}.account-label{display:none}.top-select-wrap>span{display:none}}
+@media(max-width:800px){.sidebar{position:fixed;left:0;top:0;bottom:0;width:264px;transform:translateX(-105%);box-shadow:none}.sidebar.mobile-open{transform:translateX(0);box-shadow:20px 0 70px #12335424}.sidebar.collapsed{width:264px}.sidebar.collapsed .brand-name,.sidebar.collapsed .nav-label,.sidebar.collapsed .nav-button span,.sidebar.collapsed .sidebar-note span{display:initial}.sidebar.collapsed .nav-button{justify-content:flex-start;padding-inline:13px}.sidebar.collapsed .brand{padding-inline:8px}.sidebar.collapsed .sidebar-note{display:block;padding:13px 11px}.mobile-scrim.open{display:block;position:fixed;inset:0;z-index:20;background:#17324b4d;backdrop-filter:blur(2px)}.topbar{min-height:68px;padding:11px 15px;gap:10px}.page-heading h1{font-size:16px}.page-heading p{display:none}.top-actions{gap:6px}.account-button{width:39px;padding:0;justify-content:center}.account-avatar{width:25px;height:25px}.metric-select{width:95px;padding-left:8px;padding-right:19px;font-size:10px}.top-select-wrap{gap:0}#view{padding:17px}.hero{grid-template-columns:minmax(0,1fr);padding:23px}.hero-art{display:none}.hero-copy h2{font-size:27px}.page-head{align-items:flex-start;flex-direction:column;margin-bottom:17px}.page-head-actions{width:100%}.upload-layout{grid-template-columns:minmax(0,1fr)}.virtual-scroll{height:calc(100dvh - 355px);min-height:300px}.detail-top{grid-template-columns:86px minmax(0,1fr);gap:13px}.detail-top .jacket{width:86px}.detail-song-title{font-size:18px}.modal-panel{max-height:96dvh;border-radius:18px}.detail-result-visual{aspect-ratio:16/8}.history-row .history-date{width:130px}}
+@media(max-width:540px){.topbar{gap:8px}.icon-button{width:36px;height:36px;border-radius:10px}.page-heading h1{font-size:14px}.metric-select{width:84px;height:36px;font-size:10px}.notification-button{width:36px}.account-button{height:36px;width:35px}.account-avatar{width:23px;height:23px}.top-actions{gap:5px}#view{padding:14px}.page-title{font-size:21px}.page-subtitle{font-size:11px}.hero{padding:20px;border-radius:17px}.hero-copy h2{font-size:24px}.hero-copy p{font-size:11px}.hero-actions .btn{flex:1;padding:0 10px}.stats-grid{gap:8px}.stat-card{padding:13px;gap:9px}.stat-icon{width:34px;height:34px;border-radius:11px}.stat-value{font-size:24px}.stat-label{font-size:10px}.stat-foot{font-size:9px}.toolbar{gap:7px}.search-box{min-width:100%;flex-basis:100%}.toolbar select{height:38px;max-width:100%;font-size:11px}.control-button{height:38px;padding:0 9px;font-size:10px}.filter-chip{font-size:10px;padding-inline:9px}.song-list-item{padding:9px;gap:9px}.song-list-item .jacket{width:48px;border-radius:9px}.song-main strong{font-size:11px}.song-main small{font-size:9px}.song-tags{gap:4px;margin-top:4px}.unit-tag{font-size:8px;padding:2px 4px}.difficulty-dots{gap:6px}.diff-dot{width:10px;height:10px}.song-profile{padding:13px;gap:12px;align-items:flex-start}.song-profile .jacket{width:66px}.song-profile h2{font-size:15px}.song-profile p{font-size:10px}.difficulty-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.difficulty-card{padding:13px}.difficulty-card .difficulty-level{font-size:24px}.result-card-body{padding:10px;gap:6px}.result-title{font-size:11px}.result-miss{font-size:22px}.result-combo{font-size:9px}.virtual-scroll{height:calc(100dvh - 365px);min-height:290px}.detail-stats{gap:7px}.detail-stat{padding:11px}.detail-stat strong{font-size:23px}.judgement-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.judgement{padding:10px 5px}.judgement strong{font-size:16px}.edit-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.detail-info-list{grid-template-columns:90px minmax(0,1fr)}.detail-info-row dt,.detail-info-row dd{font-size:10px;padding:9px 0}.history-row{flex-wrap:wrap;gap:6px}.history-row .history-date{width:100%;font-size:9px}.history-row .history-combo{margin-left:0}.modal-panel{padding:17px}.modal-header h2{font-size:18px}.detail-top{grid-template-columns:72px minmax(0,1fr)}.detail-top .jacket{width:72px}.detail-song-title{font-size:16px}.detail-meta{gap:5px}.detail-release-short{font-size:9px}.detail-actions .btn{flex:1}.chart-wrap{padding:14px}.upload-drop{min-height:220px;padding:20px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div id="app">
+  <aside class="sidebar" id="sidebar" aria-label="メインメニュー">
+    <div class="brand"><div class="brand-mark" id="brandHome"><svg class="icon" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 5.5v15M8 7h8M8 10h6"/></svg></div><div class="brand-name">セカイ リザルトノート<small>RESULT LIBRARY</small></div></div>
+    <div class="nav-label">WORKSPACE</div>
+    <button class="nav-button active" data-a="navigate" data-v="home" title="ホーム"><svg class="icon" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7"/><path d="M5 9.5V21h14V9.5M9 21v-7h6v7"/></svg><span>ホーム</span></button>
+    <button class="nav-button" data-a="navigate" data-v="songs" title="曲から探す"><svg class="icon" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><span>曲から探す</span></button>
+    <button class="nav-button" data-a="navigate" data-v="results" title="リザルト一覧"><svg class="icon" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg><span>リザルト一覧</span></button>
+    <button class="nav-button" data-a="navigate" data-v="history" title="履歴・推移"><svg class="icon" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m7 14 4-4 3 3 6-7"/></svg><span>履歴・推移</span></button>
+    <div class="nav-label">LIBRARY TOOLS</div>
+    <button class="nav-button" data-a="navigate" data-v="sync" title="画像追加・同期"><svg class="icon" viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 1-15.4 6.4L3 16"/><path d="M3 21v-5h5M3 12A9 9 0 0 1 18.4 5.6L21 8"/><path d="M21 3v5h-5"/></svg><span>画像追加・同期</span></button>
+    <button class="nav-button" data-a="open-notices" title="通知"><svg class="icon" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 8-3 10h18c0-2-3-3-3-10"/><path d="M10 21h4"/></svg><span>通知・更新履歴</span></button>
+    <div class="sidebar-spacer"></div>
+    <div class="sidebar-note"><strong><svg class="icon" viewBox="0 0 24 24"><path d="M12 3 4 6v5c0 5 3.5 8.4 8 10 4.5-1.6 8-5 8-10V6z"/><path d="m9 12 2 2 4-4"/></svg><span>デモモードで動作中</span></strong><span>Drive・OCRとの接続処理は画面確認用の仮実装です。</span></div>
+  </aside>
+  <div class="mobile-scrim" id="mobileScrim"></div>
+  <main class="main-shell">
+    <header class="topbar">
+      <button class="icon-button" data-a="toggle-sidebar" aria-label="メニューを開閉"><svg class="icon" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+      <div class="page-heading"><h1 id="pageHeading">ホーム</h1><p id="pageSubheading">リザルトの記録と自己ベストをひと目で。</p></div>
+      <div class="top-actions">
+        <label class="top-select-wrap"><span>ミス数</span><select class="metric-select" id="metricSelect" aria-label="ミス数の基準"><option value="fc">FC基準</option><option value="ap">AP基準</option><option value="tournament">大会基準</option></select></label>
+        <button class="icon-button notification-button" data-a="open-notices" aria-label="通知を表示"><svg class="icon" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 8-3 10h18c0-2-3-3-3-10"/><path d="M10 21h4"/></svg><span class="notification-count" id="notificationCount">3</span></button>
+        <button class="account-button" data-a="account" aria-label="Googleアカウントの接続状態"><span class="connection-dot"></span><span class="account-label">Google Drive 接続中</span><span class="account-avatar">G</span></button>
+      </div>
+    </header>
+    <section id="view" tabindex="-1" aria-live="polite"></section>
+  </main>
+</div>
+<div id="modal-root" aria-live="polite"></div>
+<div id="lock-root" aria-live="assertive"></div>
+<div id="toast" role="status"><svg class="icon" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg><span id="toastText"></span></div>
+<script>
+'use strict';
+const $ = (selector, root=document) => root.querySelector(selector);
+const $$ = (selector, root=document) => [...root.querySelectorAll(selector)];
+const escapeHTML = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+const ICONS = {
+  music:'<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>',
+  search:'<circle cx="10.8" cy="10.8" r="6.8"/><path d="m16 16 4.5 4.5"/>',
+  grid:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
+  list:'<path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/>',
+  chart:'<path d="M3 3v18h18"/><path d="m7 15 4-5 3 3 5-7"/>',
+  sync:'<path d="M21 12a9 9 0 0 1-15.4 6.4L3 16"/><path d="M3 21v-5h5M3 12A9 9 0 0 1 18.4 5.6L21 8"/><path d="M21 3v5h-5"/>',
+  bell:'<path d="M18 8a6 6 0 0 0-12 0c0 7-3 8-3 10h18c0-2-3-3-3-10"/><path d="M10 21h4"/>',
+  menu:'<path d="M4 6h16M4 12h16M4 18h16"/>',
+  close:'<path d="m18 6-12 12M6 6l12 12"/>',
+  edit:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
+  scan:'<path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M6 12h12"/>',
+  upload:'<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5M12 3v12"/>',
+  arrow:'<path d="M12 19V5M5 12l7-7 7 7"/>',
+  down:'<path d="M12 5v14M19 12l-7 7-7-7"/>',
+  chevron:'<path d="m9 18 6-6-6-6"/>',
+  check:'<path d="m20 6-11 11-5-5"/>',
+  alert:'<path d="M12 9v4M12 17h.01"/><path d="m10.3 3.9-8.5 14.2a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/>',
+  user:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
+  file:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M8 13h8M8 17h8"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  trophy:'<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0zM17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/>',
+  target:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
+  layers:'<path d="m12 3 9 5-9 5-9-5z"/><path d="m3 12 9 5 9-5M3 16l9 5 9-5"/>',
+  trash:'<path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v5M14 11v5"/>',
+  cloud:'<path d="M20 16.2A4.5 4.5 0 0 0 18 7.5a6 6 0 0 0-11.5 1.8A4 4 0 0 0 7 17h11"/><path d="M12 12v8m-3-3 3 3 3-3"/>',
+  filter:'<path d="M4 6h16M7 12h10M10 18h4"/>',
+  settings:'<circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1 1.4 1.1-1.4 2.4-1.7-.6a8 8 0 0 1-1.6.9l-.3 1.8h-2.8l-.3-1.8a8 8 0 0 1-1.6-.9l-1.7.6-1.4-2.4 1.4-1.1a7 7 0 0 1 0-1.9l-1.4-1.1 1.4-2.4 1.7.6a8 8 0 0 1 1.6-.9l.3-1.8h2.8l.3 1.8a8 8 0 0 1 1.6.9l1.7-.6 1.4 2.4-1.4 1.1a7 7 0 0 1-.1 1.8Z"/>',
+  shield:'<path d="M12 3 4 6v5c0 5 3.5 8.4 8 10 4.5-1.6 8-5 8-10V6z"/><path d="m9 12 2 2 4-4"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  external:'<path d="M14 3h7v7M10 14 21 3"/><path d="M19 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h6"/>',
+  calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/>',
+  image:'<rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/>',
+  help:'<circle cx="12" cy="12" r="9"/><path d="M9.6 9a2.5 2.5 0 1 1 4.1 1.9c-1 .8-1.7 1.1-1.7 2.6M12 17h.01"/>',
+  sort:'<path d="M4 7h16M7 12h10M10 17h4"/>'
+};
+const icon = (name, cls='') => `<svg class="icon ${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name] || ICONS.file}</svg>`;
+const DIFFS = ['easy','normal','hard','expert','master','append'];
+const DIFF_INFO = {
+  easy:{label:'EASY',color:'#31b77f',bg:'#e6f8f0'},normal:{label:'NORMAL',color:'#4b94ed',bg:'#eaf4ff'},
+  hard:{label:'HARD',color:'#e5b424',bg:'#fff7de'},expert:{label:'EXPERT',color:'#e44d5b',bg:'#fff0f2'},
+  master:{label:'MASTER',color:'#9169d5',bg:'#f3edff'},append:{label:'APPEND',color:'#c65bd7',bg:'#f9eefe'}
+};
+const UNITS = ['VS','L/n','MMJ','VBS','WxS','25時'];
+const SONGS = [
+ {id:372,title:'星屑のメロディ',pronunciation:'ほしくずのめろでぃ',lyricist:'青井',composer:'ミナト',arranger:'ミナト',units:['L/n'],release:'2021-03-12',hue:210,diffs:{expert:{level:24,notes:720},master:{level:29,notes:1120}}},
+ {id:381,title:'ネオンの海',pronunciation:'ねおんのうみ',lyricist:'sorano',composer:'sorano',arranger:'KAZE',units:['MMJ','VS'],release:'2022-07-01',hue:170,diffs:{hard:{level:17,notes:480},expert:{level:26,notes:860},master:{level:30,notes:1203}}},
+ {id:396,title:'夏空プリズム',pronunciation:'なつぞらぷりずむ',lyricist:'ハル',composer:'ハル',arranger:'ハル',units:['VBS'],release:'2020-08-20',hue:30,diffs:{expert:{level:23,notes:650},master:{level:27,notes:940},append:{level:31,notes:1010}}},
+ {id:402,title:'真夜中のラプソディ',pronunciation:'まよなかのらぷそでぃ',lyricist:'ねむ',composer:'ユウ',arranger:'ユウ',units:['25時'],release:'2023-01-18',hue:260,diffs:{expert:{level:25,notes:780},master:{level:31,notes:1260}}},
+ {id:417,title:'ワンダーステップ',pronunciation:'わんだーすてっぷ',lyricist:'ここな',composer:'ここな',arranger:'リク',units:['WxS'],release:'2021-11-05',hue:330,diffs:{hard:{level:16,notes:420},expert:{level:22,notes:600},master:{level:28,notes:910}}},
+ {id:428,title:'透明な約束',pronunciation:'とうめいなやくそく',lyricist:'みお',composer:'ナギ',arranger:'ナギ',units:['L/n','VS'],release:'2024-05-30',hue:190,diffs:{expert:{level:27,notes:830},master:{level:32,notes:1305}}},
+ {id:441,title:'ブルーライン急行',pronunciation:'ぶるーらいんきゅうこう',lyricist:'tetsu',composer:'tetsu',arranger:'tetsu',units:['MMJ'],release:'2022-02-14',hue:110,diffs:{expert:{level:24,notes:700},master:{level:29,notes:1050}}},
+ {id:453,title:'春風シグナル',pronunciation:'はるかぜしぐなる',lyricist:'さくら',composer:'ハル',arranger:'さくら',units:['VBS','WxS'],release:'2025-03-03',hue:140,diffs:{expert:{level:21,notes:560},master:{level:26,notes:880}}},
+ {id:467,title:'雨上がりのページ',pronunciation:'あめあがりのぺーじ',lyricist:'Mio',composer:'Rin',arranger:'Mio',units:['L/n'],release:'2025-06-22',hue:205,diffs:{normal:{level:12,notes:330},hard:{level:18,notes:510},expert:{level:25,notes:790}}},
+ {id:475,title:'ミッドナイト・ブルーム',pronunciation:'みっどないとぶるーむ',lyricist:'YUKI',composer:'Nagi',arranger:'KZ',units:['25時'],release:'2024-11-09',hue:285,diffs:{hard:{level:19,notes:570},expert:{level:28,notes:930},master:{level:33,notes:1390}}},
+ {id:488,title:'サマーデイズ',pronunciation:'さまーでいず',lyricist:'Coco',composer:'Coco',arranger:'Riku',units:['MMJ','WxS'],release:'2026-02-14',hue:42,diffs:{easy:{level:7,notes:210},normal:{level:13,notes:380},hard:{level:20,notes:620},expert:{level:27,notes:900}}},
+ {id:496,title:'Virtual Horizon',pronunciation:'ばーちゃるほらいずん',lyricist:'KAI',composer:'KAI',arranger:'Studio V',units:['VS'],release:'2026-05-19',hue:225,diffs:{hard:{level:18,notes:540},expert:{level:26,notes:870},master:{level:32,notes:1280},append:{level:35,notes:1510}}}
+];
+const songById = id => SONGS.find(song => song.id === Number(id));
+const diffIndex = diff => DIFFS.indexOf(diff);
+const formatDate = value => {const d = new Date(value);if(Number.isNaN(d.getTime()))return '日時不明';const p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}/${p(d.getMonth()+1)}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;};
+const formatShortDate = value => {const d=new Date(value);if(Number.isNaN(d.getTime()))return '—';return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;};
+const formatRelease = value => {const d=new Date(`${value}T00:00:00`);if(Number.isNaN(d.getTime()))return value;return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;};
+const formatNumber = value => Number(value||0).toLocaleString('ja-JP');
+let nextRecordId = 1;
+let seed = 73;
+const random = () => {seed=(seed*9301+49297)%233280;return seed/233280;};
+const records = [];
+function createRecord(songId,diff,judgements,combo,capturedAt,addedAt,extra={}){
+  const r={id:nextRecordId++,songId,diff,great:judgements.great||0,good:judgements.good||0,bad:judgements.bad||0,miss:judgements.miss||0,combo,capturedAt,addedAt,drivePresent:true,sourceName:null,imageUrl:null,isNew:false,...extra};
+  records.push(r);return r;
+}
+(function seedDemoRecords(){
+  const start = new Date('2026-06-01T09:00:00+09:00').getTime();
+  SONGS.slice(0,8).forEach((song,si)=>{
+    Object.entries(song.diffs).forEach(([diff,info],di)=>{
+      const count=4+Math.floor(random()*3);
+      for(let j=0;j<count;j++){
+        const date=start+(j*13+si*5+Math.floor(random()*9))*86400000+(8+Math.floor(random()*13))*3600000+Math.floor(random()*60)*60000;
+        let great=Math.floor(random()*(info.level>28?9:7));
+        let good=Math.floor(random()*3),bad=Math.floor(random()*2),miss=Math.floor(random()*3);
+        if(j===count-1&&((si+di)%4===0)){great=1;good=bad=miss=0;}
+        if(j===count-1&&((si+di)%5===1)){great=good=bad=miss=0;}
+        if(j===count-1&&((si+di)%5===2)){good=bad=miss=0;great=Math.floor(random()*3)+1;}
+        const used=great+good+bad+miss;
+        const combo=(good+bad+miss===0)?info.notes:Math.min(info.notes,Math.max(1,Math.floor(info.notes*(.5+random()*.46))));
+        createRecord(song.id,diff,{great,good,bad,miss},combo,date,date+Math.floor(random()*4)*3600000);
+      }
+    });
+  });
+  // 通知画面を確認しやすいよう、3件のサンプル新記録と既存記録の差が明確になるようにする。
+  for(const [songId,diff] of [[372,'expert'],[396,'master'],[428,'master']]){
+    const notes=SONGS.find(song=>song.id===songId).diffs[diff].notes;
+    records.filter(record=>record.songId===songId&&record.diff===diff).forEach(record=>{
+      record.good=Math.max(1,record.good);
+      record.combo=Math.min(record.combo,notes-1);
+    });
+  }
+  createRecord(372,'expert',{great:0,good:0,bad:0,miss:0},720,new Date('2026-10-04T20:12:00+09:00').getTime(),new Date('2026-10-05T09:00:00+09:00').getTime(),{isNew:true});
+  createRecord(396,'master',{great:0,good:0,bad:0,miss:0},940,new Date('2026-10-05T21:12:00+09:00').getTime(),new Date('2026-10-06T08:52:00+09:00').getTime(),{isNew:true});
+  createRecord(428,'master',{great:0,good:0,bad:0,miss:0},1305,new Date('2026-10-06T22:06:00+09:00').getTime(),new Date('2026-10-07T09:15:00+09:00').getTime(),{isNew:true});
+})();
+const totalNotes = record => songById(record.songId)?.diffs?.[record.diff]?.notes ?? 0;
+const perfectCount = record => Math.max(0,totalNotes(record)-record.great-record.good-record.bad-record.miss);
+const missMetric = (record,metric=state.metric) => {
+  if(metric==='fc')return record.good+record.bad+record.miss;
+  if(metric==='ap')return record.great+record.good+record.bad+record.miss;
+  const notes=totalNotes(record);
+  const score=perfectCount(record)*3+record.great*2+record.good;
+  return Math.max(0,notes*3-score);
+};
+const clearStatus = record => record.great+record.good+record.bad+record.miss===0?'AP':record.good+record.bad+record.miss===0?'FC':'CLEAR';
+const METRIC_INFO = {fc:{label:'FC基準',short:'FC'},ap:{label:'AP基準',short:'AP'},tournament:{label:'大会基準',short:'大会'}};
+const state = {
+  page:'home',metric:'fc',collapsed:false,query:'',units:[],songSort:'title',songAsc:true,songView:'list',denseColumns:false,driveOnly:false,
+  selectedSong:null,selectedDiff:null,songLevelDiff:'expert',resultSort:'miss',resultDesc:false,resultsPBOnly:false,allSort:'name',allDesc:false,allPBOnly:false,allLevelDiff:'expert',
+  historySong:372,historyDiff:'expert',historyPBOnly:false,noticeSettings:{fc:true,ap:true,tournament:true,combo:true},noticeSettingsDraft:null
+};
+const ER = [
+  {id:'read-2031',file:'IMG_2031.png',kind:'error',message:'楽曲タイトルを特定できませんでした。タイトル領域の読み取りを確認してください。',time:'2026/10/06 22:08'},
+  {id:'dup-2044',file:'IMG_2044.png',kind:'duplicate',message:'撮影日時・判定数・画面サイズから既存のリザルトとの重複候補を検出しました。',time:'2026/10/06 22:11'}
+];
+const ANOMALIES = [
+  {id:'orphan-image',file:'IMG_2048.png',kind:'missing-info',message:'Google Driveには画像がありますが、対応するリザルト情報が見つかりません。OCRで復元するか、画像を削除できます。',resolved:false},
+  {id:'orphan-info',file:'IMG_1998.png',kind:'missing-image',message:'リザルト情報は残っていますが、Google Drive上の画像が見つかりません。管理情報を削除できます。',resolved:false}
+];
+let importLogs = [
+  {id:1,file:'IMG_2050.png',kind:'success',message:'読み取り成功。楽曲・難易度・判定数を照合しました。',time:'2026/10/07 09:15'},
+  {id:2,file:'IMG_2044.png',kind:'duplicate',message:'重複候補として保留中。既存のリザルトは変更していません。',time:'2026/10/06 22:11'},
+  {id:3,file:'IMG_2031.png',kind:'error',message:'読み取りエラー：楽曲タイトルを判定できませんでした。',time:'2026/10/06 22:08'}
+];
+let lastNotices = [];
+let busy = false;
+let toastTimer = null;
+let queryComposing = false;
+let activeVirtualCleanup = null;
+let activeVirtualRefresh = null;
+let nextLogId = 4;
+let latestSyncAt = '2026/10/07 09:15';
+const OcrReference = {
+  baseWidth:1920,baseHeight:1080,
+  // 指定された1920×1080基準の切り出し位置。Google OCRとの接続はデザイン用の仮実装です。
+  regions:{result:{x:210,y:580,w:390,h:325},combo:{x:650,y:570,w:340,h:90},title:{x:370,y:20,w:600,h:70},difficulty:{x:370,y:95,w:200,h:65},level:{x:580,y:95,w:190,h:65}}
+};
+function calculateOcrRegions(width,height){
+  const Wi=Math.max(1,Number(width)||1),Hi=Math.max(1,Number(height)||1);
+  const s=Math.min(Wi/OcrReference.baseWidth,Hi/OcrReference.baseHeight);
+  const offsetX=(Wi-OcrReference.baseWidth*s)/2;
+  const offsetY=Math.max(0,(Hi-OcrReference.baseHeight*s)/2);
+  const out={};
+  for(const [name,rect] of Object.entries(OcrReference.regions)){
+    // ご指定の座標式では全領域に offsetX、リザルト・コンボには offsetY を加算。
+    const x=rect.x*s+offsetX;
+    const y=rect.y*s+(name==='title'||name==='difficulty'||name==='level'?0:offsetY);
+    out[name]={x:Math.round(x),y:Math.round(y),w:Math.round(rect.w*s),h:Math.round(rect.h*s)};
+  }
+  return out;
+}
+function compare(a,b){return a<b?-1:a>b?1:0;}
+function resultGroup(record,from=records){return from.filter(item=>item.songId===record.songId&&item.diff===record.diff);}
+function bestRecord(songId,diff,metric=state.metric,from=records){
+  return from.filter(r=>r.songId===songId&&r.diff===diff).sort((a,b)=>compare(missMetric(a,metric),missMetric(b,metric))||compare(b.combo,a.combo)||compare(b.capturedAt,a.capturedAt))[0]||null;
+}
+function isPersonalBest(record,metric=state.metric){return bestRecord(record.songId,record.diff,metric)===record;}
+function songHasResults(songId){return records.some(r=>r.songId===songId&&r.drivePresent);}
+function difficultyDotColor(songId,diff){
+  const list=records.filter(r=>r.songId===songId&&r.diff===diff&&r.drivePresent);
+  if(!list.length)return '#cbd5e1';
+  const status=clearStatus(bestRecord(songId,diff));
+  if(status==='AP')return '#25ad83';
+  if(status==='FC')return '#e6ae35';
+  return '#4786ed';
+}
+function getSongs(){
+  const q=state.query.trim().toLocaleLowerCase('ja');
+  let list=SONGS.filter(song=>{
+    const unitOk=!state.units.length||state.units.some(unit=>song.units.includes(unit));
+    const text=[song.title,song.pronunciation,song.lyricist,song.composer,song.arranger].join(' ').toLocaleLowerCase('ja');
+    const queryOk=!q||text.includes(q);
+    const driveOk=!state.driveOnly||songHasResults(song.id);
+    const levelOk=state.songSort!=='level'||Boolean(song.diffs[state.songLevelDiff||'expert']);
+    return unitOk&&queryOk&&driveOk&&levelOk;
+  });
+  const textCmp=(a,b)=>String(a).localeCompare(String(b),'ja');
+  list.sort((a,b)=>{
+    let primary=0;
+    if(state.songSort==='title')primary=textCmp(a.title,b.title);
+    else if(state.songSort==='date')primary=compare(a.release,b.release);
+    else primary=compare(a.diffs[state.songLevelDiff||'expert']?.level??999,b.diffs[state.songLevelDiff||'expert']?.level??999);
+    return primary?(state.songAsc?primary:-primary):textCmp(a.title,b.title);
+  });
+  return list;
+}
+function sortResults(list,sort=state.resultSort,desc=state.resultDesc){
+  const textCmp=(a,b)=>String(songById(a.songId)?.title||'').localeCompare(String(songById(b.songId)?.title||''),'ja');
+  return list.sort((a,b)=>{
+    let primary=0;
+    if(sort==='miss')primary=compare(missMetric(a),missMetric(b));
+    else primary=compare(a.addedAt,b.addedAt);
+    if(primary!==0)return desc?-primary:primary;
+    if(sort==='miss')return compare(b.combo,a.combo)||compare(b.addedAt,a.addedAt);
+    return compare(b.id,a.id);
+  });
+}
+function sortAllResults(list){
+  const titleCmp=(a,b)=>songById(a.songId).title.localeCompare(songById(b.songId).title,'ja');
+  return list.sort((a,b)=>{
+    const sA=songById(a.songId),sB=songById(b.songId);
+    let primary=0;
+    if(state.allSort==='name')primary=titleCmp(a,b);
+    if(state.allSort==='level')primary=compare(sA.diffs[state.allLevelDiff]?.level??999,sB.diffs[state.allLevelDiff]?.level??999);
+    if(state.allSort==='miss')primary=compare(missMetric(a),missMetric(b));
+    if(state.allSort==='added')primary=compare(a.addedAt,b.addedAt);
+    if(primary!==0)return state.allDesc?-primary:primary;
+    if(state.allSort==='name')return compare(diffIndex(a.diff),diffIndex(b.diff))||compare(missMetric(a),missMetric(b))||compare(b.combo,a.combo)||compare(b.addedAt,a.addedAt);
+    if(state.allSort==='level')return compare(diffIndex(a.diff),diffIndex(b.diff))||titleCmp(a,b)||compare(missMetric(a),missMetric(b))||compare(b.combo,a.combo)||compare(b.addedAt,a.addedAt);
+    if(state.allSort==='miss')return compare(b.combo,a.combo)||compare(sA.diffs[a.diff].level,sB.diffs[b.diff].level)||compare(diffIndex(a.diff),diffIndex(b.diff))||titleCmp(a,b)||compare(b.addedAt,a.addedAt);
+    return 0;
+  });
+}
+function getNewRecordNotices(){
+  const updates=[];
+  const metrics=[['fc','FC基準'],['ap','AP基準'],['tournament','大会基準']];
+  for(const record of records.filter(r=>r.isNew)){
+    const earlier=resultGroup(record).filter(r=>r.id!==record.id&&!r.isNew);
+    const changed=[];
+    for(const [metric,label] of metrics){
+      if(!state.noticeSettings[metric])continue;
+      const old=earlier.length?Math.min(...earlier.map(r=>missMetric(r,metric))):null;
+      const now=missMetric(record,metric);
+      if(old===null||now<old)changed.push({label,old:old===null?'初記録':old,now,metric});
+    }
+    if(state.noticeSettings.combo){
+      const oldCombo=earlier.length?Math.max(...earlier.map(r=>r.combo)):null;
+      if(oldCombo===null||record.combo>oldCombo)changed.push({label:'コンボ数',old:oldCombo===null?'初記録':oldCombo,now:record.combo,metric:'combo'});
+    }
+    if(changed.length)updates.push({record,changed});
+  }
+  return updates;
+}
+function computeBestProgress(group){
+  let prior=[Infinity,-Infinity];const bestIds=new Set();
+  group.slice().sort((a,b)=>a.capturedAt-b.capturedAt).forEach(record=>{
+    const key=[missMetric(record),-record.combo];
+    if(key[0]<prior[0]||(key[0]===prior[0]&&key[1]<prior[1])){prior=key;bestIds.add(record.id);}
+  });
+  return bestIds;
+}
+function jacketMarkup(song,cls=''){
+  return `<div class="jacket ${cls}" style="--hue:${song.hue}" aria-label="${escapeHTML(song.title)}のジャケット（デザイン用イメージ）"><span class="jacket-mark">${icon('music')}</span></div>`;
+}
+function difficultyDots(song){
+  return `<span class="difficulty-dots" aria-label="難易度別リザルト状況">${DIFFS.filter(diff=>song.diffs[diff]).map(diff=>`<span class="diff-dot" title="${DIFF_INFO[diff].label}：${records.some(r=>r.songId===song.id&&r.diff===diff&&r.drivePresent)?(clearStatus(bestRecord(song.id,diff))==='CLEAR'?'リザルトあり':clearStatus(bestRecord(song.id,diff))):'リザルトなし'}" aria-label="${DIFF_INFO[diff].label}" style="--dot:${difficultyDotColor(song.id,diff)}"></span>`).join('')}</span>`;
+}
+function songListItem(song){
+  return `<button type="button" class="song-list-item" data-a="select-song" data-v="${song.id}" aria-label="${escapeHTML(song.title)}の難易度を選択">${jacketMarkup(song)}<span class="song-main"><strong>${escapeHTML(song.title)}</strong><small>${escapeHTML(song.composer)} · ${formatRelease(song.release)}</small><span class="song-tags">${song.units.map(unit=>`<span class="unit-tag">${escapeHTML(unit)}</span>`).join('')}</span></span>${difficultyDots(song)}${icon('chevron')}</button>`;
+}
+function songJacketItem(song){
+  return `<button type="button" class="song-jacket-card" data-a="select-song" data-v="${song.id}" aria-label="${escapeHTML(song.title)}の難易度を選択">${jacketMarkup(song)}<span><strong>${escapeHTML(song.title)}</strong><span class="song-card-sub">${escapeHTML(song.composer)} · ${formatRelease(song.release)}</span></span>${difficultyDots(song)}</button>`;
+}
+function resultImageMarkup(record,large=false){
+  if(record.imageUrl){return `<div class="result-visual ${large?'detail-result-visual':''}" style="--hue:${songById(record.songId).hue}"><img class="actual-result-image" src="${escapeHTML(record.imageUrl)}" alt="${escapeHTML(record.sourceName||'追加されたリザルト画像')}" /></div>`;}
+  const song=songById(record.songId),status=clearStatus(record),statusLabel=status==='AP'?'ALL PERFECT':status==='FC'?'FULL COMBO':'CLEAR';
+  return `<div class="result-visual ${large?'detail-result-visual':''}" style="--hue:${song.hue}"><div class="mock-topline"><span>SEKAI RESULT NOTE</span><span class="mock-mini-bars"><i></i><i></i><i></i></span></div><div class="mock-result-center"><small>LIVE RESULT</small><strong>${statusLabel}</strong><span>${DIFF_INFO[record.diff].label} · Lv.${song.diffs[record.diff].level}</span></div><div class="mock-score"><i></i><i></i><i></i><i></i></div><span class="mock-clear">SCORE RESULT / DEMO</span></div>`;
+}
+function statusMarkup(record){const status=clearStatus(record);return `<span class="state-label ${status}">${status==='CLEAR'?'CLEAR':status}</span>`;}
+function resultCard(record){
+  const song=songById(record.songId),info=DIFF_INFO[record.diff],notes=totalNotes(record);
+  return `<button type="button" class="result-card" data-a="open-detail" data-v="${record.id}" aria-label="${escapeHTML(song.title)} ${info.label} Lv.${song.diffs[record.diff].level} の詳細">${resultImageMarkup(record)}<span class="result-card-body"><strong class="result-title">${escapeHTML(song.title)}</strong><span class="result-tags"><span class="diff-label" style="--diff-color:${info.color};--diff-bg:${info.bg}">${info.label} <span>Lv.${song.diffs[record.diff].level}</span></span>${isPersonalBest(record)?`<span class="pb-mark" title="自己ベスト">${icon('trophy')}</span>`:''}</span><span class="result-metrics"><strong class="result-miss">${formatNumber(missMetric(record))}</strong><span class="result-miss-label">${state.metric==='tournament'?'大会ミス': 'ミス'}</span>${statusMarkup(record)}<span class="result-combo">コンボ <strong>${formatNumber(record.combo)}</strong> <span>/ ${formatNumber(notes)}</span></span></span><span class="result-date">${icon('calendar')}${formatDate(record.capturedAt)} 撮影</span></span></button>`;
+}
+function emptyState(title,message,action=''){return `<div class="empty-state">${icon('search')}<div><strong>${escapeHTML(title)}</strong><p>${escapeHTML(message)}</p>${action}</div></div>`;}
+function pageIntro(eyebrow,title,subtitle,actions=''){
+  return `<div class="page-head"><div><div class="eyebrow"><span class="eyebrow-line"></span>${escapeHTML(eyebrow)}</div><h2 class="page-title">${escapeHTML(title)}</h2><p class="page-subtitle">${escapeHTML(subtitle)}</p></div>${actions?`<div class="page-head-actions">${actions}</div>`:''}</div>`;
+}
+function renderDashboard(){
+  const personalBestIds=new Set();
+  SONGS.forEach(song=>Object.keys(song.diffs).forEach(diff=>{const best=bestRecord(song.id,diff);if(best)personalBestIds.add(best.id);}));
+  const personalBestCount=personalBestIds.size;
+  const apCount=[...personalBestIds].map(id=>records.find(r=>r.id===id)).filter(r=>r&&clearStatus(r)==='AP').length;
+  const fcCount=[...personalBestIds].map(id=>records.find(r=>r.id===id)).filter(r=>r&&clearStatus(r)!=='CLEAR').length;
+  const recent=records.slice().sort((a,b)=>b.addedAt-a.addedAt).slice(0,5);
+  const notices=getNewRecordNotices();
+  const uploads=records.filter(r=>r.sourceName).length;
+  return `<div class="page">
+    <section class="hero"><div class="hero-copy"><div class="eyebrow"><span class="eyebrow-line"></span>YOUR RESULT LIBRARY</div><h2>プレイの記録を、<br><span>次のベスト</span>につなげる。</h2><p>リザルト画像とスコアの推移をまとめて管理。曲・難易度ごとの記録や更新履歴を、いつでも見返せるライブラリです。</p><div class="hero-actions"><button class="btn" data-a="navigate" data-v="songs">${icon('search')}曲から探す</button><button class="btn secondary" data-a="navigate" data-v="sync">${icon('upload')}画像を追加</button></div></div><div class="hero-art" aria-hidden="true"><div class="hero-art-card"><div class="hero-stamp">${icon('chart')}</div><div class="art-line long"></div><div class="art-line"></div><div class="art-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div></div></section>
+    <section class="stats-grid" aria-label="ライブラリの統計"><div class="panel stat-card"><span class="stat-icon">${icon('image')}</span><div class="stat-content"><div class="stat-label">登録リザルト</div><div class="stat-value">${formatNumber(records.length)}</div><div class="stat-foot">ライブラリ内の記録</div></div></div><div class="panel stat-card"><span class="stat-icon green">${icon('music')}</span><div class="stat-content"><div class="stat-label">収録曲</div><div class="stat-value">${formatNumber(new Set(records.map(r=>r.songId)).size)}</div><div class="stat-foot">全 ${SONGS.length} 曲中</div></div></div><div class="panel stat-card"><span class="stat-icon gold">${icon('trophy')}</span><div class="stat-content"><div class="stat-label">自己ベスト</div><div class="stat-value">${formatNumber(personalBestCount)}</div><div class="stat-foot">曲・難易度ごと</div></div></div><div class="panel stat-card"><span class="stat-icon purple">${icon('target')}</span><div class="stat-content"><div class="stat-label">FC以上の自己ベスト</div><div class="stat-value">${formatNumber(fcCount)}</div><div class="stat-foot">うち AP ${formatNumber(apCount)} 件</div></div></div></section>
+    <div class="dashboard-columns"><section class="panel panel-pad"><div class="section-head"><div><h2>最近追加されたリザルト</h2><p>画像の撮影日時を基準に表示しています</p></div><button class="control-button" data-a="navigate" data-v="results">すべて見る ${icon('chevron')}</button></div><div class="activity-list">${recent.map(r=>{const s=songById(r.songId);return `<button class="activity-item" data-a="open-detail" data-v="${r.id}" style="width:100%;text-align:left"><span style="width:43px;height:43px;flex:none">${jacketMarkup(s)}</span><span class="activity-info"><strong>${escapeHTML(s.title)}</strong><small>${DIFF_INFO[r.diff].label} · Lv.${s.diffs[r.diff].level} ・ ${formatShortDate(r.capturedAt)}</small></span><span class="activity-score"><strong>${formatNumber(missMetric(r))}</strong><small class="small-text">ミス数</small></span></button>`;}).join('')}</div></section><section class="panel panel-pad"><div class="section-head"><div><h2>クイックアクション</h2><p>よく使う機能にすぐアクセス</p></div></div><div class="quick-actions"><button class="quick-action" data-a="navigate" data-v="songs"><span class="quick-icon">${icon('search')}</span><span><strong>曲・難易度から探す</strong><small>ユニットやレベルで絞り込む</small></span>${icon('chevron')}</button><button class="quick-action" data-a="navigate" data-v="sync"><span class="quick-icon green">${icon('cloud')}</span><span><strong>Google Drive と同期</strong><small>差分確認・OCR・エラーの確認</small></span>${icon('chevron')}</button><button class="quick-action" data-a="open-notices"><span class="quick-icon" style="background:#fff4df;color:#b98725">${icon('bell')}</span><span><strong>更新通知を確認</strong><small>${notices.length} 件の自己ベスト更新候補</small></span>${icon('chevron')}</button></div><div class="divider"></div><div class="row" style="display:flex;align-items:center;gap:7px;flex-wrap:wrap"><span class="pill green">${icon('shield')}デモデータ</span><span class="small-text">実際の Drive / OCR には接続しません</span></div></section></div>
+  </div>`;
+}
+function renderSongToolbar(){
+  const sortOptions=[['title','タイトル順'],['date','公開日順'],['level','レベル順']];
+  return `<div class="toolbar"><div class="search-box">${icon('search')}<input class="search-input" id="songQuery" type="search" data-input="query" value="${escapeHTML(state.query)}" placeholder="曲名・読み方・作詞・作曲・編曲者で検索" autocomplete="off" aria-label="楽曲を検索"></div><select id="songSort" data-change="songSort" aria-label="曲の並び替え">${sortOptions.map(([value,label])=>`<option value="${value}" ${state.songSort===value?'selected':''}>${label}</option>`).join('')}</select>${state.songSort==='level'?`<select id="songSortDiff" data-change="sortDiff" aria-label="レベル順の難易度">${DIFFS.map(d=>`<option value="${d}" ${state.songLevelDiff===d?'selected':''}>${DIFF_INFO[d].label}</option>`).join('')}</select>`:''}<button class="control-button" data-a="toggle-song-asc">${icon(state.songAsc?'arrow':'down')}${state.songAsc?'昇順':'降順'}</button><button class="control-button view-toggle" data-a="toggle-song-view">${icon(state.songView==='list'?'grid':'list')}${state.songView==='list'?'ジャケット表示':'リスト表示'}</button>${state.songView==='jacket'?`<button class="control-button" data-a="toggle-columns">${icon('grid')}${getJacketCols()}列表示</button>`:''}</div><div class="filter-row"><span class="small-text" style="margin-right:2px">ユニット</span>${UNITS.map(unit=>`<button class="filter-chip ${state.units.includes(unit)?'active':''}" data-a="toggle-unit" data-v="${escapeHTML(unit)}">${escapeHTML(unit)}</button>`).join('')}<span class="toolbar-spacer"></span><button class="filter-chip ${state.driveOnly?'active':''}" data-a="toggle-drive-only">${icon('cloud')}Drive内にリザルトがある曲のみ</button></div>`;
+}
+function getJacketCols(){const mobile=window.innerWidth<800;return mobile?(state.denseColumns?3:2):(state.denseColumns?5:3);}
+function renderSongBrowse(){
+  if(state.selectedSong!==null)return renderSongSelected();
+  const list=getSongs();
+  return `<div class="page">${pageIntro('MUSIC LIBRARY','曲から探す','曲を選び、難易度ごとのリザルトや自己ベストの推移を確認できます。')} ${renderSongToolbar()}<div class="section-head"><div><h2 style="font-size:13px">楽曲一覧</h2><p>ジャケットの難易度マークはリザルトの登録状況を表します</p></div><span class="toolbar-count">${list.length} 曲</span></div>${list.length?`<div class="virtual-scroll" id="songVirtual" aria-label="楽曲一覧"><div class="virtual-space"></div></div>`:emptyState('曲が見つかりません','検索語やユニット、Drive内のみの条件を変更してください。')}</div>`;
+}
+function renderSongSelected(){
+  const song=songById(state.selectedSong);
+  if(!song){state.selectedSong=null;state.selectedDiff=null;return renderSongBrowse();}
+  const breadcrumb=`<div class="breadcrumbs"><button data-a="back-songs">曲一覧</button>${icon('chevron')}<span>${escapeHTML(song.title)}</span>${state.selectedDiff?`${icon('chevron')}<span>${DIFF_INFO[state.selectedDiff].label}</span>`:''}</div>`;
+  const profile=`<div class="song-profile">${jacketMarkup(song)}<div class="song-profile-main"><h2>${escapeHTML(song.title)}</h2><p>作詞 ${escapeHTML(song.lyricist)} ・ 作曲 ${escapeHTML(song.composer)} ・ 編曲 ${escapeHTML(song.arranger)}</p><div class="song-profile-meta">${song.units.map(unit=>`<span class="unit-tag">${escapeHTML(unit)}</span>`).join('')}<span class="pill">公開日 ${formatRelease(song.release)}</span></div></div></div>`;
+  if(!state.selectedDiff){
+    const cards=DIFFS.filter(diff=>song.diffs[diff]).map(diff=>{
+      const info=DIFF_INFO[diff],list=records.filter(r=>r.songId===song.id&&r.diff===diff&&r.drivePresent),best=bestRecord(song.id,diff);
+      return `<button class="difficulty-card" data-a="select-diff" data-v="${diff}" style="--diff-color:${info.color}"><span class="difficulty-name">${info.label}</span><strong class="difficulty-level">${song.diffs[diff].level}<small>Lv.</small></strong><span class="difficulty-stat">${icon('image')}${list.length} 件のリザルト</span><span class="difficulty-stat">${best?`自己ベスト：${statusMarkup(best)}`:'リザルト未登録'}</span></button>`;
+    }).join('');
+    return `<div class="page">${breadcrumb}${profile}<div class="subsection-title"><h2>難易度を選択</h2><span class="small-text">難易度ごとの記録を表示します</span></div><div class="difficulty-grid">${cards}</div><div class="demo-banner">${icon('help')}<span>難易度マークは「未登録：グレー」「リザルトあり：ブルー」「FC：ゴールド」「AP：グリーン」で表示しています。</span></div></div>`;
+  }
+  const info=DIFF_INFO[state.selectedDiff],all=records.filter(r=>r.songId===song.id&&r.diff===state.selectedDiff&&r.drivePresent);
+  const filtered=state.resultsPBOnly?all.filter(r=>isPersonalBest(r)):all;
+  const list=sortResults(filtered.slice());
+  const controls=`<div class="toolbar"><span class="pill" style="color:${info.color};background:${info.bg}">${info.label} · Lv.${song.diffs[state.selectedDiff].level}</span><span class="toolbar-spacer"></span><select data-change="resultSort" aria-label="履歴の並び替え"><option value="miss" ${state.resultSort==='miss'?'selected':''}>ミス数順</option><option value="added" ${state.resultSort==='added'?'selected':''}>追加日順</option></select><button class="control-button" data-a="toggle-result-desc">${icon(state.resultDesc?'down':'arrow')}${state.resultSort==='miss'?(state.resultDesc?'降順':'昇順'):(state.resultDesc?'新しい順':'古い順')}</button><button class="control-button ${state.resultsPBOnly?'active':''}" data-a="toggle-song-pb">${icon('trophy')}自己ベストのみ ${state.resultsPBOnly?'ON':'OFF'}</button></div>`;
+  return `<div class="page">${breadcrumb}${profile}<div class="section-head"><div><h2 style="font-size:15px">リザルト一覧</h2><p>ミス数順では、コンボ数・追加日時を優先順位に沿って比較します</p></div><span class="toolbar-count">${list.length} 件</span></div>${controls}${list.length?`<div class="virtual-scroll" id="songResultVirtual" aria-label="選択した曲のリザルト一覧"><div class="virtual-space"></div></div>`:emptyState('リザルトがありません','この難易度の記録はまだ登録されていません。') }</div>`;
+}
+function renderResultsPage(){
+  const filtered=records.filter(r=>!state.allPBOnly||isPersonalBest(r));
+  const list=sortAllResults(filtered.slice());
+  const sortOptions=[['name','名前順'],['level','楽曲レベル順'],['miss','ミス数順'],['added','追加日順']];
+  return `<div class="page">${pageIntro('RESULT LIBRARY','リザルト一覧','登録済みのリザルトを一括で閲覧。カードを選択すると画像・判定・履歴の詳細を確認できます。')}<div class="toolbar"><select data-change="allSort" aria-label="リザルトの並び替え">${sortOptions.map(([value,label])=>`<option value="${value}" ${state.allSort===value?'selected':''}>${label}</option>`).join('')}</select>${state.allSort==='level'?`<select data-change="allLevelDiff" aria-label="レベル順の基準難易度">${DIFFS.map(d=>`<option value="${d}" ${state.allLevelDiff===d?'selected':''}>${DIFF_INFO[d].label}基準</option>`).join('')}</select>`:''}<button class="control-button" data-a="toggle-all-desc">${icon(state.allDesc?'down':'arrow')}${state.allDesc?'降順':'昇順'}</button><button class="control-button ${state.allPBOnly?'active':''}" data-a="toggle-all-pb">${icon('trophy')}自己ベストのみ ${state.allPBOnly?'ON':'OFF'}</button><span class="toolbar-spacer"></span><span class="toolbar-count">${formatNumber(list.length)} 件</span></div>${list.length?`<div class="virtual-scroll" id="allResultVirtual" aria-label="全リザルト一覧"><div class="virtual-space"></div></div>`:emptyState('リザルトがありません','条件を変更するか、画像追加からリザルトを登録してください。',`<button class="btn" data-a="navigate" data-v="sync" style="margin-top:14px">${icon('upload')}画像を追加</button>`)}</div>`;
+}
+function chartMarkup(songId,diff,onlyPB=false){
+  const list=records.filter(r=>r.songId===songId&&r.diff===diff).sort((a,b)=>a.capturedAt-b.capturedAt);
+  const keep=onlyPB?computeBestProgress(list):null;
+  const shown=onlyPB?list.filter(r=>keep.has(r.id)):list;
+  if(!shown.length)return `<div class="empty-state" style="min-height:150px">${icon('chart')}<div><strong>表示できる推移がありません</strong><p>リザルトが追加されると、ここに推移が表示されます。</p></div></div>`;
+  const W=760,H=246,padL=42,padR=18,padT=18,padB=35;
+  const maxVal=Math.max(4,...list.map(r=>missMetric(r)));
+  const plotW=W-padL-padR,plotH=H-padT-padB;
+  const x=(record,index)=>shown.length<2?padL+plotW/2:padL+index*plotW/(shown.length-1);
+  const y=record=>padT+(missMetric(record)/maxVal)*plotH;
+  let grid='';for(let i=0;i<=4;i++){const value=Math.round(maxVal*i/4),yy=padT+plotH*i/4;grid+=`<line class="grid-line" x1="${padL}" y1="${yy}" x2="${W-padR}" y2="${yy}"/><text x="${padL-9}" y="${yy+3}" text-anchor="end">${value}</text>`;}
+  const path=shown.map((r,i)=>`${i?'L':'M'} ${x(r,i).toFixed(1)} ${y(r).toFixed(1)}`).join(' ');
+  const points=shown.map((r,i)=>`<circle class="point ${keep?.has(r.id)?'pb':''}" cx="${x(r,i).toFixed(1)}" cy="${y(r).toFixed(1)}" r="4"><title>${formatDate(r.capturedAt)} / ${missMetric(r)} / コンボ ${r.combo}</title></circle>`).join('');
+  return `<svg class="history-chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="ミス数の推移。上にあるほど良い記録です">${grid}<path class="trend-line" d="${path}"/>${points}<text x="${padL}" y="${H-10}">${formatShortDate(shown[0].capturedAt)}</text><text x="${W-padR}" y="${H-10}" text-anchor="end">${formatShortDate(shown[shown.length-1].capturedAt)}</text><text x="${padL}" y="11">${state.metric==='tournament'?'大会基準のミス数':`${METRIC_INFO[state.metric].label}のミス数`}（上ほど良い）</text></svg>`;
+}
+function getAvailableHistorySongs(){return SONGS.filter(song=>records.some(r=>r.songId===song.id));}
+function renderHistoryPage(){
+  const available=getAvailableHistorySongs();
+  if(!available.some(s=>s.id===state.historySong))state.historySong=available[0]?.id||SONGS[0].id;
+  const song=songById(state.historySong)||SONGS[0];
+  const diffList=DIFFS.filter(diff=>song.diffs[diff]&&records.some(r=>r.songId===song.id&&r.diff===diff));
+  if(!diffList.includes(state.historyDiff))state.historyDiff=diffList[0]||Object.keys(song.diffs)[0];
+  const list=records.filter(r=>r.songId===song.id&&r.diff===state.historyDiff).sort((a,b)=>b.capturedAt-a.capturedAt);
+  const bestIds=computeBestProgress(list);
+  return `<div class="page">${pageIntro('HISTORY & TRENDS','履歴・推移','曲と難易度を指定して、スコアの変化と自己ベストを時系列で振り返ります。')}<div class="toolbar"><select data-change="historySong" aria-label="曲を選択">${available.map(s=>`<option value="${s.id}" ${s.id===song.id?'selected':''}>${escapeHTML(s.title)}</option>`).join('')}</select>${diffList.map(diff=>`<button class="filter-chip ${state.historyDiff===diff?'active':''}" data-a="history-diff" data-v="${diff}">${DIFF_INFO[diff].label} · Lv.${song.diffs[diff].level}</button>`).join('')}<span class="toolbar-spacer"></span><button class="control-button ${state.historyPBOnly?'active':''}" data-a="toggle-history-pb">${icon('trophy')}自己ベストのみ</button></div><section class="panel chart-wrap"><div class="section-head"><div><h2>${escapeHTML(song.title)} · ${DIFF_INFO[state.historyDiff].label}</h2><p>撮影日時順の推移。ミス数は上にあるほど良い記録です。</p></div><div class="chart-legend"><span class="legend-dot"></span>すべての記録 <span class="legend-dot green" style="margin-left:8px"></span>自己ベスト</div></div>${chartMarkup(song.id,state.historyDiff,state.historyPBOnly)}</section><div class="subsection-title"><h2>リザルト履歴</h2><span class="toolbar-count">${list.length} 件 · 撮影日時順</span></div><div class="table-wrap"><table class="data-table"><thead><tr><th>撮影日時</th><th>PERFECT</th><th>GREAT</th><th>GOOD</th><th>BAD</th><th>MISS</th><th>コンボ</th><th>ミス数</th><th>クリア</th></tr></thead><tbody>${(state.historyPBOnly?list.filter(r=>bestIds.has(r.id)):list).map(r=>`<tr data-a="open-detail" data-v="${r.id}"><td>${formatDate(r.capturedAt)}</td><td>${formatNumber(perfectCount(r))}</td><td>${formatNumber(r.great)}</td><td>${formatNumber(r.good)}</td><td>${formatNumber(r.bad)}</td><td>${formatNumber(r.miss)}</td><td>${formatNumber(r.combo)} / ${formatNumber(totalNotes(r))}</td><td><strong>${formatNumber(missMetric(r))}</strong>${bestIds.has(r.id)?` <span class="pb-mark" title="自己ベスト">${icon('trophy')}</span>`:''}</td><td>${statusMarkup(r)}</td></tr>`).join('')}</tbody></table></div></div>`;
+}
+function renderSyncPage(){
+  const unresolved=ANOMALIES.filter(a=>!a.resolved);
+  return `<div class="page">${pageIntro('GOOGLE DRIVE','画像追加・同期','専用フォルダとの差分を確認し、画像の取り込み・OCR・重複候補の確認を行います。',`<button class="btn" data-a="sync">${icon('sync')}Driveと同期</button>`)}<div class="demo-banner">${icon('help')}<span><strong>デザインプレビュー：</strong>Google OAuth・Drive API・Google OCRには接続しません。ここでの追加、同期、削除、復元は画面確認用の仮動作です。</span></div><div class="upload-layout"><section class="panel panel-pad"><div class="section-head"><div><h2>リザルト画像を追加</h2><p>選択した画像をOCRのデモフローに通します</p></div></div><label class="upload-drop" id="uploadDrop"><span class="drop-icon">${icon('upload')}</span><strong>画像をドラッグ＆ドロップ</strong><p>またはファイルを選択して追加します。画像はこのプレビュー内でのみ一時的に表示されます。</p><span class="btn secondary small">${icon('plus')}ファイルを選択</span><span class="file-note">PNG / JPG / WEBP ・ 複数選択可</span><input id="filePicker" data-change="file" type="file" accept="image/png,image/jpeg,image/webp,image/*" multiple hidden></label><div class="divider"></div><div class="row" style="display:flex;align-items:center;gap:9px;flex-wrap:wrap"><span class="pill green">${icon('shield')}専用フォルダ</span><strong style="font-size:12px">Sekai Results</strong><span class="small-text">同期対象フォルダ（仮）</span></div></section><section class="panel panel-pad"><div class="section-head"><div><h2>同期フロー</h2><p>中断時は未完了分をロールバックする設計</p></div><span class="pill blue">トランザクション</span></div><div class="sync-step-list"><div class="sync-step"><span class="sync-step-icon">${icon('user')}</span><div><strong>Googleアカウントを認証</strong><small>OAuth認証状態を確認する想定です。</small></div></div><div class="sync-step"><span class="sync-step-icon">${icon('sync')}</span><div><strong>専用フォルダの差分を取得</strong><small>新規・削除・更新されたファイルと管理情報を比較します。</small></div></div><div class="sync-step"><span class="sync-step-icon">${icon('scan')}</span><div><strong>OCR解析と重複判定</strong><small>撮影日時・判定結果・画面サイズ・画像一致率を総合的に評価します。</small></div></div><div class="sync-step"><span class="sync-step-icon">${icon('trophy')}</span><div><strong>自己ベスト・通知を更新</strong><small>FC基準・AP基準・大会基準・コンボ数の更新を比較します。</small></div></div></div><button class="btn" style="width:100%;margin-top:15px" data-a="sync">${icon('sync')}差分を確認して同期</button></section></div><div class="subsection-title"><h2>同期時の整合性チェック</h2><span class="toolbar-count">未解決 ${unresolved.length} 件</span></div><section class="panel panel-pad"><div class="section-head"><div><h2>画像と管理情報の不一致</h2><p>片方だけが残ったケースを個別に解消できます</p></div></div>${unresolved.length?unresolved.map(a=>`<div class="anomaly-card"><div class="row" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span class="pill gold">${a.kind==='missing-info'?'管理情報なし':'画像なし'}</span><strong>${escapeHTML(a.file)}</strong></div><p>${escapeHTML(a.message)}</p><div class="anomaly-actions">${a.kind==='missing-info'?`<button class="btn small" data-a="resolve-anomaly" data-v="${a.id}" data-mode="restore">${icon('scan')}OCRして復元</button><button class="btn secondary small" data-a="resolve-anomaly" data-v="${a.id}" data-mode="delete-image">${icon('trash')}Drive画像を削除</button>`:`<button class="btn danger small" data-a="resolve-anomaly" data-v="${a.id}" data-mode="delete-info">${icon('trash')}管理情報を削除</button>`}</div></div>`).join(''):emptyState('不一致はありません','同期時に画像と管理情報の整合性を確認します。')}</section><div class="subsection-title"><h2>取り込みログ</h2><span class="toolbar-count">${importLogs.length} 件</span></div><div class="log-list">${importLogs.slice().sort((a,b)=>b.id-a.id).map(renderLogItem).join('')}</div><p class="small-text" style="margin-top:13px">最終同期：${latestSyncAt}（デモデータ）</p></div>`;
+}
+function renderLogItem(log){
+  const type=log.kind==='error'?'error':(log.kind==='duplicate'?'warning':'');
+  const iconName=log.kind==='error'?'alert':log.kind==='duplicate'?'alert':'check';
+  const label=log.kind==='error'?'読み取りエラー':log.kind==='duplicate'?'重複候補':log.kind==='warning'?'要確認':'読み取り成功';
+  return `<div class="log-item"><span class="log-icon ${type}">${icon(iconName)}</span><div class="log-text"><strong>${escapeHTML(log.file)} <span class="pill ${log.kind==='error'?'red':log.kind==='duplicate'?'gold':'green'}" style="margin-left:5px">${label}</span></strong><p>${escapeHTML(log.message)}</p></div><span class="log-time">${escapeHTML(log.time||'')}</span></div>`;
+}
+function pageMetadata(page){
+ const meta={home:['ホーム','リザルトの記録と自己ベストをひと目で。'],songs:['曲から探す','曲を選んで難易度別の記録を確認。'],results:['リザルト一覧','登録済みリザルトの一覧と詳細。'],history:['履歴・推移','楽曲・難易度ごとの記録の変化を確認。'],sync:['画像追加・同期','Drive差分・画像追加・OCRログを管理。']};return meta[page]||meta.home;
+}
+function renderApp(resetMainScroll=false){
+  if(activeVirtualCleanup){activeVirtualCleanup();activeVirtualCleanup=null;activeVirtualRefresh=null;}
+  const view=$('#view');
+  const renderer={home:renderDashboard,songs:renderSongBrowse,results:renderResultsPage,history:renderHistoryPage,sync:renderSyncPage};
+  view.innerHTML=(renderer[state.page]||renderDashboard)();
+  const [title,subtitle]=pageMetadata(state.page);$('#pageHeading').textContent=title;$('#pageSubheading').textContent=subtitle;$('#metricSelect').value=state.metric;
+  $$('.nav-button[data-v]').forEach(button=>button.classList.toggle('active',button.dataset.v===state.page));
+  updateNotificationBadge();
+  if(resetMainScroll)view.scrollTop=0;
+  if(state.page==='songs'&&state.selectedSong===null){const list=getSongs();if(list.length)mountVirtual('songVirtual',list,'song',state.songView==='list'?'song-list':'song-jacket');}
+  if(state.page==='songs'&&state.selectedSong!==null&&state.selectedDiff!==null){const song=songById(state.selectedSong);const list=records.filter(r=>r.songId===song.id&&r.diff===state.selectedDiff&&r.drivePresent&&(!state.resultsPBOnly||isPersonalBest(r)));const sorted=sortResults(list.slice());if(sorted.length)mountVirtual('songResultVirtual',sorted,'results');}
+  if(state.page==='results'){const list=sortAllResults(records.filter(r=>!state.allPBOnly||isPersonalBest(r)));if(list.length)mountVirtual('allResultVirtual',list,'results');}
+}
+function mountVirtual(id,items,kind,renderKind=''){
+  const viewport=document.getElementById(id);if(!viewport)return;
+  const space=$('.virtual-space',viewport);if(!space)return;
+  if(activeVirtualCleanup){activeVirtualCleanup();activeVirtualCleanup=null;}
+  const renderItem=kind==='song'?(renderKind==='song-jacket'?songJacketItem:songListItem):resultCard;
+  const getLayout=()=>{
+    const width=Math.max(260,viewport.clientWidth||600),gap=kind==='song'&&renderKind==='song-list'?9:14;
+    if(kind==='song'&&renderKind==='song-list')return {cols:1,rowHeight:82,gap};
+    if(kind==='song'&&renderKind==='song-jacket'){
+      const cols=getJacketCols(),cardWidth=(width-gap*(cols-1))/cols;
+      return {cols,rowHeight:Math.ceil(cardWidth+103),gap};
+    }
+    const cols=Math.max(1,Math.min(4,Math.floor((width+gap)/(258+gap))));
+    const cardWidth=(width-gap*(cols-1))/cols;
+    return {cols,rowHeight:Math.ceil(cardWidth*9/16+151),gap};
+  };
+  let currentLayout=null;
+  function paint(){
+    if(!viewport.isConnected)return;
+    const layout=getLayout();currentLayout=layout;
+    const rowCount=Math.ceil(items.length/layout.cols);
+    space.style.height=`${rowCount*layout.rowHeight}px`;
+    space.innerHTML='';
+    if(!rowCount)return;
+    const start=Math.max(0,Math.floor(viewport.scrollTop/layout.rowHeight)-2);
+    const end=Math.min(rowCount,Math.ceil((viewport.scrollTop+viewport.clientHeight)/layout.rowHeight)+2);
+    const fragment=document.createDocumentFragment();
+    for(let rowIndex=start;rowIndex<end;rowIndex++){
+      const row=document.createElement('div');row.className='virtual-row';row.style.top=`${rowIndex*layout.rowHeight}px`;row.style.height=`${Math.max(30,layout.rowHeight-layout.gap)}px`;row.style.gridTemplateColumns=`repeat(${layout.cols},minmax(0,1fr))`;row.style.gap=`${layout.gap}px`;
+      if(kind==='song'&&renderKind==='song-list')row.style.display='block';
+      const slice=items.slice(rowIndex*layout.cols,Math.min(items.length,(rowIndex+1)*layout.cols));
+      row.innerHTML=slice.map(renderItem).join('');fragment.appendChild(row);
+    }
+    space.appendChild(fragment);
+  }
+  const onScroll=()=>paint();const onResize=()=>{const next=getLayout();if(!currentLayout||next.cols!==currentLayout.cols||next.rowHeight!==currentLayout.rowHeight)paint();};
+  viewport.addEventListener('scroll',onScroll,{passive:true});window.addEventListener('resize',onResize,{passive:true});
+  activeVirtualCleanup=()=>{viewport.removeEventListener('scroll',onScroll);window.removeEventListener('resize',onResize);};
+  activeVirtualRefresh=paint;paint();
+}
+function showModal(content,compact=false){
+  const root=$('#modal-root');root.inert=false;root.innerHTML=`<section class="modal-panel ${compact?'compact':''}" role="dialog" aria-modal="true">${content}</section>`;root.classList.add('open');
+  const close=$('.modal-close',root);if(close)close.focus({preventScroll:true});
+}
+function closeModal(){const root=$('#modal-root');root.classList.remove('open');root.innerHTML='';}
+function openDetail(recordId,edit=false){
+  const record=records.find(r=>r.id===Number(recordId));if(!record){showToast('対象のリザルトが見つかりません。');return;}
+  const song=songById(record.songId),info=DIFF_INFO[record.diff],notes=totalNotes(record);
+  const group=resultGroup(record).sort((a,b)=>b.capturedAt-a.capturedAt);
+  const chart=chartMarkup(song.id,record.diff,false);
+  const editForm=edit?`<section class="panel panel-pad" style="margin-top:18px"><div class="section-head"><div><h2>判定結果を手動修正</h2><p>PERFECT数はノーツ数と各判定数から自動計算します。</p></div></div><div class="edit-grid">${[['great','GREAT'],['good','GOOD'],['bad','BAD'],['miss','MISS'],['combo','コンボ数']].map(([key,label])=>`<div class="form-field"><label for="edit-${key}">${label}</label><input type="number" id="edit-${key}" min="0" max="${notes}" step="1" value="${record[key]}" inputmode="numeric"></div>`).join('')}</div><p class="form-hint">各判定数の合計は総ノーツ数（${notes}）以下、コンボ数は総ノーツ数以下にしてください。保存後にクリア状況と自己ベストを再計算します。</p><div class="detail-actions"><button class="btn" data-a="save-record" data-v="${record.id}">${icon('check')}変更を保存</button><button class="btn secondary" data-a="edit-cancel" data-v="${record.id}">キャンセル</button></div></section>`:'';
+  const judgments=`<div class="judgement-grid"><div class="judgement perfect"><span>PERFECT</span><strong>${formatNumber(perfectCount(record))}</strong></div><div class="judgement great"><span>GREAT</span><strong>${formatNumber(record.great)}</strong></div><div class="judgement good"><span>GOOD</span><strong>${formatNumber(record.good)}</strong></div><div class="judgement bad"><span>BAD</span><strong>${formatNumber(record.bad)}</strong></div><div class="judgement miss"><span>MISS</span><strong>${formatNumber(record.miss)}</strong></div></div>`;
+  const historyRows=group.map(r=>`<button class="history-row" data-a="open-detail" data-v="${r.id}" style="width:100%;text-align:left"><span class="history-date">${formatDate(r.capturedAt)}</span><span class="history-val">ミス ${formatNumber(missMetric(r))}</span>${statusMarkup(r)}<span class="history-combo">コンボ ${formatNumber(r.combo)}</span>${r.id===record.id?`<span class="pill blue">表示中</span>`:''}</button>`).join('');
+  const content=`<button class="modal-close" data-a="close-modal" aria-label="閉じる">${icon('close')}</button><div class="modal-header"><div class="eyebrow"><span class="eyebrow-line"></span>RESULT DETAIL</div><h2>リザルト詳細</h2><p>画像・判定結果・撮影日時・曲別の履歴をまとめて確認します。</p></div><div class="detail-top">${jacketMarkup(song)}<div><h3 class="detail-song-title">${escapeHTML(song.title)}</h3><div class="detail-meta"><span class="diff-label" style="--diff-color:${info.color};--diff-bg:${info.bg}">${info.label}</span><span class="pill">楽曲レベル ${song.diffs[record.diff].level}</span>${statusMarkup(record)}${isPersonalBest(record)?`<span class="pill gold">${icon('trophy')}自己ベスト</span>`:''}</div><div class="detail-release-short">総ノーツ数 ${formatNumber(notes)} ・ ${song.units.map(escapeHTML).join(' / ')}</div></div></div><div class="detail-image-panel">${resultImageMarkup(record,true)}</div><div class="detail-stats"><div class="detail-stat"><span class="label">${icon('target')}ミス数（${METRIC_INFO[state.metric].label}）</span><strong>${formatNumber(missMetric(record))}</strong></div><div class="detail-stat"><span class="label">${icon('chart')}コンボ数</span><strong>${formatNumber(record.combo)} <small>/ ${formatNumber(notes)}</small></strong></div></div><div class="subsection-title"><h2>詳細リザルト</h2><span class="small-text">判定数の合計からPERFECTを算出</span></div>${judgments}<div class="detail-actions"><button class="btn secondary" data-a="edit-record" data-v="${record.id}">${icon('edit')}手動修正</button><button class="btn secondary" data-a="rerun-ocr" data-v="${record.id}">${icon('scan')}OCR再実行</button><button class="btn danger" data-a="confirm-delete-record" data-v="${record.id}">${icon('trash')}削除</button></div>${editForm}<div class="subsection-title"><h2>楽曲・画像情報</h2></div><dl class="detail-info-list"><div class="detail-info-row"><dt>撮影日時</dt><dd>${formatDate(record.capturedAt)}</dd></div><div class="detail-info-row"><dt>登録日時</dt><dd>${formatDate(record.addedAt)}</dd></div><div class="detail-info-row"><dt>ユニットタグ</dt><dd>${song.units.map(unit=>`<span class="unit-tag" style="margin-right:5px">${escapeHTML(unit)}</span>`).join('')}</dd></div><div class="detail-info-row"><dt>作詞</dt><dd>${escapeHTML(song.lyricist)}</dd></div><div class="detail-info-row"><dt>作曲</dt><dd>${escapeHTML(song.composer)}</dd></div><div class="detail-info-row"><dt>編曲</dt><dd>${escapeHTML(song.arranger)}</dd></div><div class="detail-info-row"><dt>公開日</dt><dd>${formatRelease(song.release)}</dd></div><div class="detail-info-row"><dt>画像ファイル</dt><dd>${escapeHTML(record.sourceName||`sekai_result_${record.id}.png`)} <span class="pill ${record.drivePresent?'green':'red'}">${record.drivePresent?'Drive同期対象':'Drive未検出'}</span></dd></div></dl><div class="subsection-title"><h2>この曲・難易度の推移</h2><button class="control-button" data-a="open-history" data-v="${record.id}">${icon('chart')}履歴画面で見る</button></div><section class="panel chart-wrap">${chart}</section><div class="subsection-title"><h2>リザルト履歴</h2><span class="toolbar-count">${group.length} 件</span></div><section class="panel panel-pad"><div class="history-record-list">${historyRows}</div></section>`;
+  showModal(content);
+}
+function showToast(message){const root=$('#toast');$('#toastText').textContent=message;root.classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>root.classList.remove('visible'),2800);}
+function updateNotificationBadge(){const count=Math.max(getNewRecordNotices().length,lastNotices.length)+ER.length+ANOMALIES.filter(a=>!a.resolved).length;$('#notificationCount').textContent=count>99?'99+':String(count);$('#notificationCount').style.display=count?'grid':'none';}
+function openNotices(useSnapshot=false){
+  const currentUpdates=getNewRecordNotices();
+  const updates=useSnapshot?lastNotices:(currentUpdates.length?currentUpdates:lastNotices);
+  const unreadErrors=ER;
+  const updatesHtml=updates.length?updates.map(({record,changed})=>{const song=songById(record.songId);return `<button class="notice-item" data-a="open-detail" data-v="${record.id}">${jacketMarkup(song,'') }<span class="notice-body"><strong>${escapeHTML(song.title)} · ${DIFF_INFO[record.diff].label}</strong><p>${formatDate(record.capturedAt)} 撮影のリザルトが基準を更新しました。</p><span class="notice-values">${changed.map(item=>`<span class="notice-value">${item.label} ${item.old} → ${item.now}</span>`).join('')}</span></span>${icon('chevron')}</button>`;}).join(''):emptyState('新しい自己ベストはありません','同期後の差分がある場合はここに表示されます。');
+  const errorsHtml=unreadErrors.length?unreadErrors.map(e=>`<div class="notice-item" style="cursor:default"><span class="log-icon ${e.kind==='error'?'error':'warning'}">${icon('alert')}</span><span class="notice-body"><strong>${escapeHTML(e.file)} · ${e.kind==='error'?'読み取りエラー':'重複候補'}</strong><p>${escapeHTML(e.message)}</p><span class="small-text">${escapeHTML(e.time)}</span></span></div>`).join(''):emptyState('エラーはありません','読み取りエラーや重複候補はありません。');
+  const settingHtml=`<section class="notice-group"><h3>通知条件 <button class="control-button" data-a="open-notice-settings">${icon('settings')}設定</button></h3><p class="small-text">FC基準・AP基準・大会基準・コンボ数のいずれかが自己ベストを更新した場合に通知します。</p></section>`;
+  showModal(`<button class="modal-close" data-a="close-modal" aria-label="閉じる">${icon('close')}</button><div class="modal-header"><div class="eyebrow"><span class="eyebrow-line"></span>NOTIFICATIONS</div><h2>通知・更新履歴</h2><p>Drive同期で検出した自己ベスト更新、読み取りエラー、重複候補です。</p></div><div class="notice-group"><h3>自己ベスト更新 <span class="pill green">${updates.length} 件</span></h3>${updatesHtml}</div><div class="notice-group"><h3>読み取りエラー・重複候補 <span class="pill red">${unreadErrors.length} 件</span></h3>${errorsHtml}</div>${settingHtml}`);
+}
+function openNoticeSettings(){
+  const labels=[['fc','FC基準','GOOD・BAD・MISSの合計が改善したとき'],['ap','AP基準','GREAT・GOOD・BAD・MISSの合計が改善したとき'],['tournament','大会基準','満点（総ノーツ数×3）との差が改善したとき'],['combo','コンボ数','自己ベストのコンボ数を更新したとき']];
+  state.noticeSettingsDraft={...state.noticeSettings};
+  showModal(`<button class="modal-close" data-a="close-modal" aria-label="閉じる">${icon('close')}</button><div class="modal-header"><div class="eyebrow"><span class="eyebrow-line"></span>NOTIFICATION SETTINGS</div><h2>通知条件</h2><p>通知したい更新条件を選択してください。複数選択できます。</p></div><div>${labels.map(([key,title,description])=>`<label class="choice-card"><input type="checkbox" data-change="notice-setting" data-v="${key}" ${state.noticeSettingsDraft[key]?'checked':''}><span><strong>${title}</strong><small>${description}</small></span></label>`).join('')}</div><div class="detail-actions"><button class="btn" data-a="save-notice-settings">${icon('check')}設定を保存</button><button class="btn secondary" data-a="close-modal">キャンセル</button></div>` ,true);
+}
+function openAccount(){showModal(`<button class="modal-close" data-a="close-modal" aria-label="閉じる">${icon('close')}</button><div class="modal-header"><div class="eyebrow"><span class="eyebrow-line"></span>ACCOUNT CONNECTION</div><h2>Google Drive の接続状態</h2><p>このファイルは画面デザイン確認用のため、実際のGoogle認証やDrive APIは呼び出しません。</p></div><div class="panel panel-pad"><div class="row" style="display:flex;align-items:center;gap:12px"><span class="account-avatar" style="width:42px;height:42px;border-radius:13px;font-size:18px">G</span><div><strong style="display:block;font-size:13px">デモアカウント</strong><span class="small-text">Google Drive 接続中（仮表示）</span></div><span class="pill green" style="margin-left:auto"><span class="connection-dot"></span>接続表示</span></div><div class="divider"></div><p class="small-text">本番実装時はGoogle OAuthでログインし、ユーザーごとに専用フォルダと権限を管理します。画像・OCR結果の永続化はこのデモでは行いません。</p></div><div class="detail-actions"><button class="btn secondary" data-a="close-modal">閉じる</button><button class="btn" data-a="navigate-sync-close">${icon('sync')}同期画面を開く</button></div>`,true);}
+function confirmDeleteRecord(id){
+  const record=records.find(r=>r.id===Number(id));if(!record)return;
+  const song=songById(record.songId);
+  showModal(`<button class="modal-close" data-a="close-modal" aria-label="閉じる">${icon('close')}</button><div class="modal-header"><div class="eyebrow"><span class="eyebrow-line"></span>DELETE RESULT</div><h2>リザルトを削除しますか？</h2><p>「${escapeHTML(song.title)}」の ${DIFF_INFO[record.diff].label} リザルトを削除します。</p></div><div class="demo-banner">${icon('alert')}<span>本番では対応するGoogle Drive画像も削除します。この画面ではサンプルデータから除外する仮動作です。削除後は元に戻せません。</span></div><div class="detail-actions"><button class="btn danger" data-a="delete-record" data-v="${record.id}">${icon('trash')}削除する</button><button class="btn secondary" data-a="edit-cancel" data-v="${record.id}">キャンセル</button></div>`,true);
+}
+function showLock(title,steps){
+  const root=$('#lock-root');root.innerHTML=`<div class="lock-card"><span class="lock-symbol"><span class="spinner"></span></span><h2>${escapeHTML(title)}</h2><p id="lockStep">準備しています…</p><div class="progress-track"><span id="lockProgress"></span></div><p class="lock-foot">処理中は画面操作をロックします。中断された場合は次回起動時に未完了の変更を破棄する設計です。</p></div>`;root.classList.add('open');$('#app').setAttribute('aria-busy','true');$('#app').inert=true;$('#modal-root').inert=true;
+}
+function hideLock(){const root=$('#lock-root');root.classList.remove('open');root.innerHTML='';$('#app').removeAttribute('aria-busy');$('#app').inert=false;$('#modal-root').inert=false;busy=false;}
+function sleep(ms){return new Promise(resolve=>setTimeout(resolve,ms));}
+async function runTransaction(title,steps,operation){
+  if(busy){showToast('別の処理が進行中です。完了後に操作してください。');return false;}
+  busy=true;let committed=false;
+  const snapshot={
+    records:records.map(record=>({...record})),
+    logs:importLogs.map(log=>({...log})),
+    anomalies:ANOMALIES.map(item=>({id:item.id,resolved:item.resolved})),
+    nextLogId,latestSyncAt,lastNotices:lastNotices.slice(),
+    state:{page:state.page,allSort:state.allSort,allDesc:state.allDesc,allPBOnly:state.allPBOnly}
+  };
+  try{
+    try{sessionStorage.setItem('sekai-demo-transaction',JSON.stringify({startedAt:Date.now(),title}));}catch(_e){}
+    showLock(title,steps);
+    for(let i=0;i<steps.length;i++){
+      $('#lockStep').textContent=steps[i];$('#lockProgress').style.width=`${Math.round((i+1)/steps.length*100)}%`;
+      await sleep(380);
+    }
+    if(typeof operation==='function')await operation();
+    committed=true;
+  }catch(error){
+    const previousIds=new Set(snapshot.records.map(record=>record.id));
+    records.filter(record=>!previousIds.has(record.id)&&record.imageUrl?.startsWith('blob:')).forEach(record=>{try{URL.revokeObjectURL(record.imageUrl);}catch(_e){}});
+    records.splice(0,records.length,...snapshot.records);
+    importLogs=snapshot.logs;
+    snapshot.anomalies.forEach(old=>{const target=ANOMALIES.find(item=>item.id===old.id);if(target)target.resolved=old.resolved;});
+    nextLogId=snapshot.nextLogId;latestSyncAt=snapshot.latestSyncAt;lastNotices=snapshot.lastNotices;
+    Object.assign(state,snapshot.state);
+    importLogs.unshift({id:nextLogId++,file:'transaction',kind:'error',message:`処理を中断しました。変更をロールバックしました（デモ）。${error?.message||''}`,time:formatDate(Date.now())});
+    showToast('処理に失敗しました。未完了の変更を破棄しました。');
+  }finally{
+    try{sessionStorage.removeItem('sekai-demo-transaction');}catch(_e){}
+    hideLock();
+  }
+  if(committed)renderApp(false);
+  return committed;
+}
+async function syncDrive(){
+  if(busy)return;
+  const steps=['Googleアカウントと専用フォルダを確認','前回同期時点からの差分を取得','画像・管理情報の整合性を検証','新規画像のOCRと重複候補を確認','自己ベストと通知条件を比較'];
+  const committed=await runTransaction('Google Drive と同期中',steps,async()=>{
+    lastNotices=getNewRecordNotices();
+    const now=formatDate(Date.now());latestSyncAt=now;
+    importLogs.unshift({id:nextLogId++,file:'Sekai Results',kind:'success',message:'差分確認・トランザクション処理が完了しました（デモ）。',time:now});
+    records.forEach(r=>{r.isNew=false;});
+  });
+  if(committed)openSyncSummary();
+}
+function openSyncSummary(){
+  const unresolved=ANOMALIES.filter(a=>!a.resolved);
+  const updates=lastNotices;
+  const html=updates.length?updates.map(({record,changed})=>`<button class="notice-item" data-a="open-detail" data-v="${record.id}"><span class="notice-body"><strong>${escapeHTML(songById(record.songId).title)} · ${DIFF_INFO[record.diff].label}</strong><p>${changed.map(c=>`${c.label} ${c.old} → ${c.now}`).join(' / ')}</p></span>${icon('chevron')}</button>`).join(''):emptyState('自己ベストの更新はありません','今回の同期では通知対象のスコア更新はありませんでした。');
+  showModal(`<button class="modal-close" data-a="close-modal" aria-label="閉じる">${icon('close')}</button><div class="modal-header"><div class="eyebrow"><span class="eyebrow-line"></span>SYNC COMPLETE</div><h2>同期が完了しました</h2><p>差分確認の結果（デモ）です。撮影日時と判定数などを用いて更新候補を比較しました。</p></div><div class="stats-grid" style="grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:16px"><div class="panel stat-card"><div class="stat-content"><div class="stat-label">自己ベスト更新</div><div class="stat-value">${updates.length}</div></div></div><div class="panel stat-card"><div class="stat-content"><div class="stat-label">読み取りエラー・重複</div><div class="stat-value">${ER.length}</div></div></div><div class="panel stat-card"><div class="stat-content"><div class="stat-label">要整合性チェック</div><div class="stat-value">${unresolved.length}</div></div></div></div><div class="notice-group"><h3>自己ベスト更新</h3>${html}</div><div class="notice-group"><h3>次に確認する項目</h3><p class="small-text">読み取りエラー・重複候補、Drive上の画像と管理情報の不一致は、同期画面で個別に解決できます。</p><div class="detail-actions"><button class="btn" data-a="navigate-sync-close">${icon('sync')}同期画面を確認</button><button class="btn secondary" data-a="open-notices">${icon('bell')}通知一覧</button></div></div>`);
+}
+async function uploadFiles(fileList){
+  const files=[...fileList].filter(file=>file&&file.type.startsWith('image/'));
+  if(!files.length){showToast('画像ファイルを選択してください。');return;}
+  await runTransaction('画像を追加してOCR解析中',['画像サイズと撮影日時を取得','リザルト領域を切り出し・画像補正','Google OCRを想定した文字認識','楽曲マスタ・難易度・レベルと照合','重複候補と自己ベストを確認'],async()=>{
+    for(let i=0;i<files.length;i++){
+      const file=files[i];
+      const availableSong=SONGS.find(song=>Object.keys(song.diffs).some(diff=>records.some(r=>r.songId===song.id&&r.diff===diff)))||SONGS[0];
+      const diff=Object.keys(availableSong.diffs).find(d=>records.some(r=>r.songId===availableSong.id&&r.diff===d))||Object.keys(availableSong.diffs)[0];
+      const info=availableSong.diffs[diff],usedDate=Date.now()-(files.length-i)*60000;
+      const url=URL.createObjectURL(file);
+      const gr=Math.floor(random()*3),gd=Math.floor(random()*2),ba=Math.floor(random()),ms=Math.floor(random());
+      createRecord(availableSong.id,diff,{great:gr,good:gd,bad:ba,miss:ms},Math.min(info.notes,Math.floor(info.notes*.8)),usedDate,Date.now(),{sourceName:file.name,imageUrl:url,isNew:true});
+      importLogs.unshift({id:nextLogId++,file:file.name,kind:'success',message:'画像を追加しました。OCR結果はデモ用のサンプル値です。',time:formatDate(Date.now())});
+    }
+    showToast(`${files.length} 件の画像を追加しました（デモ）。`);
+    state.page='results';state.allSort='added';state.allDesc=true;state.allPBOnly=false;
+  });
+}
+async function rerunOcr(recordId){
+  const record=records.find(r=>r.id===Number(recordId));if(!record)return;
+  let details='';
+  const committed=await runTransaction('OCR解析を再実行中',['画像サイズを取得','結果・コンボ・タイトル・難易度・レベル領域を切り出し','領域ごとに拡大・二値化・ネガポジ反転','Google OCRで文字認識（デモ）','楽曲マスタと照合・値の妥当性を検証'],async()=>{
+    if(record.imageUrl){
+      try{const image=new Image();image.src=record.imageUrl;await image.decode();const regions=calculateOcrRegions(image.naturalWidth,image.naturalHeight);details=`画像 ${image.naturalWidth}×${image.naturalHeight}px / タイトル領域 ${regions.title.w}×${regions.title.h}px を算出`;}catch(_e){details='画像のサイズ取得に失敗したため、デモの標準領域を使用';}
+    }else details='1920×1080基準で指定領域を切り出し';
+    importLogs.unshift({id:nextLogId++,file:record.sourceName||`result_${record.id}.png`,kind:'success',message:`OCR再実行フローを完了しました。${details}。認識値はデモのためサンプル値を維持しています。`,time:formatDate(Date.now())});
+  });
+  if(committed)openDetail(recordId,false);
+}
+async function resolveAnomaly(id,mode){
+  const anomaly=ANOMALIES.find(item=>item.id===id);if(!anomaly||anomaly.resolved)return;
+  if(mode==='restore'){
+    await runTransaction('画像から情報を復元中',['画像ファイルのサイズを取得','OCR解析と楽曲マスタを照合','重複候補を確認','リザルト情報を復元'],async()=>{
+      const song=SONGS[0],diff=Object.keys(song.diffs)[0],notes=song.diffs[diff].notes;
+      createRecord(song.id,diff,{great:2,good:0,bad:0,miss:0},Math.floor(notes*.88),Date.now()-86400000,Date.now(),{sourceName:anomaly.file,isNew:true});
+      anomaly.resolved=true;importLogs.unshift({id:nextLogId++,file:anomaly.file,kind:'success',message:'画像からリザルト情報を復元しました（デモ）。',time:formatDate(Date.now())});
+    });
+  }else{
+    await runTransaction(mode==='delete-image'?'Drive画像を削除中':'孤立した管理情報を削除中',[mode==='delete-image'?'Google Driveの画像を削除':'対応するリザルト情報を削除','整合性を再確認'],async()=>{
+      anomaly.resolved=true;importLogs.unshift({id:nextLogId++,file:anomaly.file,kind:'success',message:mode==='delete-image'?'Drive上の画像を削除した想定です（デモ）。':'孤立した管理情報を削除した想定です（デモ）。',time:formatDate(Date.now())});
+    });
+  }
+  renderApp(false);
+}
+function navigate(page,reset=true){
+  if(!['home','songs','results','history','sync'].includes(page))return;
+  state.page=page;closeMobileSidebar();renderApp(reset);
+}
+function closeMobileSidebar(){ $('#sidebar').classList.remove('mobile-open');$('#mobileScrim').classList.remove('open'); }
+function toggleSidebar(){
+  const sidebar=$('#sidebar');
+  if(window.innerWidth<=800){sidebar.classList.toggle('mobile-open');$('#mobileScrim').classList.toggle('open',sidebar.classList.contains('mobile-open'));}
+  else{state.collapsed=!state.collapsed;sidebar.classList.toggle('collapsed',state.collapsed);}
+}
+function openHistoryForRecord(id){const record=records.find(r=>r.id===Number(id));if(!record)return;state.historySong=record.songId;state.historyDiff=record.diff;closeModal();navigate('history');}
+function deleteRecord(id){
+  const index=records.findIndex(r=>r.id===Number(id));if(index<0)return;
+  const record=records[index];if(record.imageUrl&&record.imageUrl.startsWith('blob:')){try{URL.revokeObjectURL(record.imageUrl);}catch(_e){}}
+  records.splice(index,1);closeModal();importLogs.unshift({id:nextLogId++,file:record.sourceName||`sekai_result_${record.id}.png`,kind:'success',message:'リザルトと対応するDrive画像を削除した想定です（デモ）。',time:formatDate(Date.now())});showToast('リザルトを削除しました（デモ）。');renderApp(false);
+}
+function saveRecord(id){
+  const record=records.find(r=>r.id===Number(id));if(!record)return;
+  const keys=['great','good','bad','miss','combo'];const next={};
+  for(const key of keys){const el=$(`#edit-${key}`);const raw=el?el.value:'';if(raw.trim()===''||!Number.isFinite(Number(raw))||Number(raw)<0||!Number.isInteger(Number(raw))){showToast('判定数とコンボ数は0以上の整数で入力してください。');return;}next[key]=Number(raw);}
+  const notes=totalNotes(record);
+  if(next.great+next.good+next.bad+next.miss>notes){showToast(`判定数の合計は総ノーツ数（${notes}）以下にしてください。`);return;}
+  if(next.combo>notes){showToast(`コンボ数は総ノーツ数（${notes}）以下にしてください。`);return;}
+  Object.assign(record,next);closeModal();showToast('修正内容を保存しました（デモ）。');renderApp(false);openDetail(id,false);
+}
+function handleAction(action,target){
+  const value=target.dataset.v,mode=target.dataset.mode;
+  switch(action){
+    case 'navigate':navigate(value);break;
+    case 'toggle-sidebar':toggleSidebar();break;
+    case 'open-notices':closeMobileSidebar();openNotices();break;
+    case 'account':openAccount();break;
+    case 'close-modal':closeModal();break;
+    case 'toggle-song-asc':state.songAsc=!state.songAsc;renderApp(false);break;
+    case 'toggle-song-view':state.songView=state.songView==='list'?'jacket':'list';renderApp(false);break;
+    case 'toggle-columns':state.denseColumns=!state.denseColumns;renderApp(false);break;
+    case 'toggle-drive-only':state.driveOnly=!state.driveOnly;renderApp(false);break;
+    case 'toggle-unit':state.units=state.units.includes(value)?state.units.filter(x=>x!==value):[...state.units,value];renderApp(false);break;
+    case 'select-song':state.selectedSong=Number(value);state.selectedDiff=null;state.resultsPBOnly=false;state.page='songs';renderApp(true);break;
+    case 'select-diff':state.selectedDiff=value;state.resultSort='miss';state.resultDesc=false;state.resultsPBOnly=false;renderApp(false);break;
+    case 'back-songs':state.selectedSong=null;state.selectedDiff=null;renderApp(false);break;
+    case 'toggle-result-desc':state.resultDesc=!state.resultDesc;renderApp(false);break;
+    case 'toggle-song-pb':state.resultsPBOnly=!state.resultsPBOnly;renderApp(false);break;
+    case 'toggle-all-desc':state.allDesc=!state.allDesc;renderApp(false);break;
+    case 'toggle-all-pb':state.allPBOnly=!state.allPBOnly;renderApp(false);break;
+    case 'history-diff':state.historyDiff=value;renderApp(false);break;
+    case 'toggle-history-pb':state.historyPBOnly=!state.historyPBOnly;renderApp(false);break;
+    case 'open-detail':closeModal();openDetail(value);break;
+    case 'edit-record':openDetail(value,true);break;
+    case 'edit-cancel':openDetail(value,false);break;
+    case 'save-record':saveRecord(value);break;
+    case 'confirm-delete-record':confirmDeleteRecord(value);break;
+    case 'delete-record':deleteRecord(value);break;
+    case 'rerun-ocr':closeModal();rerunOcr(value);break;
+    case 'open-history':openHistoryForRecord(value);break;
+    case 'sync':closeMobileSidebar();syncDrive();break;
+    case 'resolve-anomaly':closeModal();resolveAnomaly(value,mode);break;
+    case 'open-notice-settings':openNoticeSettings();break;
+    case 'save-notice-settings':if(state.noticeSettingsDraft){state.noticeSettings={...state.noticeSettingsDraft};state.noticeSettingsDraft=null;}closeModal();updateNotificationBadge();showToast('通知条件を保存しました（デモ）。');break;
+    case 'navigate-sync-close':closeModal();navigate('sync');break;
+    case 'brand-home':navigate('home');break;
+  }
+}
+document.addEventListener('click',event=>{
+  const actionEl=event.target.closest('[data-a]');
+  if(actionEl){if(busy)return;const action=actionEl.dataset.a;handleAction(action,actionEl);return;}
+  if(event.target.id==='modal-root'){closeModal();}
+});
+document.addEventListener('change',event=>{
+  const target=event.target,key=target.dataset.change;if(!key)return;if(busy)return;
+  if(key==='songSort'){state.songSort=target.value;renderApp(false);}
+  if(key==='sortDiff'){state.songLevelDiff=target.value;renderApp(false);}
+  if(key==='resultSort'){state.resultSort=target.value;state.resultDesc=target.value==='added';renderApp(false);}
+  if(key==='allSort'){state.allSort=target.value;state.allDesc=target.value==='added';renderApp(false);}
+  if(key==='allLevelDiff'){state.allLevelDiff=target.value;renderApp(false);}
+  if(key==='historySong'){state.historySong=Number(target.value);const song=songById(state.historySong);state.historyDiff=DIFFS.find(d=>song?.diffs[d]&&records.some(r=>r.songId===song.id&&r.diff===d))||Object.keys(song?.diffs||{})[0]||'expert';state.historyPBOnly=false;renderApp(false);}
+  if(key==='metric'){state.metric=target.value;renderApp(false);}
+  if(key==='file'){const files=target.files;uploadFiles(files);target.value='';}
+  if(key==='notice-setting'){if(state.noticeSettingsDraft)state.noticeSettingsDraft[target.dataset.v]=target.checked;}
+});
+document.addEventListener('compositionstart',event=>{if(event.target.id==='songQuery')queryComposing=true;});
+document.addEventListener('compositionend',event=>{
+  if(event.target.id!=='songQuery'||busy)return;
+  queryComposing=false;state.query=event.target.value;renderApp(false);
+});
+document.addEventListener('input',event=>{
+  if(event.target.dataset.input!=='query'||busy)return;
+  state.query=event.target.value;
+  // 日本語IMEの変換中はDOMを再描画せず、変換確定後に検索結果を更新する。
+  if(queryComposing||event.isComposing)return;
+  const oldStart=event.target.selectionStart;
+  renderApp(false);
+  const input=$('#songQuery');if(input){input.focus({preventScroll:true});try{input.setSelectionRange(oldStart,oldStart);}catch(_e){}}
+});
+$('#metricSelect').addEventListener('change',event=>{if(busy)return;state.metric=event.target.value;renderApp(false);});
+$('#mobileScrim').addEventListener('click',closeMobileSidebar);
+$('#brandHome').addEventListener('click',()=>navigate('home'));
+document.addEventListener('click',event=>{
+  const drop=$('#uploadDrop');if(drop&&event.target.closest('#uploadDrop')&&!event.target.closest('input')){const picker=$('#filePicker');if(picker&&event.target.closest('.upload-drop')&&event.target.closest('.file-note')===null&&event.target.closest('button')===null){/* label opens the native picker */}}
+});
+document.addEventListener('dragover',event=>{if(event.target.closest('#uploadDrop')){event.preventDefault();$('#uploadDrop')?.classList.add('dragover');}});
+document.addEventListener('dragleave',event=>{if(event.target.closest('#uploadDrop'))$('#uploadDrop')?.classList.remove('dragover');});
+document.addEventListener('drop',event=>{const drop=event.target.closest('#uploadDrop');if(!drop)return;event.preventDefault();drop.classList.remove('dragover');if(busy)return;uploadFiles(event.dataTransfer?.files||[]);});
+window.addEventListener('keydown',event=>{if(event.key==='Escape'&&!busy&&$('#modal-root').classList.contains('open'))closeModal();if(event.key==='Escape')closeMobileSidebar();});
+window.addEventListener('resize',()=>{if(window.innerWidth>800)closeMobileSidebar();});
+(function recoverInterruptedDemoTransaction(){try{if(sessionStorage.getItem('sekai-demo-transaction')){sessionStorage.removeItem('sekai-demo-transaction');importLogs.unshift({id:nextLogId++,file:'transaction-recovery',kind:'warning',message:'前回の未完了デモ処理を検出し、変更を破棄した状態に戻しました。',time:formatDate(Date.now())});}}catch(_e){}})();
+lastNotices=getNewRecordNotices();
+renderApp(true);
+</script>
+</body>
+</html>
