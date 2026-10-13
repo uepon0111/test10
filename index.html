@@ -174,7 +174,7 @@ const $=s=>document.querySelector(s),ic=n=>`<svg class="ic"><use href="#i-${n}"/
 const D=[['EASY','#66DD11'],['NORMAL','#33BBEE'],['HARD','#FFAA00'],['EXPERT','#EE4466'],['MASTER','#BB33EE'],['APPEND','linear-gradient(135deg,#FF9BD8,#9D7CFF)','#E27FD0']].map(a=>({n:a[0],c:a[1],s:a[2]||a[1]}));
 const J=[['PERFECT','linear-gradient(90deg,#46D5F0,#FF8BD2,#FFD54A)','pf'],['GREAT','#FF8AC4','gr'],['GOOD','#5BA8FF','go'],['BAD','#5CCB8A','ba'],['MISS','#A3AEC2','mi']];
 const BS={FC:'FC基準',AP:'AP基準',TA:'大会基準'},UN=['バーチャル・シンガー','Leo/need','MORE MORE JUMP!','Vivid BAD SQUAD','ワンダーランズ×ショウタイム','25時、ナイトコードで。','その他'];
-const FN='SekaiResults',DBU='https://sekai-world.github.io/sekai-master-db-diff/',DV='https://www.googleapis.com/drive/v3/files',SC='https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/cloud-vision',CID_DEFAULT='';/* ←OAuthクライアントIDを直接設定する場合はここに記入（ログイン画面での入力も可） */
+const FN='SekaiResults',DBU='https://sekai-world.github.io/sekai-master-db-diff/',DV='https://www.googleapis.com/drive/v3/files',SC='https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/cloud-vision',CID_DEFAULT='888821664633-osk51l7ooscsfdlp0qiqct7tcpcv65ij.apps.googleusercontent.com';/* ←OAuthクライアントIDを直接設定する場合はここに記入（ログイン画面での入力も可） */
 const LS=localStorage,gj=k=>{try{return JSON.parse(LS.getItem(k))}catch(e){return null}},cid=()=>LS.getItem('sr_cid')||CID_DEFAULT;
 const CN=['FC基準','AP基準','大会基準','コンボ数'],EM={title:'楽曲タイトルを特定できません',diff:'難易度を特定できません',lv:'難易度とレベルが一致しません',num:'判定数・コンボ数を読み取れません',sum:'判定数の合計がノーツ数と一致しません',api:'OCRの通信に失敗しました',unk:'楽曲情報が見つかりません'};
 let S=[],SM=new Map,R=[],ER=[],N=gj('sr_n')||[],US={n:'',e:''},TKN='',FID='',TX=0,TXN=1,TXP=[];
