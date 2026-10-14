@@ -139,6 +139,17 @@ h3{font-size:16px;font-weight:900;margin:0 0 12px}
 #pc{width:150px;max-width:46%;height:auto;flex:none;border-radius:8px;background:#fff;box-shadow:0 2px 8px rgba(20,33,61,.15)}
 #pv>div{min-width:0;flex:1}#pl{gap:4px 12px;font-size:11px}
 #oi{position:absolute;inset:0}
+#c1,#c2{position:absolute;inset:0}
+.vs.ld{overflow:hidden;scrollbar-gutter:stable}
+#ldp{position:fixed;left:0;right:0;margin:0 auto;width:max-content;max-width:90vw;top:calc(env(safe-area-inset-top,0px) + 74px);z-index:20;display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:20px;background:#fff;border:1px solid var(--ln);box-shadow:var(--sh);font-size:12px;font-weight:700;color:var(--mu);white-space:nowrap;animation:in .3s both}
+#ldp .sp{margin:0;width:16px;height:16px;border-width:2px}
+#sbar{flex:none;position:relative;display:flex;align-items:center;gap:12px;padding:8px var(--pd);background:#fff;border-bottom:1px solid var(--ln);animation:in .35s cubic-bezier(.2,.8,.2,1) both}
+#sbar .sp{margin:0;width:22px;height:22px;border-width:3px;flex:none}
+#sbar .sbm{min-width:0;flex:1;line-height:1.35}#sbar .sbm b,#sbar .sbm small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#sbar .sbm small{color:var(--mu);font-size:11px;font-weight:700}
+#sbar .btn{height:34px;padding:0 12px;flex:none}
+#sbp{flex:none;min-width:44px;text-align:right;font-size:16px;font-weight:900}
+#sbb{position:absolute;left:0;bottom:-1px;height:3px;width:0;background:var(--br);transition:width .35s}
+.cmr{display:grid;grid-template-columns:76px minmax(0,1fr) minmax(0,1fr);gap:10px;padding:8px 0;border-top:1px solid var(--ln);font-size:13px;align-items:start}.cmr small{color:var(--mu);font-weight:700}.cmr span{min-width:0;overflow-wrap:anywhere}.cmr.df span{color:#E8890C;font-weight:700}.cmr.cmh{border-top:0}.cmr.cmh span{color:var(--mu);font-size:11px;font-weight:700}
 </style></head><body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
 <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 10v10h5v-6h4v6h5V10"/></symbol>
@@ -169,8 +180,8 @@ h3{font-size:16px;font-weight:900;margin:0 0 12px}
 <div class="usr"><div class="av" id="uav"></div><div><b id="unm"></b><small id="uem">Googleアカウント</small></div></div></aside><div id="scrim" data-act="side"></div>
 <div id="main"><header class="top"><button class="ib" data-act="side" aria-label="メニュー"><svg class="ic"><use href="#i-menu"/></svg></button><h2 id="ttl"></h2>
 <select class="btn" id="bs" aria-label="ミス数の基準"><option value="FC">FC基準</option><option value="AP">AP基準</option><option value="TA">大会基準</option></select>
-<button class="ib" data-act="go" data-v="notif" aria-label="通知"><svg class="ic"><use href="#i-bell"/></svg><em class="bdg nbd"></em></button></header><main id="view"></main></div></div>
-<div id="md"></div><div id="ts"></div>
+<button class="ib" data-act="go" data-v="notif" aria-label="通知"><svg class="ic"><use href="#i-bell"/></svg><em class="bdg nbd"></em></button></header><div id="sbar" hidden><div class="sp"></div><div class="sbm"><b id="sbt"></b><small id="sbs"></small></div><b id="sbp">0%</b><button class="btn" id="sba" data-act="abort"><svg class="ic"><use href="#i-x"/></svg><span>中断</span></button><i id="sbb"></i></div><main id="view"></main></div></div>
+<div id="md"></div><div id="ts"></div><div id="ldp" hidden><div class="sp"></div>画像を読み込んでいます</div>
 <div id="tx"><div class="lc" style="padding:24px;width:min(440px,92vw);text-align:left"><div class="rw"><div class="sp" style="margin:0;width:30px;height:30px;border-width:3px"></div><b id="tm" style="flex:1;min-width:0"></b><b id="tp" style="font-size:24px;font-weight:900">0%</b></div><div class="pb"><i id="tb"></i></div><div id="pv" hidden><canvas id="pc"></canvas><div><b class="sb" id="pn" style="display:block;margin-bottom:6px;color:var(--ink)"></b><div class="lg2" id="pl"></div></div></div><ul id="tl"></ul><small class="sb w" style="display:block">処理中は操作できません。中断されても、次回起動時に自動で整合します。</small></div></div>
 <div id="lg"><div class="lc"><div class="logo" style="margin:0 auto 16px;width:64px;height:64px;border-radius:20px"><svg class="ic" style="width:30px;height:30px"><use href="#i-music"/></svg></div><h1 style="margin:0 0 8px;font-size:26px;font-weight:900">SEKAI RESULT</h1><p class="sb w" style="margin:0 0 24px;font-size:14px">Googleアカウントでログインすると、ドライブのリザルト画像を読み込みます。</p><button class="btn p" data-act="login" style="width:100%;justify-content:center;height:48px"><b style="font-size:18px">G</b>Googleでログイン</button></div></div>
 <input type="file" id="fi" accept="image/*" multiple hidden>
@@ -182,7 +193,7 @@ const BS={FC:'FC基準',AP:'AP基準',TA:'大会基準'},UN=['バーチャル・
 const FN='SekaiResults',DBU='https://sekai-world.github.io/sekai-master-db-diff/',DV='https://www.googleapis.com/drive/v3/files',SC='https://www.googleapis.com/auth/drive',CID_DEFAULT='888821664633-osk51l7ooscsfdlp0qiqct7tcpcv65ij.apps.googleusercontent.com';/* ←OAuthクライアントIDを直接設定する場合はここに記入（ログイン画面での入力も可） */
 const LS=localStorage,gj=k=>{try{return JSON.parse(LS.getItem(k))}catch(e){return null}},cid=()=>LS.getItem('sr_cid')||CID_DEFAULT;
 const CN=['FC基準','AP基準','大会基準','コンボ数'],EM={title:'楽曲タイトルを特定できません',diff:'難易度を特定できません',lv:'難易度とレベルが一致しません',num:'判定数・コンボ数を読み取れません',sum:'判定数の合計がノーツ数と一致しません',api:'OCRの実行に失敗しました',unk:'楽曲情報が見つかりません'};
-let S=[],SM=new Map,R=[],ER=[],N=gj('sr_n')||[],US={n:'',e:''},TKN='',FID='',TX=0,TXN=1,TXP=[];
+let S=[],SM=new Map,R=[],ER=[],N=gj('sr_n')||[],US={n:'',e:''},TKN='',FID='',TX=0,TXN=1,TXP=[],TXS=[],AB=0,UQ=[],SP=0;
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let JB=0;const JX=new Set,JH=[['storage.sekai.best/sekai-jp-assets/music/jacket/{}/{}.webp','no-referrer'],['storage.sekai.best/sekai-jp-assets/music/jacket/{}/{}.webp','strict-origin-when-cross-origin'],['assets.unipjsk.com/startapp/music/jacket/{}/{}.webp','no-referrer']];
 const JU=(id,k=JB)=>{const n='jacket_s_'+String(id).padStart(3,'0');return'https://'+JH[k][0].split('{}').join(n)},
@@ -191,7 +202,7 @@ const tgs=s=>s.u.map(i=>UN[i]).join(' / '),sv=()=>LS.setItem('sr_n',JSON.stringi
 const JK=(s,x='')=>`<div class="jk" style="background:${jk(s.id)};${x}">${ic('music')}${JX.has(s.id)?'':`<img src="${JU(s.id)}" data-i="${s.id}" data-j="${JB}" alt="" loading="lazy" referrerpolicy="${JH[JB][1]}" onload="JB=+this.dataset.j" onerror="jkE(this)">`}</div>`;
 const thm=(r,n)=>r.th?`<img src="${r.th.replace(/=s\d+(-c)?$/,'=s'+n)}" alt="" loading="lazy" referrerpolicy="no-referrer">`:ic('image');
 const etx=e=>{const[c,p]=String(e).split(':');return c=='dup'?`重複の可能性：リザルト・撮影日時・画面サイズ・画像が近似（一致率 ${p}%）`:`読み取りエラー：${EM[c]||'不明なエラー'}${+p?`（類似度 ${p}%）`:''}`};
-const mkE=(f,e)=>({u:f.id,k:'err',f:esc(f.name),t:Date.parse(f.createdTime),tx:etx(e),fm:f});
+const mkE=(f,e)=>{const a=String(e).split(':');return{u:f.id,k:'err',f:esc(f.name),t:Date.parse(f.createdTime),tx:etx(e),fm:f,dp:a[0]=='dup',pc:+a[1]||0,du:a[2]||''}};
 /* ---- 認証・Drive ---- */
 const gw=()=>new Promise((ok,ng)=>{let n=0;(function f(){window.google&&google.accounts?ok():++n>60?ng(new Error('Googleのスクリプトを読み込めませんでした')):setTimeout(f,100)})()});
 async function auth(){await gw();return new Promise((ok,ng)=>{google.accounts.oauth2.initTokenClient({client_id:cid(),scope:SC,callback:r=>{if(r.access_token){TKN=r.access_token;LS.setItem('sr_li','1');ok()}else ng(new Error(r.error_description||r.error||'認証に失敗しました'))},error_callback:e=>ng(new Error(e&&e.type=='popup_closed'?'ログインがキャンセルされました':'ログインに失敗しました（'+((e&&e.type)||'error')+'）'))}).requestAccessToken({prompt:''})})}
@@ -230,8 +241,8 @@ const nz=t=>(t||'').normalize('NFKC').toLowerCase().replace(/[\s"'`´‘’“�
 function lev(a,b){const m=a.length,n=b.length;if(!m||!n)return Math.max(m,n);let p=Array.from({length:n+1},(_,j)=>j);for(let i=1;i<=m;i++){const c=[i];for(let j=1;j<=n;j++)c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]==b[j-1]?0:1));p=c}return p[n]}
 const sim=(a,b)=>{a=nz(a);b=nz(b);const L=Math.max(a.length,b.length);return L?1-lev(a,b)/L:0},nums=t=>(t.normalize('NFKC').match(/\d+/g)||[]).map(Number),mt4=r=>[r.go+r.ba+r.mi,r.gr+r.go+r.ba+r.mi,r.nt*3-3*r.pf-2*r.gr-r.go,-r.cb];
 const hs=(a,b)=>{if(!a||a.length!=b.length)return 0;let n=0;for(let i=0;i<a.length;i++){let x=parseInt(a[i],16)^parseInt(b[i],16);while(x){n+=x&1;x>>=1}}return 1-n/(a.length*4)};
-function dupOf(x,pool){let b=0;pool.forEach(r=>{if(r.s!=x.s||r.d!=x.d||!['pf','gr','go','ba','mi','cb'].every(k=>r[k]==x[k]))return;
- const v=.35+(Math.abs(r.ts-x.ts)<2000?.3:0)+(r.W==x.W&&r.H==x.H?.1:0)+.25*hs(r.h,x.h);if(v>b)b=v});return b>=.75?Math.round(b*100):0}
+function dupOf(x,pool){let b=0,bi='';pool.forEach(r=>{if(r.s!=x.s||r.d!=x.d||!['pf','gr','go','ba','mi','cb'].every(k=>r[k]==x[k]))return;
+ const v=.35+(Math.abs(r.ts-x.ts)<2000?.3:0)+(r.W==x.W&&r.H==x.H?.1:0)+.25*hs(r.h,x.h);if(v>b){b=v;bi=r.id}});return b>=.75?[Math.round(b*100),bi]:0}
 function otsu(g){const h=new Uint32Array(256);for(let i=0;i<g.length;i++)h[g[i]]++;const t=g.length;let sm=0,sB=0,wB=0,mx=-1,th=127;for(let i=0;i<256;i++)sm+=i*h[i];
  for(let i=0;i<256;i++){wB+=h[i];if(!wB)continue;const wF=t-wB;if(!wF)break;sB+=i*h[i];const d=sB/wB-(sm-sB)/wF,v=wB*wF*d*d;if(v>mx){mx=v;th=i}}return th}
 function prep(bm,x,y,w,h){x=Math.max(0,Math.round(x));y=Math.max(0,Math.round(y));w=Math.min(bm.width-x,Math.round(w));h=Math.min(bm.height-y,Math.round(h));if(w<4||h<4)return'';
@@ -243,12 +254,16 @@ function prep(bm,x,y,w,h){x=Math.max(0,Math.round(x));y=Math.max(0,Math.round(y)
 function ah(bm){const c=document.createElement('canvas');c.width=16;c.height=8;const g=c.getContext('2d',{willReadFrequently:true});g.drawImage(bm,0,0,16,8);const d=g.getImageData(0,0,16,8).data,v=[];
  for(let i=0;i<128;i++)v.push(.299*d[i*4]+.587*d[i*4+1]+.114*d[i*4+2]);const m=v.reduce((a,b)=>a+b,0)/128;let o='';
  for(let i=0;i<128;i+=4)o+=v.slice(i,i+4).reduce((a,x,j)=>a+((x>m?1:0)<<(3-j)),0).toString(16);return o}
-let ML,OU='',EK=0;const RC=[['リザルト','#2C7BF5'],['コンボ','#14C29B'],['タイトル','#FFAA00'],['難易度','#EE4466'],['レベル','#BB33EE']];
+let ML,OU='',EK=0,OX=[];const RC=[['リザルト','#2C7BF5'],['コンボ','#14C29B'],['タイトル','#FFAA00'],['難易度','#EE4466'],['レベル','#BB33EE']];
 function pv(bm,rg,nm){const c=$('#pc'),k=Math.min(1,320/bm.width);c.width=Math.round(bm.width*k);c.height=Math.round(bm.height*k);const g=c.getContext('2d');g.drawImage(bm,0,0,c.width,c.height);
  if(rg)rg.forEach((r,i)=>{const[x,y,w,h]=r.map(v=>v*k);g.fillStyle=RC[i][1]+'55';g.fillRect(x,y,w,h);g.lineWidth=2;g.strokeStyle=RC[i][1];g.strokeRect(x,y,w,h)});
  if(nm!=null)$('#pn').textContent=nm;$('#pl').innerHTML=rg?RC.map(a=>`<span><i class="jd" style="background:${a[1]}"></i>${a[0]}</span>`).join(''):'';$('#pv').hidden=false}
 async function pvF(f){try{const b=await createImageBitmap(f);pv(b,0,f.name);b.close()}catch(e){$('#pv').hidden=true}}
 async function eim(u,t='#ei',q){const k=++EK;try{const b=await(await api(`${DV}/${u}?alt=media`)).blob(),i=$(t);if(k!=EK||!i||!$('#md').classList.contains('on'))return;if(OU)URL.revokeObjectURL(OU);OU=URL.createObjectURL(b);i.innerHTML=`<img src="${OU}" alt="">`}catch(e){const i=$(t);k==EK&&i&&!q&&(i.textContent='画像を読み込めませんでした')}}
+async function eimX(u,t,k){try{const b=await(await api(`${DV}/${u}?alt=media`)).blob(),i=$(t);if(k!=EK||!i||!$('#md').classList.contains('on'))return;const o=URL.createObjectURL(b);OX.push(o);i.innerHTML=`<img src="${o}" alt="">`}catch(e){const i=$(t);k==EK&&i&&(i.textContent='画像を読み込めませんでした')}}
+function efU(t){const d=$('#ed'),nt=+d.dataset.nt,v=k=>Math.max(0,Math.floor(+$('#e_'+k).value)||0),p=$('#e_pf');
+ if(t&&t.id=='e_pf')p.dataset.m='1';else if(!p.dataset.m)p.value=Math.max(0,nt-v('gr')-v('go')-v('ba')-v('mi'));
+ const s=v('pf')+v('gr')+v('go')+v('ba')+v('mi'),o=$('#e_sm');o.textContent=s+' / '+nt;o.style.color=s!=nt?'#E5484D':''}
 const mS=()=>S.find(s=>ML(s)==$('#m_s').value.trim());
 function mfU(){const s=mS(),d=$('#m_d'),id=s?s.id:'';if(d.dataset.s!=id){d.dataset.s=id;d.innerHTML=s?D.map((x,i)=>s.lv[i]?`<option value="${i}">${x.n} Lv.${s.lv[i]}</option>`:'').join(''):'<option value="">先に楽曲を選択してください</option>'}
  const nt=s&&d.value!==''?s.nt[+d.value]:0,v=k=>Math.max(0,Math.floor(+$('#m_'+k).value)||0),pf=nt-v('gr')-v('go')-v('ba')-v('mi'),o=$('#m_pf');o.textContent=nt?`${pf} / ${nt}`:'-';o.style.color=nt&&pf<0?'#E5484D':''}
@@ -269,33 +284,43 @@ async function read(bm){const W=bm.width,H=bm.height,s=Math.min(W/1920,H/1080),o
  if(cb==null||cb>q.nt[d]||pf+gr+go+ba+mi!=q.nt[d])return{err:(cb==null||cb>q.nt[d]?'num':'sum')+':0'};
  return{rec:{s:si,d,lv:q.lv[d],nt:q.nt[d],pf,gr,go,ba,mi,cb}}}
 async function proc(f){const b=await(await api(`${DV}/${f.id}?alt=media`)).blob();let bm;try{bm=await createImageBitmap(b)}catch(e){return{err:'num:0'}}
- try{pv(bm,0,f.name);const o=await read(bm);if(o.err)return o;const x={...o.rec,id:f.id,nm:f.name,fm:f,ts:Math.floor(tsOf(f)/1000)*1000,ad:Date.parse(f.createdTime),th:f.thumbnailLink||'',W:bm.width,H:bm.height,h:ah(bm)},p=dupOf(x,R.filter(r=>r.id!=f.id));return p?{err:'dup:'+p}:{rec:x}}finally{bm.close()}}
+ try{pv(bm,0,f.name);const o=await read(bm);if(o.err)return o;const x={...o.rec,id:f.id,nm:f.name,fm:f,ts:Math.floor(tsOf(f)/1000)*1000,ad:Date.parse(f.createdTime),th:f.thumbnailLink||'',W:bm.width,H:bm.height,h:ah(bm)},p=dupOf(x,R.filter(r=>r.id!=f.id));return p?{err:'dup:'+p[0]+':'+p[1]}:{rec:x}}finally{bm.close()}}
 async function redo(f,keep){const o=await proc(f);
  if(o.rec){await commit(f,o);R=R.filter(x=>x.id!=f.id);ER=ER.filter(x=>x.u!=f.id);R.push(o.rec);bld()}
  else if(!keep){await commit(f,o);ER=ER.filter(x=>x.u!=f.id);ER.push(mkE(f,o.err))}return o}
 /* ---- トランザクション（処理中は操作不能・中断しても次回起動時に整合） ---- */
 function txS(i,q,l){TXP[i]=q;for(let j=0;j<i;j++)TXP[j]=1;
  for(let j=0;j<TXN;j++){const x=$('#ps'+j);if(!x)continue;const p=TXP[j]||0;x.className=p>=1?'ok':j==i?'on':'';x.children[2].textContent=p>=1?'完了':j==i?(l||''):'';x.children[3].firstChild.style.width=Math.min(1,p)*100+'%'}
- const t=TXP.slice(0,TXN).reduce((a,b)=>a+(b||0),0)/TXN;$('#tb').style.width=t*100+'%';$('#tp').textContent=Math.floor(t*100)+'%'}
-async function run(m,sp,fn){if(TX)return 0;TX=1;TXN=sp.length;TXP=[];LS.setItem('sr_tx',JSON.stringify({m,t:Date.now()}));$('#tm').textContent=m;
- $('#tl').innerHTML=sp.map((x,i)=>`<li id="ps${i}"><i class="si"></i><span>${x}</span><em></em><div class="sbp"><i></i></div></li>`).join('');$('#pv').hidden=true;$('#tx').classList.add('on');txS(0,0);let ok=1;
- try{await fn();txS(TXN-1,1);await new Promise(r=>setTimeout(r,350))}catch(e){ok=0;console.error(e);toast(e.message||'エラーが発生しました',null,1)}
- LS.removeItem('sr_tx');TX=0;$('#pv').hidden=true;$('#tx').classList.remove('on');return ok}
-async function sync(up){const u=up&&up.length?up:null,sp=['Googleドライブに接続','フォルダの差分を検出'].concat(u?['画像をアップロード']:[],['OCRで解析','自己ベストを照合']),iO=u?3:2;let nn=0,ne=0;
+ const t=TXP.slice(0,TXN).reduce((a,b)=>a+(b||0),0)/TXN;$('#tb').style.width=t*100+'%';$('#tp').textContent=Math.floor(t*100)+'%';
+ $('#sbb').style.width=t*100+'%';$('#sbp').textContent=Math.floor(t*100)+'%';$('#sbs').textContent=(TXS[i]||'')+(l?'　'+l:'')}
+async function run(m,sp,fn,bg){if(TX)return toast('別の処理を実行中のため操作できません',null,1),0;TX=1;AB=0;TXN=sp.length;TXP=[];TXS=sp;LS.setItem('sr_tx',JSON.stringify({m,t:Date.now()}));$('#tm').textContent=m;
+ $('#tl').innerHTML=sp.map((x,i)=>`<li id="ps${i}"><i class="si"></i><span>${x}</span><em></em><div class="sbp"><i></i></div></li>`).join('');$('#pv').hidden=true;
+ if(bg){$('#sbt').textContent=m;$('#sba').disabled=false;$('#sba').querySelector('span').textContent='中断';$('#sbar').hidden=false}else $('#tx').classList.add('on');txS(0,0);let ok=1;
+ try{if(await fn()!==-1){txS(TXN-1,1);await new Promise(r=>setTimeout(r,350))}}catch(e){ok=0;console.error(e);toast(e.message||'エラーが発生しました',null,1)}
+ LS.removeItem('sr_tx');TX=0;$('#pv').hidden=true;$('#tx').classList.remove('on');$('#sbar').hidden=true;return ok}
+const rsl=d=>SP?'同期を再開'+(SP>0?`（残り${SP}枚）`:''):d;
+async function sync(up){if(TX)return toast('別の処理を実行中のため同期できません。完了後にお試しください',null,1);
+ const q=UQ.concat(up&&up.length?up:[]),u=q.length?q:null,sp=['Googleドライブに接続','フォルダの差分を検出'].concat(u?['画像をアップロード']:[],['OCRで解析','自己ベストを照合']),iO=u?3:2;UQ=[];SP=0;let nn=0,ne=0,ab=0;
  const ok=await run('Googleドライブと同期しています',sp,async()=>{
-  txS(0,.2);if(!TKN)await auth();if(!S.length){txS(0,.5,'楽曲情報を取得');await master()}FID=await folder();
-  if(u)for(let k=0;k<u.length;k++){txS(2,k/u.length,`${k+1} / ${u.length} 枚`);await pvF(u[k]);await upl(u[k])}
-  txS(1,.3);const td=await load();td.sort((a,b)=>tsOf(a)-tsOf(b));
-  const first=!R.length,BM=new Map,add=r=>{const k=r.s+'-'+r.d,v=mt4(r),b=BM.get(k);BM.set(k,b?b.map((x,i)=>Math.min(x,v[i])):v);return[b,v]};R.forEach(r=>add(r));
-  if(td.length){txS(iO,0,'OCRエンジンを準備中');await tw()}
-  for(let i=0;i<td.length;i++){const f=td[i];txS(iO,i/td.length,`${i+1} / ${td.length} 枚`);let o;
-   try{o=await proc(f)}catch(e){if(/\(40[13]\)/.test(e.message))throw e;o={err:'api:0',tmp:1}}
-   if(o.rec){await commit(f,o);const[b,v]=add(o.rec);R.push(o.rec);
-    const t=first?'':b?v.map((x,j)=>x<b[j]?`${CN[j]} ${Math.abs(b[j])} → ${Math.abs(x)}`:'').filter(Boolean).join(' / '):'初回記録';
-    if(t){N.unshift({u:Date.now()+i,k:'rec',id:o.rec.id,t:Date.now(),tx:t});nn++}}
-   else{await commit(f,o);ER.push(mkE(f,o.err));ne++}}
-  txS(iO+1,.5);bld();N=N.filter(n=>R.some(r=>r.id==n.id));sv()});
+  txS(0,.2);if(!TKN)await auth();if(!S.length){txS(0,.5,'楽曲情報を取得');await master();view()}FID=await folder();
+  fin:{
+   if(u)for(let k=0;k<u.length;k++){if(AB){ab=1;UQ=u.slice(k);SP=-1;break fin}txS(2,k/u.length,`${k+1} / ${u.length} 枚`);await pvF(u[k]);await upl(u[k])}
+   if(AB){ab=1;SP=-1;break fin}
+   txS(1,.3);const h0=R.length,td=await load();td.sort((a,b)=>tsOf(a)-tsOf(b));if(!h0)view();
+   if(AB){ab=1;SP=td.length;break fin}
+   const kf='sr_f1',first=!R.length||LS.getItem(kf)==US.e,BM=new Map,add=r=>{const k=r.s+'-'+r.d,v=mt4(r),b=BM.get(k);BM.set(k,b?b.map((x,i)=>Math.min(x,v[i])):v);return[b,v]};R.forEach(r=>add(r));
+   if(first&&td.length)LS.setItem(kf,US.e);
+   if(td.length){txS(iO,0,'OCRエンジンを準備中');await tw()}
+   for(let i=0;i<td.length;i++){if(AB){ab=1;SP=td.length-i;break fin}const f=td[i];txS(iO,i/td.length,`${i+1} / ${td.length} 枚`);let o;
+    try{o=await proc(f)}catch(e){if(/\(40[13]\)/.test(e.message))throw e;o={err:'api:0',tmp:1}}
+    if(o.rec){await commit(f,o);const[b,v]=add(o.rec);R.push(o.rec);bld();
+     const t=first?'':b?v.map((x,j)=>x<b[j]?`${CN[j]} ${Math.abs(b[j])} → ${Math.abs(x)}`:'').filter(Boolean).join(' / '):'初回記録';
+     if(t){N.unshift({u:Date.now()+i,k:'rec',id:o.rec.id,t:Date.now(),tx:t});nn++;ub()}}
+    else{await commit(f,o);ER.push(mkE(f,o.err));ne++;ub()}}
+  }
+  if(!ab){txS(iO+1,.5);LS.removeItem('sr_f1')}bld();N=N.filter(n=>R.some(r=>r.id==n.id));sv();ub();return ab?-1:0},1);
  view();if(!ok)return;
+ if(ab)toast(SP>0?`同期を中断しました。残り${SP}枚は「同期を再開」で続きから処理できます`:'同期を中断しました。「同期を再開」で続きから処理できます','home');
  if(nn)toast(`自己ベストを${nn}件更新しました。タップして確認`,'notif');
  if(ne)toast(`読み取りエラー・重複が${ne}件あります。タップして確認`,'notif',1,()=>{st.nt='err'})}
 async function boot(){try{const a=await dj('https://www.googleapis.com/drive/v3/about?fields=user(displayName,emailAddress)');US={n:a.user.displayName||'ユーザー',e:a.user.emailAddress||''}}catch(e){toast(e.message,null,1);return}
@@ -311,16 +336,18 @@ const p2=n=>String(n).padStart(2,'0'),fdd=t=>{const d=new Date(t);return d.getFu
 const jk=id=>`linear-gradient(${id*47%360}deg,hsl(${id*37%360} 80% 74%),hsl(${(id*37+70)%360} 75% 62%))`;
 const has=i=>[0,1,2,3,4,5].some(d=>G.has(i*10+d));
 const CM={n:(a,b)=>S[a.s].t.localeCompare(S[b.s].t,'ja'),d:(a,b)=>a.d-b.d,l:(a,b)=>a.lv-b.lv,m:(a,b)=>miss(a)-miss(b),c:(a,b)=>b.cb-a.cb,a:(a,b)=>a.ad-b.ad};
-let ro;
-function vgrid(el,a,rh,mw,g,tp){ro&&ro.disconnect();let b=el.querySelector('#vb');if(!b){b=document.createElement('div');b.id='vb';el.append(b)}b.innerHTML='';b.style.cssText='position:relative';el.scrollTop=0;
+let ro,LK=0;const OV=6,lkR=el=>{LK&&clearInterval(LK);LK=0;el&&el.classList.remove('ld');$('#ldp').hidden=true},
+lkW=(el,b)=>{const p=[...b.querySelectorAll('img')].filter(i=>!i.complete);if(!p.length)return lkR(el);lkR(el);el.classList.add('ld');$('#ldp').hidden=false;const t0=Date.now();
+ LK=setInterval(()=>{if(!el.isConnected||Date.now()-t0>8000||p.every(i=>i.complete||!i.isConnected))lkR(el)},100)};
+function vgrid(el,a,rh,mw,g,tp){ro&&ro.disconnect();let b=el.querySelector('#vb');if(!b){b=document.createElement('div');b.id='vb';el.append(b)}b.innerHTML='';b.style.cssText='position:relative';el.scrollTop=0;lkR(el);
  if(!a.length){b.innerHTML='<p class="cnt" style="text-align:center;padding:48px 0">該当する項目がありません</p>';return}
  let key='';
  const draw=()=>{const W=b.clientWidth;if(W<=0)return;
   const n=Math.max(1,Math.floor((W+g)/(mw+g))),cw=(W-g*(n-1))/n,rows=Math.ceil(a.length/n),u=rh+g;b.style.height=rows*u-g+'px';
-  const y=el.scrollTop-b.offsetTop,s=Math.max(0,Math.floor(y/u)-2),e=Math.min(rows,Math.ceil((y+el.clientHeight)/u)+2),k=[n,cw|0,s,e].join();
+  const y=el.scrollTop-b.offsetTop,s=Math.max(0,Math.floor(y/u)-OV),e=Math.min(rows,Math.ceil((y+el.clientHeight)/u)+OV),k=[n,cw|0,s,e].join();
   if(k==key)return;key=k;let o='';
   for(let r=s;r<e;r++)for(let c=0;c<n;c++){const i=r*n+c;if(i<a.length)o+=tp(a[i],i,`position:absolute;left:${c*(cw+g)}px;top:${r*u}px;width:${cw}px;height:${rh}px`)}
-  b.innerHTML=o};
+  b.innerHTML=o.split('loading="lazy"').join('loading="eager"');lkW(el,b)};
  el.onscroll=draw;ro=new ResizeObserver(draw);ro.observe(el);ro.observe(b);draw()}
 const card=(r,i,p)=>{const s=S[r.s],d=D[r.d];return`<div class="cd" data-act="card" data-id="${r.id}" style="--c:${d.c};${p||''}"><div class="rs">${thm(r,240)}<div class="mb">${J.map(j=>`<i style="flex:${r[j[2]]||.02};background:${j[1]}"></i>`).join('')}</div></div><div class="ci"><b class="tt">${s.t}</b><div class="rw"><span class="dc">${d.n} ${r.lv}</span>${bd(clr(r))}</div><div class="rw"><small class="sb">ミス</small><span class="mv">${miss(r)}</span><span class="sb" style="margin-left:auto">${fdd(r.ts)}</span></div></div></div>`};
 const sRow=(s,i,p)=>`<div class="sr" data-act="song" data-s="${s.i}" style="${p}">${JK(s)}<div class="ci" style="gap:6px"><b class="tt">${s.t}</b><span class="sb">${s.co} / ${s.ly} / ${s.ar}</span><div class="rw"><span class="ut">${tgs(s)}</span><span style="margin-left:auto;display:flex;gap:5px">${D.map((d,j)=>s.lv[j]?`<i class="dd ${G.has((s.i)*10+j)?'on':''}" style="--s:${d.s}"></i>`:'').join('')}</span></div></div></div>`;
@@ -334,7 +361,7 @@ const selV=()=>{const s=S[st.sel[0]],d=D[st.sel[1]];return`<div class="pg"><div 
 const VW={
 home(){const g=[...G.values()],
  k=[['登録リザルト',R.length],['FC達成',g.filter(a=>a.some(clr)).length],['AP達成',g.filter(a=>a.some(r=>clr(r)=='AP')).length],['未確認の通知',N.length+ER.length]];
- return`<div class="pg sy"><div class="hero"><h1>ドライブの画像から、<br>自己ベストを見つける。</h1><p>リザルト画像をOCRで読み取り、記録の更新をお知らせします。</p><div class="row"><button class="btn p" data-act="up">${ic('upload')}画像を追加</button><button class="btn" data-act="sync">${ic('sync')}ドライブと同期</button></div>
+ return`<div class="pg sy"><div class="hero"><h1>ドライブの画像から、<br>自己ベストを見つける。</h1><p>リザルト画像をOCRで読み取り、記録の更新をお知らせします。</p><div class="row"><button class="btn p" data-act="up">${ic('upload')}画像を追加</button><button class="btn" data-act="sync">${ic('sync')}${rsl('ドライブと同期')}</button></div>
  </div>
  <div class="stl">${k.map(a=>`<div><b>${a[1]}</b><span>${a[0]}</span></div>`).join('')}</div>${lvt()}<h3>最近追加したリザルト</h3><div class="cg">${[...R].sort((a,b)=>b.ad-a.ad).slice(0,6).map(r=>card(r)).join('')}</div></div>`},
 songs(){if(st.sel)return selV();return`<div class="pg"><div class="vs" id="vs"><div class="tb"><select class="btn" data-k="unit" data-n="1"><option value="-1">すべてのユニット</option>${UN.map((u,i)=>`<option value="${i}">${u}</option>`).join('')}</select><label class="sf">${ic('search')}<input data-k="q" placeholder="タイトル・作詞・作曲・編曲で検索" autocomplete="off"></label></div>
@@ -342,10 +369,10 @@ songs(){if(st.sel)return selV();return`<div class="pg"><div class="vs" id="vs"><
 list(){return`<div class="pg"><div class="tb"><select class="btn" data-k="ls"><option value="n">名前順</option><option value="l">楽曲レベル順</option><option value="m">ミス数順</option><option value="a">追加日順</option></select><select class="btn" id="ll" data-k="ld" data-n="1" hidden><option value="-1">全難易度</option>${D.map((d,i)=>`<option value="${i}">${d.n}</option>`).join('')}</select><button class="btn" id="dir" data-act="dir"></button><label class="sw"><input type="checkbox" data-k="best"><i></i>自己ベストのみ</label></div>
  <p class="cnt" id="cn"></p><div class="vs" id="vs"></div></div>`},
 notif(){const L=st.nt=='err'?ER:N;return`<div class="pg sy"><div class="tb"><button class="btn" data-act="back">${ic('back')}戻る</button>${st.nt=='rec'&&N.length?`<button class="btn" data-act="nclr">${ic('check')}既読にする</button>`:''}</div><div class="tabs" style="margin-bottom:16px">${[['rec','記録更新',N],['err','エラー',ER]].map(a=>`<button class="${st.nt==a[0]?'on':''}" data-act="nt" data-v="${a[0]}">${a[1]} ${a[2].length}</button>`).join('')}</div>
- ${L.map(n=>{if(n.k=='err')return`<div class="ni e"><div class="ni-i">${ic('alert')}</div><div class="ci" style="gap:2px"><b class="tt">${n.f}</b><span class="sb w">${n.tx}</span></div><span class="row" style="flex:none"><button class="btn" data-act="eimg" data-u="${n.u}">${ic('image')}画像を見る</button><button class="btn" data-act="man" data-u="${n.u}">${ic('edit')}手動登録</button><button class="btn" data-act="fix" data-u="${n.u}" data-v="r">${ic('scan')}再解析</button><button class="btn d" data-act="fix" data-u="${n.u}" data-v="d">${ic('trash')}削除</button></span></div>`;
+ ${L.map(n=>{if(n.k=='err')return`<div class="ni e"><div class="ni-i">${ic('alert')}</div><div class="ci" style="gap:2px"><b class="tt">${n.f}</b><span class="sb w">${n.tx}</span></div><span class="row" style="flex:none">${n.dp?`<button class="btn" data-act="cmp" data-u="${n.u}">${ic('search')}比較</button>`:''}<button class="btn" data-act="eimg" data-u="${n.u}">${ic('image')}画像を見る</button><button class="btn" data-act="man" data-u="${n.u}">${ic('edit')}手動登録</button><button class="btn" data-act="fix" data-u="${n.u}" data-v="r">${ic('scan')}再解析</button><button class="btn d" data-act="fix" data-u="${n.u}" data-v="d">${ic('trash')}削除</button></span></div>`;
  const r=R.find(x=>x.id==n.id);return r?`<div class="ni" data-act="card" data-id="${r.id}"><div class="ni-i">${ic('trophy')}</div><div class="ci" style="gap:4px"><b class="tt">${S[r.s].t}</b><div class="rw"><span class="dc" style="--c:${D[r.d].c}">${D[r.d].n} ${r.lv}</span><span class="sb">${n.tx}</span></div></div><span class="sb">${fd(n.t)}</span></div>`:''}).join('')||'<p class="cnt">通知はありません</p>'}</div>`},
 set(){return`<div class="pg sy"><div class="cx"><h3>アカウント</h3><div class="set"><span>${US.n}<br><small class="sb">${US.e}</small></span><button class="btn" data-act="logout">${ic('logout')}ログアウト</button></div></div>
- <div class="cx"><h3>Googleドライブ</h3><div class="set"><span>連携フォルダ<br><small class="sb">マイドライブ / ${FN}</small></span><button class="btn p" data-act="sync">${ic('sync')}今すぐ同期</button></div></div>
+ <div class="cx"><h3>Googleドライブ</h3><div class="set"><span>連携フォルダ<br><small class="sb">マイドライブ / ${FN}</small></span><button class="btn p" data-act="sync">${ic('sync')}${rsl('今すぐ同期')}</button></div></div>
  <div class="cx"><h3>同期の不整合</h3><p class="sb w" style="margin:0 0 6px">画像はドライブにありますが、記録がありません。復元か削除を選べます。</p>${ER.map(x=>`<div class="set"><b>${x.f}</b><span class="row"><button class="btn" data-act="fix" data-u="${x.u}" data-v="r">${ic('scan')}OCRで復元</button><button class="btn d" data-act="fix" data-u="${x.u}" data-v="d">${ic('trash')}削除</button></span></div>`).join('')||'<p class="sb">不整合はありません</p>'}</div></div>`}};
 const selP=()=>{$('#dir').innerHTML=ic(st.md>0?'up':'down')+(st.md>0?'昇順':'降順');let a=R.filter(r=>r.s==st.sel[0]&&r.d==st.sel[1]);
  if(st.mb){const m=new Map();a.forEach(r=>{const k=r.s*10+r.d,c=m.get(k);if(!c||better(r,c)<0)m.set(k,r)});a=[...m.values()]}
@@ -363,7 +390,7 @@ const P={songs(){if(st.sel)return selP();$('#sl').hidden=st.ss!='lv';$('#dir').i
 function view(){$('#view').innerHTML=VW[st.v]();$('#ttl').textContent=T[st.v];$('#bs').value=st.b;document.querySelectorAll('#nav a').forEach(a=>a.classList.toggle('on',a.dataset.v==st.v));
  document.querySelectorAll('#view [data-k]').forEach(e=>{const x=st[e.dataset.k];e.type=='checkbox'?e.checked=x:e.value=x});P[st.v]&&P[st.v]();ub()}
 const ub=()=>document.querySelectorAll('.nbd').forEach(e=>{e.textContent=N.length+ER.length;e.hidden=!(N.length+ER.length)}),go=v=>{if(v=='notif'&&st.v!='notif')st.pv=st.v;st.v=v;$('#app').classList.remove('open');view()};
-const openM=(h,c='')=>{$('#md').innerHTML=`<div class="sh ${c}">${h}</div>`;$('#md').classList.add('on')},closeM=()=>{$('#md').classList.remove('on');OU&&URL.revokeObjectURL(OU);OU=''},X=`<button class="ib x" data-act="close" aria-label="閉じる">${ic('x')}</button>`;
+const openM=(h,c='')=>{$('#md').innerHTML=`<div class="sh ${c}">${h}</div>`;$('#md').classList.add('on')},closeM=()=>{$('#md').classList.remove('on');OU&&URL.revokeObjectURL(OU);OU='';OX.forEach(u=>URL.revokeObjectURL(u));OX=[]},X=`<button class="ib x" data-act="close" aria-label="閉じる">${ic('x')}</button>`;
 function toast(m,v,er,cb){const t=document.createElement('div'),s=document.createElement('span');t.className='t'+(er?' er':'');t.innerHTML=ic(er?'alert':'check');s.textContent=m;t.append(s);if(v)t.onclick=()=>{cb&&cb();go(v);t.remove()};$('#ts').append(t);setTimeout(()=>{t.style.transition='opacity .4s';t.style.opacity=0;setTimeout(()=>t.remove(),400)},er?8000:5000)}
 function pickD(i){const s=S[i];openM(`${X}<div class="rw" style="margin:0 44px 16px 0">${JK(s)}<div class="ci" style="gap:2px"><b style="font-size:18px;line-height:1.3">${s.t}</b><span class="sb">${tgs(s)}</span></div></div><h3>難易度を選択</h3>${D.map((d,j)=>s.lv[j]?`<div class="dp" data-act="pick" data-s="${i}" data-d="${j}" style="--c:${d.c}"><span class="dc">${d.n}</span><b>Lv.${s.lv[j]}</b><span class="sb">${(G.get(i*10+j)||[]).length}件</span>${ic('chev')}</div>`:'').join('')}`,'sm')}
 function hist(r,b){let h=G.get(r.s*10+r.d),m=1e9;if(b)h=h.filter(x=>{const v=miss(x);return v<m?(m=v,1):0});
@@ -375,13 +402,13 @@ function detail(id){const r=R.find(x=>x.id==id);if(!r)return;const s=S[r.s],d=D[
  <div class="g3"><div class="kv"><small>ミス数（${BS[st.b]}）</small><b>${miss(r)}</b></div><div class="kv"><small>コンボ数</small><b>${r.cb}</b><small>/ ${r.nt}</small></div></div>
  ${J.map(j=>`<div class="jr"><span><i class="jd" style="background:${j[1]}"></i>${j[0]}</span><div class="jb"><i style="width:${r[j[2]]/r.nt*100}%;background:${j[1]}"></i></div><b>${r[j[2]]}</b></div>`).join('')}
  <div class="row" style="margin-top:14px"><button class="btn" data-act="edit">${ic('edit')}手動修正</button><button class="btn" data-act="ocr" data-id="${r.id}">${ic('scan')}OCR再実行</button><button class="btn d" data-act="del" data-id="${r.id}">${ic('trash')}削除</button></div>
- <div class="ed" id="ed" hidden>${[['gr','GREAT'],['go','GOOD'],['ba','BAD'],['mi','MISS'],['cb','コンボ']].map(a=>`<label>${a[1]}<input id="e_${a[0]}" type="number" min="0" value="${r[a[0]]}"></label>`).join('')}<button class="btn p" data-act="save" data-id="${r.id}">保存</button></div><div class="inf"><div><small>撮影日時</small><span>${fd(r.ts)}</span></div></div><div class="inf"><div><small>楽曲タグ</small><span><span class="ut">${tgs(s)}</span></span></div><div><small>作詞・作曲・編曲</small><span><em class="nw">作詞 ${s.ly}</em><em class="nw">作曲 ${s.co}</em><em class="nw">編曲 ${s.ar}</em></span></div><div><small>公開日時</small><span>${fd(s.rel)}</span></div></div>
+ <div class="ed" id="ed" data-nt="${r.nt}" hidden>${[['pf','PERFECT'],['gr','GREAT'],['go','GOOD'],['ba','BAD'],['mi','MISS'],['cb','コンボ']].map(a=>`<label>${a[1]}<input id="e_${a[0]}" type="number" min="0" value="${r[a[0]]}"></label>`).join('')}<div class="kv" style="flex:1 1 100%"><small>判定の合計 / ノーツ数（一致が必要）</small><b id="e_sm">${r.pf+r.gr+r.go+r.ba+r.mi} / ${r.nt}</b></div><button class="btn p" data-act="save" data-id="${r.id}">保存</button></div><div class="inf"><div><small>撮影日時</small><span>${fd(r.ts)}</span></div></div><div class="inf"><div><small>楽曲タグ</small><span><span class="ut">${tgs(s)}</span></span></div><div><small>作詞・作曲・編曲</small><span><em class="nw">作詞 ${s.ly}</em><em class="nw">作曲 ${s.co}</em><em class="nw">編曲 ${s.ar}</em></span></div><div><small>公開日時</small><span>${fd(s.rel)}</span></div></div>
  <div class="rw" style="justify-content:space-between;margin:22px 0 0"><h3 style="margin:0">推移（${d.n}）</h3><div class="tabs">${[['0','すべて'],['1','自己ベストのみ']].map(a=>`<button class="${a[0]=='0'?'on':''}" data-act="hist" data-id="${r.id}" data-v="${a[0]}">${a[1]}</button>`).join('')}</div></div><div id="hc">${hist(r,false)}</div>`,'dt');eim(r.id,'#oi',1)}
 const A={go:t=>go(t.dataset.v),side:()=>$('#app').classList.toggle(mob()?'open':'col'),close:closeM,song:t=>pickD(+t.dataset.s),pick:t=>{st.sy=$('#vs').scrollTop;st.sel=[+t.dataset.s,+t.dataset.d];closeM();go('songs')},card:t=>detail(t.dataset.id),sback:()=>{st.sel=null;view();$('#vs').scrollTop=st.sy},back:()=>go(st.pv||'home'),
  dir:()=>{const k=st.v=='songs'?st.sel?'md':'sdir':'ldir';st[k]*=-1;P[st.v]()},nt:t=>{st.nt=t.dataset.v;view()},nclr:()=>{N=[];sv();view()},up:()=>$('#fi').click(),sync:()=>sync(),
- login:async()=>{if(!cid())return toast('OAuthクライアントIDが未設定です。コード内のCID_DEFAULTに設定してください',null,1);try{await auth();await boot()}catch(e){toast(e.message||'ログインに失敗しました',null,1)}},logout:()=>{TKN&&window.google&&google.accounts.oauth2.revoke(TKN,()=>{});TKN='';LS.removeItem('sr_li');R=[];ER=[];N=[];bld();$('#lg').hidden=false;go('home')},edit:()=>{$('#ed').hidden=!$('#ed').hidden},
- save:t=>{const r=R.find(x=>x.id==t.dataset.id);if(!r)return;const v=k=>Math.max(0,Math.floor(+$('#e_'+k).value)||0),n={...r,gr:v('gr'),go:v('go'),ba:v('ba'),mi:v('mi'),cb:v('cb')};n.pf=r.nt-n.gr-n.go-n.ba-n.mi;if(!(n.go+n.ba+n.mi))n.cb=r.nt;
-  if(n.pf<0||n.cb>r.nt)return toast(`入力値がノーツ数（${r.nt}）を超えています`,null,1);
+ login:async()=>{if(!cid())return toast('OAuthクライアントIDが未設定です。コード内のCID_DEFAULTに設定してください',null,1);try{await auth();await boot()}catch(e){toast(e.message||'ログインに失敗しました',null,1)}},logout:()=>{TKN&&window.google&&google.accounts.oauth2.revoke(TKN,()=>{});TKN='';LS.removeItem('sr_li');R=[];ER=[];N=[];UQ=[];SP=0;bld();$('#lg').hidden=false;go('home')},edit:()=>{$('#ed').hidden=!$('#ed').hidden},
+ save:t=>{const r=R.find(x=>x.id==t.dataset.id);if(!r)return;const v=k=>Math.max(0,Math.floor(+$('#e_'+k).value)||0),n={...r,pf:v('pf'),gr:v('gr'),go:v('go'),ba:v('ba'),mi:v('mi'),cb:v('cb')},sm=n.pf+n.gr+n.go+n.ba+n.mi;if(!(n.go+n.ba+n.mi))n.cb=r.nt;
+  if(sm!=r.nt)return toast(`判定数の合計（${sm}）がノーツ数（${r.nt}）と一致しません`,null,1);if(n.cb>r.nt)return toast(`入力値がノーツ数（${r.nt}）を超えています`,null,1);
   closeM();run('リザルトを修正しています',['ドライブに保存'],async()=>{txS(0,.4);await pat(r.id,{appProperties:{r:enc(n)}});Object.assign(r,n);bld()}).then(ok=>{view();ok&&(detail(r.id),toast('リザルトを修正しました'))})},
  ocr:t=>{const id=t.dataset.id,r=R.find(x=>x.id==id);if(!r)return;closeM();
   run('OCRを再実行しています',['OCRで解析'],async()=>{txS(0,.3);const o=await redo(r.fm,1);if(o.err)throw new Error(etx(o.err)+'　元の記録は変更されていません');toast('OCRの再解析が完了しました')}).then(()=>{view();R.some(x=>x.id==id)&&detail(id)})},
@@ -390,6 +417,19 @@ const A={go:t=>go(t.dataset.v),side:()=>$('#app').classList.toggle(mob()?'open':
  hist:t=>{document.querySelectorAll('.tabs [data-act=hist]').forEach(b=>b.classList.toggle('on',b==t));$('#hc').innerHTML=hist(R.find(x=>x.id==t.dataset.id),t.dataset.v=='1')},
  eimg:t=>{const e=ER.find(x=>x.u==t.dataset.u);if(!e)return;
   openM(`${X}<h3 style="margin-right:44px">${e.f}</h3><p class="sb w" style="margin:0 0 12px">${e.tx}</p><div class="big" id="ei">${ic('image')}</div><div class="row" style="margin-top:14px"><button class="btn p" data-act="man" data-u="${e.u}">${ic('edit')}手動で登録</button><button class="btn" data-act="fix" data-u="${e.u}" data-v="r">${ic('scan')}再解析</button><button class="btn d" data-act="fix" data-u="${e.u}" data-v="d">${ic('trash')}削除</button></div>`,'dt');eim(e.u)},
+ abort:()=>{if(!TX||AB)return;AB=1;const b=$('#sba');b.disabled=true;b.querySelector('span').textContent='中断しています…';$('#sbs').textContent='処理中の画像が終わり次第、安全に停止します'},
+ cmp:t=>{const e=ER.find(x=>x.u==t.dataset.u);if(!e)return;const f=e.fm,m=f.imageMediaMetadata||{},r=R.find(x=>x.id==e.du),k=++EK,
+  sc=(w,h)=>w&&h?w+' × '+h:'不明',fs=x=>fd(x)+':'+p2(new Date(x).getSeconds()),
+  rw=(l,a,b)=>`<div class="cmr${a!=b?' df':''}"><small>${l}</small><span>${a}</span><span>${b}</span></div>`,
+  bt=`<div class="row" style="margin-top:14px">${r?`<button class="btn" data-act="card" data-id="${r.id}">${ic('trophy')}登録済みを開く</button>`:''}<button class="btn" data-act="man" data-u="${e.u}">${ic('edit')}手動で登録</button><button class="btn" data-act="fix" data-u="${e.u}" data-v="r">${ic('scan')}再解析</button><button class="btn d" data-act="fix" data-u="${e.u}" data-v="d">${ic('trash')}削除</button></div>`;
+  openM(`${X}<h3 style="margin-right:44px">重複の比較</h3><p class="sb w" style="margin:0 0 12px">${e.tx}</p>
+  <div class="dg"><div><b class="sb" style="display:block;margin-bottom:6px">重複の疑いがある画像</b><div class="big">${thm({th:f.thumbnailLink||''},480)}<div id="c1"></div></div></div>
+  <div><b class="sb" style="display:block;margin-bottom:6px">登録済みのリザルト</b><div class="big">${r?thm(r,480)+'<div id="c2"></div>':'<span class="sb w" style="padding:16px;text-align:center">比較対象のリザルトが見つかりません。削除済み、または旧形式の判定です。「再解析」で比較対象を取得し直せます。</span>'}</div></div></div>
+  ${r?`<div class="rw" style="margin:16px 0 0;gap:10px"><b class="tt">${S[r.s].t}</b><span class="dc" style="--c:${D[r.d].c}">${D[r.d].n} ${r.lv}</span></div>
+  <div class="g3">${[['PERFECT','pf'],['GREAT','gr'],['GOOD','go'],['BAD','ba'],['MISS','mi'],['コンボ','cb']].map(a=>`<div class="kv"><small>${a[0]}</small><b>${r[a[1]]}</b></div>`).join('')}</div>
+  <p class="sb w" style="margin:0 0 6px">リザルトの数値は両方の画像で一致しています。下の項目を見比べて重複か確認できます（相違する項目はオレンジで表示）。</p>
+  <div class="cmr cmh"><small></small><span>重複の疑い</span><span>登録済み</span></div>${rw('ファイル名',e.f,esc(r.nm))}${rw('撮影日時',fs(tsOf(f)),fs(r.ts))}${rw('追加日時',fs(Date.parse(f.createdTime)),fs(r.ad))}${rw('画面サイズ',sc(m.width,m.height),sc(r.W,r.H))}`:''}${bt}`);
+  eimX(e.u,'#c1',k);r&&eimX(r.id,'#c2',k)},
  man:t=>{const e=ER.find(x=>x.u==t.dataset.u);if(!e)return;const c={};S.forEach(s=>c[s.t]=(c[s.t]||0)+1);ML=s=>c[s.t]>1?`${s.t} [${s.id}]`:s.t;
   openM(`${X}<h3 style="margin-right:44px">手動で登録</h3><p class="sb w" style="margin:0 0 12px">${e.f}　${e.tx}</p><div class="dg"><div class="big" id="ei" style="align-self:start">${ic('image')}</div><div class="ed" id="mf" data-u="${e.u}" style="margin:0"><label style="flex:1 1 100%">楽曲<input id="m_s" list="m_l" autocomplete="off" placeholder="タイトルを入力して選択"><datalist id="m_l">${S.map(s=>`<option value="${esc(ML(s))}">`).join('')}</datalist></label><label style="flex:1 1 100%">難易度<select class="btn" id="m_d" style="width:100%"></select></label>${[['gr','GREAT'],['go','GOOD'],['ba','BAD'],['mi','MISS'],['cb','コンボ']].map(a=>`<label>${a[1]}<input id="m_${a[0]}" type="number" min="0" inputmode="numeric" value="0"></label>`).join('')}<div class="kv" style="flex:1 1 100%"><small>PERFECT（自動計算）/ ノーツ数</small><b id="m_pf">-</b></div><button class="btn p" data-act="msave" style="margin-left:auto">${ic('check')}登録</button></div></div>`);eim(e.u);mfU()},
  msave:()=>{const e=ER.find(x=>x.u==$('#mf').dataset.u),s=mS(),dv=$('#m_d').value;if(!e)return;if(!s||dv==='')return toast('楽曲と難易度を選択してください',null,1);
@@ -400,8 +440,9 @@ const A={go:t=>go(t.dataset.v),side:()=>$('#app').classList.toggle(mob()?'open':
  fix:t=>{const e=ER.find(x=>x.u==t.dataset.u);if(!e)return;closeM();
   t.dataset.v=='d'?run('削除しています',['ドライブから画像を削除'],async()=>{txS(0,.3);await pat(e.u,{trashed:true});ER=ER.filter(x=>x!=e)}).then(ok=>{view();ok&&toast('ドライブから画像を削除しました')})
   :run('OCRを再実行しています',['OCRで解析'],async()=>{txS(0,.3);const o=await redo(e.fm);toast(o.rec?'OCRで記録を復元しました':etx(o.err),null,!o.rec)}).then(()=>view())}};
-document.addEventListener('click',e=>{if(e.target.id=='md')return closeM();const t=e.target.closest('[data-act]');t&&A[t.dataset.act]&&A[t.dataset.act](t)});
-document.addEventListener('input',e=>{const t=e.target,k=t.dataset.k;if(/^m_/.test(t.id))return mfU();if(t.id=='bs'){st.b=t.value;return view()}if(!k)return;const v=t.type=='checkbox'?t.checked:t.dataset.n?+t.value:t.value;st[k]=v;if(k=='ls')st.ldir=v=='a'?-1:1;if(k=='ss')st.sdir=v=='rel'?-1:1;if(k=='ms')st.md=v=='a'?-1:1;P[st.v]()});
+const MU=new Set(['up','sync','edit','save','ocr','del','delok','man','msave','fix','logout']);
+document.addEventListener('click',e=>{if(e.target.id=='md')return closeM();const t=e.target.closest('[data-act]');if(t&&TX&&MU.has(t.dataset.act))return toast('同期などの処理を実行中のため、この操作はできません。完了または中断してからお試しください',null,1);t&&A[t.dataset.act]&&A[t.dataset.act](t)});
+document.addEventListener('input',e=>{const t=e.target,k=t.dataset.k;if(/^m_/.test(t.id))return mfU();if(/^e_/.test(t.id))return efU(t);if(t.id=='bs'){st.b=t.value;return view()}if(!k)return;const v=t.type=='checkbox'?t.checked:t.dataset.n?+t.value:t.value;st[k]=v;if(k=='ls')st.ldir=v=='a'?-1:1;if(k=='ss')st.sdir=v=='rel'?-1:1;if(k=='ms')st.md=v=='a'?-1:1;P[st.v]()});
 document.addEventListener('keydown',e=>e.key=='Escape'&&closeM());
 $('#fi').onchange=e=>{const f=[...e.target.files].filter(x=>/^image\//.test(x.type));e.target.value='';f.length&&sync(f)};
 addEventListener('beforeunload',e=>{if(TX){e.preventDefault();e.returnValue=''}});
