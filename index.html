@@ -1121,6 +1121,25 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
         const cx=W/2,yV=oy+.0574*Sh,yJ=oy+.7347*Sh,LU=.0658*Sw,zM=ap/100*.978,sg=mir?-1:1,top=JY*(1-zM),sB=(yB-yV)/(yJ-yV);
         const pj=(lp,z)=>{const s=Math.exp(-KAP*z);return[cx+sg*lp*LU*s,yV+(yJ-yV)*s,s]}; /* レーン位置lp(-6〜6)・奥行きz → 画面[x,y,縮尺] */
         const quad=(l0,l1,z0,z1)=>poly([pj(l0,z0),pj(l1,z0),pj(l1,z1),pj(l0,z1)]);
+        /* ロングノーツの本体（実機の画面収録を計測。不透明度100%＝この見た目）：中央は濃い色、縁へ向かって白っぽく明るくなる横グラデーション（奥行きで濃さは変わらない）。
+           縁の内側に約1.5pxの明線、外側に約1pxの暗線。通常は不透明度0.85で背景がわずかに透ける。ガイドは平らな単色で、奥は透明・判定線で最大（画面の縮尺に比例）。 */
+        const BN=14,BMIX=[],BF=[];for(let j=1;j<BN;j++){BF.push(.5*(BN-j)/BN);BMIX.push(.73*Math.pow((j+.5)/BN,1.7))} /* 縁からの帯：中央0〜縁1 の明るさ配分 ≈ (中心からの距離)^1.7 */
+        const BODY={long:['107,229,188','168,235,200'],crit:['234,226,153','238,233,180']},GUIDE={long:['82,250,162',1.11],crit:['255,188,39',.874]};
+        const pxv=Sw/1920,ringOf=(L,R)=>L.concat(R.slice().reverse());
+        const strokeEdges=(L,R)=>{for(const E of[L,R]){gx.beginPath();E.forEach((q,i)=>i?gx.lineTo(q[0],q[1]):gx.moveTo(q[0],q[1]));gx.stroke()}};
+        const bandPoly=(L,R,f,right)=>{const A=[],B=[];for(let i=0;i<L.length;i++){const p=right?R[i]:L[i],q=right?L[i]:R[i];A.push(p);B.push([p[0]+(q[0]-p[0])*f,p[1]+(q[1]-p[1])*f])}poly(A.concat(B.reverse()))};
+        const slideBody=(L,R,cr)=>{
+         const[c0,c1]=BODY[cr?'crit':'long'];
+         gx.lineWidth=Math.max(1.4,2.6*pxv);gx.strokeStyle='rgba(0,10,20,'+.55*sl+')';strokeEdges(L,R); /* 外側の暗線（内側の半分は本体で隠れる） */
+         poly(ringOf(L,R));gx.fillStyle='rgba('+c0+','+.85*sl+')';gx.fill();
+         let pv=0;BF.forEach((f,j)=>{const a=(1-(1-BMIX[j])/(1-pv))*sl;pv=BMIX[j];gx.fillStyle='rgba('+c1+','+a+')';bandPoly(L,R,f,0);gx.fill();bandPoly(L,R,f,1);gx.fill()}); /* 縁ほど明るい */
+         gx.save();poly(ringOf(L,R));gx.clip();gx.lineWidth=Math.max(1.6,3*pxv);gx.strokeStyle='rgba(255,255,255,'+.3*sl+')';strokeEdges(L,R);gx.restore(); /* 内側の明線 */
+        };
+        const guideBody=(L,R,cr)=>{
+         const[col,K]=GUIDE[cr?'crit':'long'],g=gx.createLinearGradient(0,yV,0,yJ);
+         g.addColorStop(0,'rgba('+col+',0)');g.addColorStop(1,'rgba('+col+','+Math.min(1,gd*K)+')');
+         poly(ringOf(L,R));gx.fillStyle=g;gx.fill();
+        };
         const yFar=pj(0,zM)[1],vg=(c0,c1,y0=yFar,y1=yJ)=>{const g=gx.createLinearGradient(0,y0,0,y1);g.addColorStop(0,c0);g.addColorStop(1,c1);return g};
         /* ヒットエフェクトの部品（実機の画面収録から再現）。m=主色／lt=明るい色。bm=光の柱・gl=判定枠の発光と閃光・dm=床のひし形の強さ
            柱は2本：レーン線に沿って画面下端まで伸びる床の光と、判定線からまっすぐ上へ伸びて薄れる光 */
@@ -1191,7 +1210,7 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
         poly([[cx+6*LU*sL,yL0],[cx+6*LU*sB,yB],[cx-6*LU*sB,yB],[cx-6*LU*sL,yL0]]);gx.fillStyle=vg('rgba(6,4,28,0)','rgba(6,4,28,.22)',yL0,yL1);gx.fill();
         for(const[a,w,ls]of[[.19,1,[-4,-2,0,2,4]],[.5,1.5,[-6,6]]]){gx.strokeStyle=lg(a);gx.lineWidth=Math.max(1,w*k0);gx.beginPath();for(const lp of ls){gx.moveTo(cx+sg*lp*LU*sL,yL0);gx.lineTo(cx+sg*lp*LU*sB,yB)}gx.stroke()}
         /* スライド（経路を奥行き方向にサンプリングして、遠近を付けた帯として塗る） */
-        const holds=[],items=[];
+        const holds=[],items=[],bodyQ=[]; /* 本体は判定枠より後（枠の上）に、ガイド→ロングの順で描く */
         for(const c of C){
          const ys=c.Q.map((q,i)=>JY-(q-Q(c.p[i][3]))*pps);let lo=1e9,hi=-1e9;for(const y of ys){if(y<lo)lo=y;if(y>hi)hi=y}
          if(hi<top-4||lo>JY+4)continue;
@@ -1202,11 +1221,7 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
           for(let k=0;k<=K;k++){const y=up-(up-dn)*k/K,z=(JY-y)/JY;L.push(pj(cubicXAtY(cu[0],y)/LW-6,z));R.push(pj(cubicXAtY(cu[1],y)/LW-6,z))}
          }
          if(!c.deco&&ys[0]>=JY&&ys[n1]<=JY){let i=0;while(i<n1-1&&ys[i+1]>JY)i++;const cu=curves(c,ys,i);holds.push([cubicXAtY(cu[0],JY)/LW-6,cubicXAtY(cu[1],JY)/LW-6,c.cr])} /* 保持中：判定線上の経路位置 */
-         if(L.length>1){
-          const col=c.cr?'255,233,130':'75,240,230',al=c.deco?gd:sl,g=vg('rgba('+col+','+al*.5+')','rgba('+col+','+al+')');g.addColorStop(.15,'rgba('+col+','+al+')');
-          poly(L.concat(R.slice().reverse()));gx.fillStyle=g;gx.fill();
-          if(!c.deco){gx.strokeStyle='rgba('+(c.cr?'255,250,200':'190,255,250')+','+Math.min(1,al+.3)+')';gx.lineWidth=Math.max(1,1.4*k0);for(const E of[L,R]){gx.beginPath();E.forEach((q,i)=>i?gx.lineTo(q[0],q[1]):gx.moveTo(q[0],q[1]));gx.stroke()}}
-         }
+         if(L.length>1)bodyQ.push([c.deco?1:0,()=>c.deco?guideBody(L,R,c.cr):slideBody(L,R,c.cr)]);
          for(const r of c.R){const ym=JY-(r.q-Q(r.h))*pps;if(ym<top-2||ym>JY+2)continue;const cu=curves(c,ys,r.e);items.push({z:(JY-ym)/JY,g:1,lp:(cubicXAtY(cu[0],ym)+cubicXAtY(cu[1],ym))/2/LW-6,k:r.k?'crit':'long'})}
         }
         for(const n of N){if(!n.m)continue;const z=(n.q-Q(n.h))*pps/JY;if(z<-.002||z>zM)continue;n.m[0]==='relay'?items.push({z,g:1,lp:n.x/LW-6+n.w/2,k:n.m[1]?'crit':'long'}):items.push({z,n})}
@@ -1215,12 +1230,23 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
         rpoly(fr,5*k0);gx.fillStyle='rgba(6,5,16,.82)';gx.fill();
         gx.strokeStyle='rgba(150,122,255,.7)';gx.lineWidth=Math.max(1,1.3*k0);gx.beginPath();for(let i=1;i<12;i++){const a=pj(i-6,GF),b=pj(i-6,-GF);gx.moveTo(a[0],a[1]);gx.lineTo(b[0],b[1])}gx.stroke();
         rpoly(fr,5*k0);gx.lineWidth=12*k0;gx.strokeStyle='rgba(166,126,255,.22)';gx.stroke();gx.lineWidth=4.2*k0;gx.strokeStyle='#a67eff';gx.stroke();
+        bodyQ.sort((p,q)=>q[0]-p[0]).forEach(q=>q[1]());
         gx.globalCompositeOperation='lighter';
         holds.forEach(([a,b,cr],i)=>{const k=cr?'crit':'long';burst(a,b,k,.8,.75*(.85+.15*Math.sin(t*20+i)),.8);glit(i,a,b,k,t)}); /* 保持中：柱・枠の発光・ひし形を出し続け、粒子を舞い上げる */
         gx.globalCompositeOperation='source-over';
         /* ノーツ：床に寝かせた板として遠近どおりの台形で描く（奥の辺は狭く、手前の辺は広い。左右の辺はレーン線と同じ向き）。
            厚みは判定枠の内側に収まる程度（奥行きz±1.25%）。フリックの矢印は全ノーツの上に重ねる */
-        const gemAt=(lp,z,k)=>{const[x,y,s]=pj(lp,z),hw=.28*LU*s,hh=.2*LU*s,c=GEM[k]||GEM.long;poly([[x,y-hh*1.35],[x+hw*1.3,y],[x,y+hh*1.35],[x-hw*1.3,y]]);gx.fillStyle=hexA(c[0],.4);gx.fill();poly([[x,y-hh],[x+hw,y],[x,y+hh],[x-hw,y]]);gx.fillStyle=c[1];gx.fill();gx.lineWidth=Math.max(1,.05*LU*s);gx.strokeStyle=c[0];gx.stroke();poly([[x,y-hh],[x-hw,y],[x,y]]);gx.fillStyle='rgba(255,255,255,.95)';gx.fill()};
+        /* 宝石（実機の画面収録を計測）：八面体。上の四角錐は左面が白・右面が淡色のグラデーション、下の逆さ四角錐はごく淡い。
+           幅=0.88マス・上の高さ=0.405マス・手前の頂点=+0.20マス・下の頂点=+0.475マス（その奥行きでの1マス=LU*s）。上の縁のまわりに濃い色の影 */
+        const GEMS={long:{r0:'#9bf2c6',r1:'#d6fce9',e0:'#a8f0d6',e1:'#ecfff7',h:'10,120,85',u:'150,240,215'},crit:{r0:'#ffe888',r1:'#fff8c8',e0:'#ffc649',e1:'#ffd870',h:'200,140,10',u:'255,238,160'},flick:{r0:'#ffb0d2',r1:'#ffe3f0',e0:'#ff8fbf',e1:'#ffc4de',h:'190,50,110',u:'255,180,215'}};
+        const gemAt=(lp,z,k)=>{const[x,y,s]=pj(lp,z),u=LU*s,w=.44*u,t=.405*u,f=.2*u,b=.475*u,c=GEMS[k]||GEMS.long;
+         for(const[m,a]of[[1.5,.07],[1.34,.1],[1.18,.14]]){poly([[x,y-t*m*.96],[x+w*m,y-.02*u],[x,y+f*.9],[x-w*m,y-.02*u]]);gx.fillStyle='rgba('+c.h+','+a+')';gx.fill()} /* 上の縁の影 */
+         poly([[x-w,y],[x,y+f],[x+w,y],[x,y+b]]);gx.fillStyle='rgba('+c.u+',.32)';gx.fill(); /* 下の逆さ四角錐 */
+         poly([[x,y-t],[x,y+f],[x-w,y]]);gx.fillStyle='#fff';gx.fill(); /* 左面：白 */
+         const g=gx.createLinearGradient(x,y-t,x+w*.8,y+f);g.addColorStop(0,c.r0);g.addColorStop(1,c.r1);
+         poly([[x,y-t],[x+w,y],[x,y+f]]);gx.fillStyle=g;gx.fill(); /* 右面 */
+         gx.lineWidth=Math.max(1,.05*u);gx.strokeStyle=c.e0;gx.beginPath();gx.moveTo(x-w,y);gx.lineTo(x,y+f);gx.stroke();
+         gx.strokeStyle=c.e1;gx.beginPath();gx.moveTo(x,y+f);gx.lineTo(x+w,y);gx.stroke()};
         const arrows=[];
         const note=(n,z)=>{
          const[ty,cr,ar]=n.m,tr=ty==='trace',lp0=n.x/LW-6+.06,lp1=lp0+n.w-.12,dz=tr?.0125:.0165;
