@@ -163,15 +163,15 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
         <div class="card pset"><h2>譜面再生の設定</h2>
           <div class="psg">
             <div><h3>再生と音声</h3>
-              <div class="fld"><label for="plRate"><span>再生速度</span><b id="plRateV"></b></label><input id="plRate" type="range" min="0.25" max="1" step="0.05" /></div>
+              <div class="fld"><label for="plRate"><span>再生速度</span><b id="plRateV"></b></label><input id="plRate" type="range" min="0.25" max="1" step="0.01" /></div>
               <div class="fld"><label for="plRk"><span>再生速度を変えたとき</span></label><select id="plRk"><option value="all">全体が変化（ノーツ速度も変わる）</option><option value="keep">ノーツ速度はそのまま</option></select></div>
               <div class="fld"><label for="plDv"><span>デフォルトボーカル</span></label><select id="plDv"><option value="sekai">セカイバージョン</option><option value="virtual_singer">バーチャルシンガーバージョン</option></select><div class="mut">譜面再生を開いたときに選ばれるボーカルです。選んだバージョンがない曲では、もう一方のバージョンを使います。</div></div>
               <div class="fld"><label for="plVol"><span>音量</span><b id="plVolV"></b></label><input id="plVol" type="range" min="0" max="100" /></div>
               <div class="fld"><label for="plAo"><span>音源のタイミング補正</span><b id="plAoV"></b></label><input id="plAo" type="range" min="-3" max="3" step="0.01" /><div class="mut">＋で音が早く、−で遅くなります</div></div>
             </div>
             <div><h3>ノーツの見え方</h3>
-              <div class="fld"><label for="plSpd"><span>ノーツ速度</span><b id="plSpdV"></b></label><input id="plSpd" type="range" min="1" max="12" step="0.5" /></div>
-              <div class="fld"><label for="plAp"><span>ノーツ表示開始位置（手前⇔奥）</span><b id="plApV"></b></label><input id="plAp" type="range" min="20" max="100" step="5" /></div>
+              <div class="fld"><label for="plSpd"><span>ノーツ速度</span><b id="plSpdV"></b></label><input id="plSpd" type="range" min="1" max="12" step="0.01" /></div>
+              <div class="fld"><label for="plAp"><span>ノーツ表示開始位置（レーン奥から）</span><b id="plApV"></b></label><input id="plAp" type="range" min="0" max="100" step="1" /><div class="mut">画面上のレーンの縦方向で、奥から何%の位置からノーツを表示するかを指定します（0%＝最奥から表示、30%＝奥から30%の位置から表示）。3D上の距離の割合ではなく、画面に映るレーンの長さに対する割合です。</div></div>
               <div class="fld sw"><label><span>ソフランなし（速度変化を無効にする）</span><input id="plSf" type="checkbox" /></label></div>
             </div>
           </div>
@@ -763,17 +763,47 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
       /* ================= App (3 pages: home / songs / settings) ================= */
       const DN={easy:'EASY',normal:'NORMAL',hard:'HARD',expert:'EXPERT',master:'MASTER',append:'APPEND'};
       const UNITS=[['all','すべてのユニット'],['vocaloid','VIRTUAL SINGER'],['light_music_club','Leo/need'],['idol','MORE MORE JUMP!'],['street','Vivid BAD SQUAD'],['theme_park','ワンダーランズ×ショウタイム'],['school_refusal','25時、ナイトコードで。'],['other','その他']];
-      const PREF_KEY='sekaiChartViewer.settings.v1',DEF={zm:36,bpc:8,sl:34,gd:12,mirror:false},BPCS=[4,6,8,12,16,24,32];
+      function stepperInit(spec,dark){
+        var d=document,c=dark?{b:'#2a3d57',t:'#e5edf7',v:'#0f1a2b',vt:'#8ef0e2',s:'0 1px 3px #0009',o:'#344b66'}:{b:'#f4f8fd',t:'#27324a',v:'#dde8f6',vt:'#27324a',s:'0 1px 4px #27324a33',o:'#dde8f6'},st=d.createElement('style');
+        st.textContent='.stp{display:flex;gap:6px;justify-content:center;align-items:stretch;margin-top:4px}'
+          +'.stp button{flex:1 1 0;min-width:0;max-width:64px;height:42px;padding:0;border:1px solid '+c.o+';border-radius:10px;background:'+c.b+';color:'+c.t+';font-family:inherit;font-size:15px;font-weight:800;line-height:1;box-shadow:'+c.s+';cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}'
+          +'.stp button.sm{font-size:12px}.stp button.xs{font-size:10px}'
+          +'.stp button:active{transform:translateY(1px);box-shadow:none}.stp button:disabled{opacity:.35;cursor:default;transform:none}'
+          +'.stp b,.stp .value{flex:1.7 1 0;min-width:0;max-width:104px;display:flex;align-items:center;justify-content:center;padding:0 2px;border-radius:10px;background:'+c.v+';color:'+c.vt+';font-size:15px;font-weight:400;font-variant-numeric:tabular-nums;white-space:nowrap}';
+        d.head.appendChild(st);
+        Object.keys(spec).forEach(function(id){
+          var inp=d.getElementById(id),lab=d.querySelector('label[for="'+id+'"]');
+          if(!inp||!lab)return;
+          var ds=spec[id],mn=+inp.min,mx=+inp.max,bs=[],row=d.createElement('div'),val=lab.querySelector('b,.value')||d.createElement('b'),n=lab.firstChild,name,
+            dec=Math.max.apply(null,ds.map(function(x){return (String(x).split('.')[1]||'').length}));
+          if(n&&n.nodeType===1)n=n.firstChild;
+          name=n?n.textContent.trim():'';
+          var upd=function(){var v=+inp.value;bs.forEach(function(x){x[0].disabled=x[1]<0?v<=mn:v>=mx})};
+          var mk=function(x){
+            var b=d.createElement('button'),t=(x<0?'\u2212':'+')+Math.abs(x);
+            b.type='button';b.textContent=t;b.className=t.length>4?'xs':t.length>3?'sm':'';b.setAttribute('aria-label',name+' '+t);
+            b.onclick=function(){inp.value=Math.min(mx,Math.max(mn,+(+inp.value+x).toFixed(dec)));inp.dispatchEvent(new Event('input',{bubbles:true}));upd()};
+            bs.push([b,x]);return b};
+          row.className='stp';row.setAttribute('role','group');row.setAttribute('aria-label',name);
+          ds.slice().reverse().forEach(function(x){row.appendChild(mk(-x))});
+          row.appendChild(val);
+          ds.forEach(function(x){row.appendChild(mk(x))});
+          inp.style.display='none';inp.parentNode.insertBefore(row,inp.nextSibling);
+          new MutationObserver(upd).observe(val,{childList:true,characterData:true,subtree:true});
+          upd();
+        });
+      }
+      const PREF_KEY='sekaiChartViewer.settings.v1',DEF={zm:200,bpc:8,sl:100,gd:40,mirror:false},BPCS=[4,6,8,12,16,24,32];
       let songs=[],diffs={},tags={},cur=null,curD=null,key='',rid=0,cancel=()=>{},lastR=null,sus='',dirty=false,listY=0,stT=0,songLabel='',songInfo=null,lastName='score';
       const clamp=(v,d,lo,hi)=>{v=v==null?NaN:Number(v);return Number.isFinite(v)?Math.min(hi,Math.max(lo,v)):d};
-      let cfg=(()=>{try{const m=(JSON.parse(localStorage.getItem(PREF_KEY))||{}).main||{};return{zm:Math.round(clamp(m.zm,36,16,400)),bpc:BPCS.includes(+m.bpc)?+m.bpc:8,sl:Math.round(clamp(m.sl,34,0,100)),gd:Math.round(clamp(m.gd,12,0,100)),mirror:!!m.mirror}}catch(e){return{...DEF}}})();
+      let cfg=(()=>{try{const m=(JSON.parse(localStorage.getItem(PREF_KEY))||{}).main||{};return{zm:Math.round(clamp(m.zm,200,16,400)),bpc:BPCS.includes(+m.bpc)?+m.bpc:8,sl:Math.round(clamp(m.sl,100,0,100)),gd:Math.round(clamp(m.gd,40,0,100)),mirror:!!m.mirror}}catch(e){return{...DEF}}})();
       const saveCfg=()=>{try{localStorage.setItem(PREF_KEY,JSON.stringify({...(JSON.parse(localStorage.getItem(PREF_KEY))||{}),main:cfg}))}catch(e){}};
       const loadPrefs=()=>{try{const v=JSON.parse(localStorage.getItem(PREF_KEY));return v&&typeof v==='object'?v:{}}catch(e){return{}}};
       const savePrefs=p=>{try{localStorage.setItem(PREF_KEY,JSON.stringify({...loadPrefs(),...p}))}catch(e){}};
       const pref=clamp;
       const vs=()=>({slideOpacity:cfg.sl/100,guideOpacity:cfg.gd/100,mirror:cfg.mirror});
       /* 譜面再生の設定。再生画面（openPlayer）と設定画面の両方がこれを読む（スライド/ガイドの透明度とミラーは「表示の設定」と共通） */
-      const playPrefs=()=>{const pp=loadPrefs().player||{};return{spd:pref(pp.spd,8,1,12),rate:Math.round(pref(pp.rate,1,.25,1)*20)/20,ap:Math.round(pref(pp.ap,100,20,100)),sf:pp.sf==null?true:!!pp.sf,rk:pp.rk==='keep'?'keep':'all',sl:vs().slideOpacity,gd:vs().guideOpacity,mirror:vs().mirror,ao:pref(pp.aoff,0,-3,3),vol:pref(pp.vol,.8,0,1),dv:pp.dv==='virtual_singer'?'virtual_singer':'sekai',vw:pp.vw==='game'?'game':'flat'}};
+      const playPrefs=()=>{const pp=loadPrefs().player||{},ab=pp.apb!=null?pp.apb:pp.ap!=null?100-pp.ap:null /* 新：apb＝レーン奥からの%。旧設定 ap（見える範囲%・100=全体）は 100-ap に読み替え */;return{spd:Math.round(pref(pp.spd,6,1,12)*100)/100,rate:Math.round(pref(pp.rate,1,.25,1)*100)/100,ap:Math.round(pref(ab,0,0,100)),sf:pp.sf==null?true:!!pp.sf,rk:pp.rk==='keep'?'keep':'all',sl:vs().slideOpacity,gd:vs().guideOpacity,mirror:vs().mirror,ao:Math.round(pref(pp.aoff,0,-3,3)*100)/100,vol:pref(pp.vol,1,0,1),dv:pp.dv==='virtual_singer'?'virtual_singer':'sekai',vw:pp.vw==='game'?'game':'flat'}};
       const st=t=>{const e=$('#st');e.textContent=t;e.hidden=!t;clearTimeout(stT);if(t&&!/…$/.test(t))stT=setTimeout(()=>e.hidden=true,6000)};
       const jget=u=>fetch(MASTER+u).then(r=>{if(!r.ok)throw 0;return r.json()});
       const fd=ms=>{if(!ms)return'-';const d=new Date(ms);return`${d.getFullYear()}/${pad(d.getMonth()+1,2)}/${pad(d.getDate(),2)}`};
@@ -1006,7 +1036,7 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
        'use strict';
        const $=id=>document.getElementById(id),NS='http://www.w3.org/2000/svg',LW=20,ML=40,SW=12*LW,VW=ML+SW+16,VH=560,JY=480,LEAD=1.6,TT=v=>Math.max(.1,3.1-.25*v);
        /* ノーツ速度：T=3.1-0.25v（T=表示開始位置100%の位置から判定線まで進む時間[秒]、v=ノーツ速度）。
-          表示開始位置が100%未満でも速さは常に100%の位置を基準に決める（手前から現れるだけで速さは変わらない）。pps=JY/T */
+          表示開始位置を奥から離しても速さは常に最奥の位置（奥から0%）を基準に決める（手前から現れるだけで速さは変わらない）。pps=JY/T */
        const el=(tag,at,p)=>{const e=document.createElementNS(NS,tag);for(const k in at)e.setAttribute(k,at[k]);if(p)p.appendChild(e);return e};
        const setT=(e,s)=>{if(e._s!==s){e._s=s;e.textContent=s}};
        /* ---- 小節→拍→秒 ---- */
@@ -1038,7 +1068,7 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
        for(let i=0;i<=12;i++)el('line',{x1:i*LW,x2:i*LW,y1:0,y2:JY,stroke:'#394b63','stroke-width':i%12?1:1.5},bg);
        el('rect',{x:-6,y:JY,width:SW+12,height:VH-JY,fill:'#0d1524'},bg);
        const gL=el('g',{},root),gX=el('g',{},el('g',{'clip-path':'url(#clipH)'},root)),gP=el('g',{},gX),gN=el('g',{},gX),gA=el('g',{},gX);
-       /* 表示開始位置より奥は背景色で隠し、境界に線を引く（100%のときは非表示） */
+       /* 表示開始位置より奥は背景色で隠し、境界に線を引く（0%のときは非表示） */
        const cov=el('rect',{x:-ML,y:0,width:VW,height:0,fill:'#111827'},root),bl=el('rect',{x:-4,y:0,width:SW+8,height:2,rx:1,fill:'#ffa94d'},root);
        el('rect',{x:-6,y:JY-6,width:SW+12,height:12,fill:'#8ef0e2',opacity:.14},root);
        el('rect',{x:-4,y:JY-1.5,width:SW+8,height:3,rx:1.5,fill:'#e8fffb',opacity:.92},root);
@@ -1065,7 +1095,7 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
        const pf=D.pf;let spd=pf.spd,rate=pf.rate,sl=pf.sl,gd=pf.gd,mir=pf.mirror,pps=JY/TT(spd),ap=pf.ap,tp=0,rk=pf.rk,cur=-LEAD,playing=false,last=0,need=true,raf=0,drag=false;const inv=()=>{need=true;if(!raf)raf=requestAnimationFrame(loop)};
        const KEY='sekaiChartViewer.settings.v1';
        const FS=D.fs||0;let ao=pf.ao,vl=pf.vol,VL=[],vi=0,ctx,gn,src=null,ab=null,B=0,T0=0,AR=1,gen=0,rtm;
-       const save=()=>{try{const v=JSON.parse(localStorage.getItem(KEY))||{},p={...(v.player||{}),spd,rate,sl,gd,mirror:mir,ap,sf,rk,aoff:ao,vol:vl,vw:view};delete p.vt;v.player=p;localStorage.setItem(KEY,JSON.stringify(v))}catch(e){}try{if(parent&&parent.__setShared)parent.__setShared({slideOpacity:sl,guideOpacity:gd,mirror:mir})}catch(e){}}; /* 透明度・ミラーはアプリ全体の表示設定にも反映 */
+       const save=()=>{try{const v=JSON.parse(localStorage.getItem(KEY))||{},p={...(v.player||{}),spd,rate,sl,gd,mirror:mir,apb:ap,sf,rk,aoff:ao,vol:vl,vw:view};delete p.vt;delete p.ap;v.player=p;localStorage.setItem(KEY,JSON.stringify(v))}catch(e){}try{if(parent&&parent.__setShared)parent.__setShared({slideOpacity:sl,guideOpacity:gd,mirror:mir})}catch(e){}}; /* 透明度・ミラーはアプリ全体の表示設定にも反映 */
        /* ---- 音源：ボーカル取得／速度に合わせた音声変換(WSOLA・音程維持)／再生。譜面時刻は音声クロックに同期 ---- */
        const MD='https://sekai-world.github.io/sekai-master-db-diff/',SC=new Map();
        const getCtx=()=>{if(!ctx){ctx=new(window.AudioContext||window.webkitAudioContext)();gn=ctx.createGain();gn.gain.value=vl;gn.connect(ctx.destination)}return ctx};
@@ -1152,10 +1182,14 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
        /* ---- ゲーム画面：実機のスクリーンショットから形を測って再現した遠近表示（Canvas）。譜面再生画面と同じデータ・同じ時刻 cur から描く ----
           形（実機の画面収録 1920×1342 から計測）：消失点＝中央・画面上端の5.74%下／判定枠の中心＝上から73.47%／判定線での1マスの幅＝画面幅の6.58%／
           白い案内線は2マスごとの7本で消失点から画面下端まで伸び、判定枠だけが12マス。枠の厚みは奥行きzで±1.55%、枠線の色は#a796ff。
-          奥行き：z=0 が判定線、z=1 が最奥（表示開始位置100%）。縮尺 s=exp(-KAP*z)（実機の 1.06^(-45*(1-p)) と同じ形）、画面y=yV+(yJ-yV)*s、画面x=中央+レーン位置*LU*s。
+          奥行き：z=0 が判定線、z=ZF(.978) が最奥（表示開始位置＝レーン奥から0%）。縮尺 s=exp(-KAP*z)（実機の 1.06^(-45*(1-p)) と同じ形）、画面y=yV+(yJ-yV)*s、画面x=中央+レーン位置*LU*s。
           ノーツ速度・ソフラン・ミラー・各透明度は譜面再生画面の設定をそのまま使う。 */
        let view=pf.vw==='game'?'game':'flat';
        let gx,bgK='';const gcv=$('gview'),gx0=gx=gcv.getContext('2d'),bgc=document.createElement('canvas'),bgx=bgc.getContext('2d'),KAP=45*Math.log(1.06),GF=.0155,GAR=1920/1342,PI=Math.PI,FK=D.fk;
+       /* ノーツ表示開始位置（レーン奥から ap%）→ 奥行きz。ap%は「画面上のレーンの縦方向（投影後のy）」での割合で、3D上の奥行きzの割合ではない。
+          開始位置のy＝最奥のy＋ap%×(判定線のy−最奥のy)。画面yは縮尺sに比例（y=yV+(yJ-yV)*s）するので、その位置の縮尺は s=SF+f*(1-SF)、奥行きは z=-ln(s)/KAP。
+          ap=0 で z=ZF（最奥）、ap=100 で z=0（判定線）。奥ほど遠近で縮むため、例えば ap=30 の位置は奥行きz上では最奥から約60%進んだ所になる。 */
+       const ZF=.978,SF=Math.exp(-KAP*ZF),zOf=f=>-Math.log(SF+f*(1-SF))/KAP;
        let GW=0,GH=0,DPR=1,jk=null;
        const fit=()=>{const r=gcv.getBoundingClientRect();DPR=Math.min(2,window.devicePixelRatio||1);GW=r.width;GH=r.height;gcv.width=Math.max(1,Math.round(GW*DPR));gcv.height=Math.max(1,Math.round(GH*DPR));inv()}; /* サイズ指定で描画状態も初期化される */
        if(window.ResizeObserver)new ResizeObserver(()=>{if(view==='game')fit()}).observe($('wrap'));
@@ -1166,6 +1200,7 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
        const PT={long:['#52edc6','#58f0a9','#81faa7'],crit:['#fad584','#fdde85','#fff775'],flick:['#ff95be','#ff92c7','#ff8dcc']}; /* トレースの棒：上/中/下 */
        const GEM={crit:['#ffd24a','#fff1c4'],flick:['#ff8fbf','#ffd9ee'],long:['#4fe0b0','#d5fff0']}; /* 宝石：[縁と光彩, 右の面]（左の面は白） */
        const EF={tap:['110,90,255','170,205,255'],flick:['255,95,160','255,215,235'],long:['50,230,165','200,255,235'],crit:['255,196,60','255,244,180']}; /* ヒットエフェクトの色：[主色, 明るい色] */
+       const OUT={long:'#2f6f5a',crit:'#9a7a1e',flick:'#a05a7a',tap:'#7a52a0',dmg:'#4a2d73'}; /* ノーツの濃い縁取り色（譜面表示の「外側の影」と同じ） */
        const rnd=(i,j)=>{const x=Math.sin(i*127.1+j*311.7)*43758.5453;return x-Math.floor(x)};
        const hexA=(h,a)=>{const n=parseInt(h.slice(1),16);return'rgba('+(n>>16)+','+(n>>8&255)+','+(n&255)+','+a+')'};
        const poly=p=>{gx.beginPath();p.forEach((q,i)=>i?gx.lineTo(q[0],q[1]):gx.moveTo(q[0],q[1]));gx.closePath()};
@@ -1191,7 +1226,7 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
         const t=cur,cq=new Map(),Q=h=>{let v=cq.get(h);if(v===undefined){v=lay(h)(t);cq.set(h,v)}return v};
         /* ステージは実機（画面収録 1920×1342）と同じ画面比率。横長の画面は左右に余白、縦長の画面は上下に余白を取る */
         const wide=W/H>=GAR,Sw=wide?H*GAR:W,Sh=Sw/GAR,ox=(W-Sw)/2,oy=(H-Sh)/2,yB=oy+Sh,k0=Sw/1136;
-        const cx=W/2,yV=oy+.0574*Sh,yJ=oy+.7347*Sh,LU=.0658*Sw,zM=ap/100*.978,sg=mir?-1:1,top=JY*(1-zM),sB=(yB-yV)/(yJ-yV);
+        const cx=W/2,yV=oy+.0574*Sh,yJ=oy+.7347*Sh,LU=.0658*Sw,zM=zOf(ap/100),sg=mir?-1:1,top=JY*(1-zM),sB=(yB-yV)/(yJ-yV);
         const pj=(lp,z)=>{const s=Math.exp(-KAP*z);return[cx+sg*lp*LU*s,yV+(yJ-yV)*s,s]}; /* レーン位置lp(-6〜6)・奥行きz → 画面[x,y,縮尺] */
         const quad=(l0,l1,z0,z1)=>poly([pj(l0,z0),pj(l1,z0),pj(l1,z1),pj(l0,z1)]);
         /* ロングノーツの本体（実機の画面収録を計測。不透明度100%＝この見た目）：中央は濃い色、縁へ向かって白っぽく明るくなる横グラデーション（奥行きで濃さは変わらない）。
@@ -1334,7 +1369,9 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
          const a=pj(lp0,z-dz),b=pj(lp1,z-dz),c=pj(lp1,z+dz),d=pj(lp0,z+dz),u=LU*Math.exp(-KAP*z),hgt=a[1]-d[1],P=[a,b,c,d];
          const kk=ty==='dmg'?'dmg':cr?'crit':ty==='flick'?'flick':ty==='long'?'long':tr?(ar!=null?'flick':'long'):'tap',pal=PAL[kk],r=Math.min(hgt*.26,.22*u);
          const Lp=(p,q)=>{const x0=d[0]+(c[0]-d[0])*p,y0=d[1]+(c[1]-d[1])*p,x1=a[0]+(b[0]-a[0])*p,y1=a[1]+(b[1]-a[1])*p;return[x0+(x1-x0)*q,y0+(y1-y0)*q]}; /* p:左→右, q:奥→手前 */
-         rpoly(P,r);gx.lineWidth=.3*u;gx.strokeStyle='rgba('+pal[6]+',.3)';gx.stroke(); /* 外側のにじみ */
+         if(!tr){gx.save();gx.translate(0,.05*u);rpoly(P,r);gx.fillStyle='rgba(6,24,20,.4)';gx.fill();gx.restore()} /* 手前へ落ちる影 */
+         rpoly(P,r);gx.lineWidth=(tr?.3:.14)*u;gx.strokeStyle='rgba('+pal[6]+','+(tr?.3:.2)+')';gx.stroke(); /* 外側のにじみ（トレース以外は細く） */
+         if(!tr){rpoly(P,r);gx.lineWidth=Math.max(1.5,.085*u);gx.strokeStyle=OUT[kk]||OUT.long;gx.stroke()} /* 濃い縁取り：帯の上でも始点・終点の輪郭が埋もれない */
          if(!tr){
           rpoly(P,r);const g=vg(pal[0],pal[4],d[1],a[1]);g.addColorStop(.66,pal[0]);g.addColorStop(.78,pal[3]);gx.fillStyle=g;gx.fill(); /* 枠：上は淡い色、手前の帯は濃い色（タップは水色） */
           const F=[Lp(.03,.1),Lp(.97,.1),Lp(.97,.72),Lp(.03,.72)];rpoly(F,r*.7);gx.fillStyle=vg(pal[1],pal[2],F[0][1],F[3][1]);gx.fill(); /* 内側の面 */
@@ -1399,12 +1436,12 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
        $('bStart').onclick=()=>seek(-LEAD);
        $('bBack').onclick=()=>seek(cur-5);$('bFwd').onclick=()=>seek(cur+5);
               const setPps=()=>{pps=JY/TT(spd)/(rk==='keep'?rate:1);inv()};
-       $('rate').oninput=e=>{const r=Math.round(+e.target.value*20)/20;$('ratev').textContent=r.toFixed(2)+'×';if(r===rate)return;rate=r;setPps();save();aStop();ab=null;clearTimeout(rtm);rtm=setTimeout(load,300)};
+       $('rate').oninput=e=>{const r=Math.round(+e.target.value*100)/100;$('ratev').textContent=r.toFixed(2)+'×';if(r===rate)return;rate=r;setPps();save();aStop();ab=null;clearTimeout(rtm);rtm=setTimeout(load,300)};
        $('rk').onchange=e=>{rk=e.target.value==='keep'?'keep':'all';setPps();save()};
        $('sf').onchange=e=>{sf=!e.target.checked;prep();inv();save()};
-       const applyAp=()=>{tp=JY*(1-ap/100);clp.setAttribute('y',tp);clp.setAttribute('height',JY+2-tp);cov.setAttribute('height',tp);bl.setAttribute('y',tp-1);bl.setAttribute('display',tp>0?'inline':'none');$('apv').textContent=ap+'%';inv()};
-       $('ap').oninput=e=>{ap=Math.round(Math.min(100,Math.max(20,+e.target.value||100)));applyAp();save()};
-       const setSpd=v=>{spd=Math.min(12,Math.max(1,+v||8));setPps();$('spd').value=spd;$('spdv').textContent=spd.toFixed(1);inv();save()};
+       const applyAp=()=>{tp=JY*ap/100;clp.setAttribute('y',tp);clp.setAttribute('height',JY+2-tp);cov.setAttribute('height',tp);bl.setAttribute('y',tp-1);bl.setAttribute('display',tp>0?'inline':'none');$('apv').textContent=ap+'%';inv()};
+       $('ap').oninput=e=>{ap=Math.round(Math.min(100,Math.max(0,+e.target.value||0)));applyAp();save()};
+       const setSpd=v=>{spd=Math.round(Math.min(12,Math.max(1,+v||6))*100)/100;setPps();$('spd').value=spd;$('spdv').textContent=spd.toFixed(2);inv();save()};
        $('spd').oninput=e=>setSpd(e.target.value);
        const setOp=()=>{$('slv').textContent=Math.round(sl*100)+'%';$('gdv').textContent=Math.round(gd*100)+'%';inv()};
        $('slO').value=Math.round(sl*100);$('gdO').value=Math.round(gd*100);setOp();
@@ -1456,13 +1493,13 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
        </style>
        <header>${songHTML}<div class="tools"><button id="bkL" class="g" onclick="parent.__closeLayer&&parent.__closeLayer()">‹ 戻る</button><button id="vw" class="g" aria-pressed="false" aria-label="表示切り替え">表示切り替え</button><button id="tg" class="g" aria-expanded="false" aria-controls="panel">表示設定</button></div></header>
        <section id="panel" aria-label="表示設定" hidden>
-        <div class="control wide"><label class="cap" for="rate">再生速度 <b id="ratev"></b></label><input id="rate" type="range" min="0.25" max="1" step="0.05"></div>
+        <div class="control wide"><label class="cap" for="rate">再生速度 <b id="ratev"></b></label><input id="rate" type="range" min="0.25" max="1" step="0.01"></div>
         <div class="control wide"><label class="cap" for="vocal">ボーカル</label><select id="vocal" disabled><option>読み込み中…</option></select></div>
         <div class="control"><label class="cap" for="vol">音量 <b id="volv"></b></label><input id="vol" type="range" min="0" max="100"></div>
         <div class="control"><label class="cap" for="ao">音源のタイミング補正（＋で音が早く／−で遅く） <b id="aov"></b></label><input id="ao" type="range" min="-3" max="3" step="0.01"></div>
-        <div class="control"><label class="cap" for="spd">ノーツ速度 <b id="spdv"></b></label><input id="spd" type="range" min="1" max="12" step=".5"></div>
+        <div class="control"><label class="cap" for="spd">ノーツ速度 <b id="spdv"></b></label><input id="spd" type="range" min="1" max="12" step=".01"></div>
         <div class="control"><label class="cap" for="rk">再生速度を変えたとき</label><select id="rk"><option value="all">全体が変化（ノーツ速度も変わる）</option><option value="keep">ノーツ速度はそのまま</option></select></div>
-        <div class="control wide"><label class="cap" for="ap">ノーツ表示開始位置（手前⇔奥） <b id="apv"></b></label><input id="ap" type="range" min="20" max="100" step="5"></div>
+        <div class="control wide"><label class="cap" for="ap">ノーツ表示開始位置（レーン奥から） <b id="apv"></b></label><input id="ap" type="range" min="0" max="100" step="1"></div>
         <div class="control"><span class="cap">ミラー</span><label class="chk"><input id="mir" type="checkbox"> 左右反転</label></div>
         <div class="control"><span class="cap">ソフラン（速度変化）</span><label class="chk"><input id="sf" type="checkbox"> ソフランなし</label></div>
         <div class="control"><label class="cap" for="slO">スライドノーツ透明度 <b id="slv"></b></label><input id="slO" type="range" min="0" max="100"></div>
@@ -1480,7 +1517,7 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
         <div id="astat" class="hint" role="status"></div>
         <div class="hint">Space：再生/一時停止　←→：1秒（Shift で5秒）　↑↓：小節移動　Home：先頭　End：末尾　V：表示切り替え</div>
        </footer>
-       <script>const cubicPoint=${cubicPoint},cubicXAtY=${cubicXAtY};(${playerMain})(${json});<\/script></html>`);
+       <script>const cubicPoint=${cubicPoint},cubicXAtY=${cubicXAtY};(${playerMain})(${json});(${stepperInit})({rate:[.01,.1],vol:[1,10],ao:[.01,.1],spd:[.01,.1,1],ap:[1,10],slO:[5],gdO:[5]},1);<\/script></html>`);
        w.document.close();
       };
       /* ---------- 拡大表示・譜面再生：別タブを開かず、同じタブの全画面レイヤー（iframe）で表示する ----------
@@ -1566,7 +1603,7 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
           $('mirror').addEventListener('change',e=>{cfg.mirror=e.target.checked;requestRender()});
           $('toggle').addEventListener('click',()=>{const panel=$('panel');panel.hidden=!panel.hidden;$('toggle').textContent=panel.hidden?'設定を表示':'設定を隠す'});
           ['Svg','Png'].forEach(function(k){$('dl'+k).addEventListener('click',function(){if(typeof window.__saveFromParent==='function')window.__saveFromParent(k.toLowerCase(),{...cfg})})});
-          window.__applyZoom=applyZoom;
+          (${stepperInit})({spacing:[1,10],slideOpacity:[5],guideOpacity:[5]},1);window.__applyZoom=applyZoom;
         <\/script></html>`);
         w.document.close();
         let shown=first; /* いま表示中の描画結果（0小節目の位置＝余白 ml/mb を求めるのに使う） */
@@ -1638,12 +1675,13 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
       function syncPlay(){
         const p=playPrefs(),pc=v=>Math.round(v*100)+'%',set=(id,v,t)=>{$('#'+id).value=v;if(t!=null)$('#'+id+'V').textContent=t};
         set('plRate',p.rate,p.rate.toFixed(2)+'×');set('plVol',Math.round(p.vol*100),pc(p.vol));set('plAo',p.ao,(p.ao>=0?'+':'')+p.ao.toFixed(2)+'秒');
-        set('plSpd',p.spd,p.spd.toFixed(1));set('plAp',p.ap,p.ap+'%');
+        set('plSpd',p.spd,p.spd.toFixed(2));set('plAp',p.ap,p.ap+'%');
         $('#plRk').value=p.rk;$('#plDv').value=p.dv;$('#plSf').checked=!p.sf;fillRanges();
       }
       const onP=(id,fn,ev='oninput')=>{$('#'+id)[ev]=e=>{setP(fn(e.target));syncPlay()}};
-      onP('plRate',t=>({rate:Math.round(+t.value*20)/20}));onP('plVol',t=>({vol:t.value/100}));onP('plAo',t=>({aoff:+t.value}));
-      onP('plSpd',t=>({spd:+t.value}));onP('plAp',t=>({ap:+t.value}));
+      onP('plRate',t=>({rate:Math.round(+t.value*100)/100}));onP('plVol',t=>({vol:t.value/100}));onP('plAo',t=>({aoff:+t.value}));
+      onP('plSpd',t=>({spd:+t.value}));onP('plAp',t=>({apb:+t.value}));
+      stepperInit({zm:[1,10],slOpacity:[5],gdOpacity:[5],plRate:[.01,.1],plVol:[1,10],plAo:[.01,.1],plSpd:[.01,.1,1],plAp:[1,10]});
       onP('plRk',t=>({rk:t.value}),'onchange');onP('plDv',t=>({dv:t.value}),'onchange');onP('plSf',t=>({sf:!t.checked}),'onchange');
       $('#plRst').onclick=()=>{savePrefs({player:{}});syncPlay()}; /* デフォルトボーカルもセカイバージョンに戻る */
       addEventListener('storage',e=>{if(e.key===PREF_KEY&&!$('#p-settings').hidden)syncPlay()}); /* 再生タブで変えた値を設定画面にも反映 */
