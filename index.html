@@ -468,15 +468,20 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
         curve[0][1]*u2*u+3*curve[1][1]*u2*t+3*curve[2][1]*u*t2+curve[3][1]*t2*t
       ]};
       /* 時間軸が上下どちら向きでも、指定Yに対応するBezier上のXを二分探索する。 */
-      const cubicXAtY=(curve,y)=>{
-        const y0=curve[0][1],y1=curve[3][1];
-        if(Math.abs(y1-y0)<1e-9)return(curve[0][0]+curve[3][0])/2;
-        let lo=0,hi=1;
-        for(let i=0;i<36;i++){
-          const mid=(lo+hi)/2,py=cubicPoint(curve,mid)[1];
-          if((y1>y0&&py<y)||(y1<y0&&py>y))lo=mid;else hi=mid;
+      const cubicXAtY=(c,y)=>{
+        const y0=c[0][1],d=c[3][1]-y0;
+        if(Math.abs(d)<1e-9)return(c[0][0]+c[3][0])/2;
+        const f=(y-y0)/d,A=(c[1][1]-y0)/d,B=(c[2][1]-y0)/d;
+        let lo=0,hi=1,t=f<0?0:f>1?1:f;
+        for(let i=0;i<24;i++){
+          const u=1-t,v=3*u*u*t*A+3*u*t*t*B+t*t*t-f;
+          if(Math.abs(v)<1e-7)break;
+          if(v<0)lo=t;else hi=t;
+          const dv=3*(u*u*A+2*u*t*(B-A)+t*t*(1-B)),n=t-v/dv;
+          t=dv>1e-9&&n>lo&&n<hi?n:(lo+hi)/2;
         }
-        return cubicPoint(curve,(lo+hi)/2)[0];
+        const u=1-t;
+        return c[0][0]*u*u*u+3*c[1][0]*u*u*t+3*c[2][0]*u*t*t+c[3][0]*t*t*t;
       };
       const slideChainPath=edges=>{
         if(!edges.length)return'';
@@ -1052,9 +1057,9 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
         return(t,g)=>{let lo=0,hi=T.length-1,i=-1;while(lo<=hi){const m=(lo+hi)>>1;if(T[m]<=t){i=m;lo=m+1}else hi=m-1}return g?(i<0?1:V[i]):i<0?t:P[i]+V[i]*(t-T[i])}};
        let sf=D.pf.sf;const SL={},ident=(t,g)=>g?1:t,lay=h=>!sf||h==null?ident:SL[h]||ident;
        for(const k in D.til)SL[k]=mkS(D.til[k]);
-       const N=D.nodes,C=D.chains,LN=[],NLAY=[];
-       N.forEach(n=>n.t=tm(n.b));const prep=()=>{NLAY.length=0;{const g=new Map();N.forEach((n,i)=>{n._i=i;n.q=lay(n.h)(n.t);if(n.m){let a=g.get(n.h);if(!a)g.set(n.h,a=[]);a.push(n)}});for(const[h,a]of g){a.sort((x,y)=>x.q-y.q);NLAY.push([h,a])}} /* ゲーム画面用：レイヤーごとにスクロール位置順 */
-       C.forEach(c=>{c.Q=c.p.map(p=>lay(p[3])(tm(p[0])));c._qa=Math.min(...c.Q);c._qb=Math.max(...c.Q);c._one=c.p.every(p=>p[3]===c.p[0][3]);c.R=c.r.map(r=>({q:lay(r[3])(tm(r[0])),e:r[1],s:r[2],h:r[3],k:r[4]}))});LN.length=0;for(let m=0;m<=total;m++)for(let k=0;k<len[m];k++)LN.push({q:lay(D.mhs)(tm(m+k/len[m])),m,maj:!k})};prep();
+       const N=D.nodes,C=D.chains,LN=[],NLAY=[],FLAY=[],QC=new Map();const mono=a=>{for(let i=1;i<a.length;i++)if(a[i-1]._i>a[i]._i)return false;return true};
+       N.forEach(n=>n.t=tm(n.b));const prep=()=>{NLAY.length=0;{const g=new Map();const g2=new Map();N.forEach((n,i)=>{n._i=i;n.q=lay(n.h)(n.t);let b=g2.get(n.h);if(!b)g2.set(n.h,b=[]);b.push(n);if(n.m){let a=g.get(n.h);if(!a)g.set(n.h,a=[]);a.push(n)}});for(const[h,a]of g){a.sort((x,y)=>x.q-y.q);a._m=mono(a);NLAY.push([h,a])}FLAY.length=0;for(const[h,a]of g2){a.sort((x,y)=>x.q-y.q);a._m=mono(a);FLAY.push([h,a])}} /* ゲーム画面用：レイヤーごとにスクロール位置順 */
+       C.forEach(c=>{c.Q=c.p.map(p=>lay(p[3])(tm(p[0])));c._qa=Math.min(...c.Q);c._qb=Math.max(...c.Q);c._one=c.p.every(p=>p[3]===c.p[0][3]);c.R=c.r.map(r=>({q:lay(r[3])(tm(r[0])),e:r[1],s:r[2],h:r[3],k:r[4]}))});LN.length=0;for(let m=0;m<=total;m++)for(let k=0;k<len[m];k++)LN.push({q:lay(D.mhs)(tm(m+k/len[m])),m,maj:!k});LN.sort((a,b)=>a.q-b.q)};prep();
        let dur=0;N.forEach(n=>dur=Math.max(dur,n.t));C.forEach(c=>dur=Math.max(dur,tm(c.p[c.p.length-1][0])));dur+=1.5;
        
        const cnt=new Map();N.forEach(n=>cnt.set(n.h,(cnt.get(n.h)||0)+1));
@@ -1072,7 +1077,7 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
        const cov=el('rect',{x:-ML,y:0,width:VW,height:0,fill:'#111827'},root),bl=el('rect',{x:-4,y:0,width:SW+8,height:2,rx:1,fill:'#ffa94d'},root);
        el('rect',{x:-6,y:JY-6,width:SW+12,height:12,fill:'#8ef0e2',opacity:.14},root);
        el('rect',{x:-4,y:JY-1.5,width:SW+8,height:3,rx:1.5,fill:'#e8fffb',opacity:.92},root);
-       const mkPool=(g,tag,at,fn)=>{const els=[];let used=0;return list=>{for(let i=0;i<list.length;i++){let e=els[i];if(!e){e=el(tag,at,g);els.push(e)}else if(i>=used)e.removeAttribute('display');fn(e,list[i])}for(let i=list.length;i<used;i++)els[i].setAttribute('display','none');used=list.length}};
+       const mkPool=(g,tag,at,fn)=>{const els=[];let used=0;return(l1,l2)=>{const n1=l1.length,n=n1+(l2?l2.length:0);for(let i=0;i<n;i++){let e=els[i];if(!e){e=el(tag,at,g);els.push(e)}else if(i>=used)e.removeAttribute('display');fn(e,i<n1?l1[i]:l2[i-n1])}for(let i=n;i<used;i++)els[i].setAttribute('display','none');used=n}};
        const useFn=(e,a)=>{if(e._h!==a[0]){e._h=a[0];e.setAttribute('href','#'+a[0])}e.setAttribute('x',a[1].toFixed(1));e.setAttribute('y',a[2].toFixed(1))};
        const pMin=mkPool(gL,'rect',{x:0,width:SW,height:1,fill:'#2e4058'},(e,y)=>e.setAttribute('y',(y-.5).toFixed(1)));
        const pMaj=mkPool(gL,'rect',{x:-4,width:SW+4,height:1.6,fill:'#7b91ad'},(e,y)=>e.setAttribute('y',(y-.8).toFixed(1)));
@@ -1084,13 +1089,25 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
        const curves=(c,ys,i)=>{const y0=ys[i],y1=ys[i+1],m=(y0+y1)/2,ein=c.e[i]===2,eout=c.e[i]===5||c.e[i]===6;
         return[[[lx(c,i),y0],[lx(c,i),ein?m:y0],[lx(c,i+1),eout?m:y1],[lx(c,i+1),y1]],[[rx(c,i),y0],[rx(c,i),ein?m:y0],[rx(c,i+1),eout?m:y1],[rx(c,i+1),y1]]]};
        /* スライド本体の見た目はゲーム画面の slideBody と同じ：中央は濃い色・縁ほど白っぽく明るい／縁の外側に暗線・内側に明線。ガイドは奥が透明な単色 */
-       const fq=v=>+v.toFixed(1),fp=p=>fq(p[0])+','+fq(p[1]),FBN=8,FBAND=[],FBODY=[['rgb(107,229,188)','rgb(168,235,200)'],['rgb(234,226,153)','rgb(238,233,180)']];
+       /* ---- スライド曲線の高速計算 ----
+          縁のベジェは X の制御点が(x0,x0,x1,x1)なので X=x0+(x1-x0)·s(t)、s=3t²-2t³。Y の制御点は ein/eout で 0,[.5],[.5],1 の4通りになり、
+          Y(t)は 直線:s(t)／ein:1.5t-.5t³／eout:1.5t²-.5t³／両方:1.5t-1.5t²+t³。どれも Y→t が閉じた式で解けるので、二分探索(36回)も配列生成も不要。
+          ※ curves() の制御点の作り方を変えたら、ここも合わせること。 */
+       const tIn=f=>2*Math.cos(Math.acos(-f)/3+4.1887902047863905), /* t³-3t+2f=0 の [0,1] の解 */
+        easeS=(f,ein,eout)=>{if(!ein&&!eout)return f;let t;
+         if(ein&&eout){const g=f-.5,r=Math.sqrt(g*g+.0625);t=.5+Math.cbrt((g+r)/2)+Math.cbrt((g-r)/2)}else t=ein?tIn(f):1-tIn(1-f);
+         t=t<0?0:t>1?1:t;return t*t*(3-2*t)},
+        EX=[0,0],YS=[],VIS=[],VN=[],FA={mj:[],mn:[],lb:[],pg:[],pp:[],ga:[],vn:[],va:[]}; /* EX=edgeXの結果置き場／YS以降は毎フレーム使い回す作業用バッファ */
+       const edgeX=(c,ys,i,y)=>{const y0=ys[i],d=ys[i+1]-y0,e=c.e[i];let s=.5;
+        if(Math.abs(d)>=1e-9){let f=(y-y0)/d;f=f<0?0:f>1?1:f;s=easeS(f,e===2,e===5||e===6)}
+        const a=lx(c,i),b=rx(c,i);EX[0]=a+(lx(c,i+1)-a)*s;EX[1]=b+(rx(c,i+1)-b)*s}; /* 区間 i の高さ y での左縁・右縁の X(px) → EX[0],EX[1] */
+       const fq=v=>Math.round(v*10)/10,fp=p=>fq(p[0])+','+fq(p[1]),FBN=8,FBAND=[],FBODY=[['rgb(107,229,188)','rgb(168,235,200)'],['rgb(234,226,153)','rgb(238,233,180)']];
        for(let j=1;j<FBN;j++)FBAND.push([.5*(FBN-j)/FBN,.73*Math.pow((j+.5)/FBN,1.7)]); /* [縁からの幅の割合, 縁側の明るさ配分] */
        const fSegs=(c,ys)=>{const a=[];for(let i=0;i<c.p.length-1;i++)a.push(curves(c,ys,i));return a};
-       const fRibbon=(sg,fa,fb)=>{const P=(s,k,f)=>{const l=s[0][k],r=s[1][k];return[l[0]+(r[0]-l[0])*f,l[1]]},n=sg.length; /* 左縁(0)〜右縁(1)を補間した曲線2本で挟んだ帯 */
-        let d='M'+fp(P(sg[0],0,fa));for(const s of sg)d+='C'+fp(P(s,1,fa))+' '+fp(P(s,2,fa))+' '+fp(P(s,3,fa));
-        d+='L'+fp(P(sg[n-1],3,fb));for(let i=n-1;i>=0;i--){const s=sg[i];d+='C'+fp(P(s,2,fb))+' '+fp(P(s,1,fb))+' '+fp(P(s,0,fb))}return d+'Z'};
-       const fEdges=(sg,o)=>{let d='';for(const e of[0,1]){const P=(s,k)=>[s[e][k][0]+(e?-o:o),s[e][k][1]];d+='M'+fp(P(sg[0],0));for(const s of sg)d+='C'+fp(P(s,1))+' '+fp(P(s,2))+' '+fp(P(s,3))}return d};
+       const fRibbon=(sg,fa,fb)=>{const P=(s,k,f)=>{const l=s[0][k],r=s[1][k];return fq(l[0]+(r[0]-l[0])*f)+','+fq(l[1])},n=sg.length; /* 左縁(0)〜右縁(1)を補間した曲線2本で挟んだ帯（点の配列は作らず文字列を直接組む） */
+        let d='M'+P(sg[0],0,fa);for(const s of sg)d+='C'+P(s,1,fa)+' '+P(s,2,fa)+' '+P(s,3,fa);
+        d+='L'+P(sg[n-1],3,fb);for(let i=n-1;i>=0;i--){const s=sg[i];d+='C'+P(s,2,fb)+' '+P(s,1,fb)+' '+P(s,0,fb)}return d+'Z'};
+       const fEdges=(sg,o)=>{let d='';for(const e of[0,1]){const P=(s,k)=>fq(s[e][k][0]+(e?-o:o))+','+fq(s[e][k][1]);d+='M'+P(sg[0],0);for(const s of sg)d+='C'+P(s,1)+' '+P(s,2)+' '+P(s,3)}return d};
        /* ---- 状態 ---- */
        const pf=D.pf;let spd=pf.spd,rate=pf.rate,sl=pf.sl,gd=pf.gd,mir=pf.mirror,pps=JY/TT(spd),ap=pf.ap,tp=0,rk=pf.rk,cur=-LEAD,playing=false,last=0,need=true,raf=0,drag=false;const inv=()=>{need=true;if(!raf)raf=requestAnimationFrame(loop)};
        const KEY='sekaiChartViewer.settings.v1';
@@ -1157,13 +1174,13 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
        const fmt=t=>{t=Math.max(0,t);const m=Math.floor(t/60),s=t-m*60;return m+':'+(s<10?'0':'')+s.toFixed(1)};
        /* ---- 1フレームの描画：現在時刻 t から全要素の位置を計算（状態を持たないのでシーク・巻き戻しも同じ処理） ---- */
        const drawFlat=()=>{
-        const t=cur,cq=new Map(),Q=h=>{let v=cq.get(h);if(v===undefined){v=lay(h)(t);cq.set(h,v)}return v};
-        const qm=Q(D.mhs),mj=[],mn=[],lb=[];
-        for(const l of LN){const y=JY-(l.q-qm)*pps;if(y<tp-4||y>JY+1)continue;if(l.maj){mj.push(y);lb.push([y,l.m])}else mn.push(y)}
+        const t=cur,cq=(QC.clear(),QC),Q=h=>{let v=cq.get(h);if(v===undefined){v=lay(h)(t);cq.set(h,v)}return v};
+        const qm=Q(D.mhs),{mj,mn,lb,pg,pp,ga,vn,va}=FA;mj.length=mn.length=lb.length=pg.length=pp.length=ga.length=vn.length=va.length=0;
+        {const qlo=qm-1/pps,qhi=qm+(JY-tp+4)/pps;let a=0,b=LN.length;while(a<b){const m=(a+b)>>1;if(LN[m].q<qlo)a=m+1;else b=m}for(;a<LN.length&&LN[a].q<=qhi;a++){const l=LN[a],y=JY-(l.q-qm)*pps;if(l.maj){mj.push(y);lb.push([y,l.m])}else mn.push(y)}} /* 拍線：q順に並べてあるので画面内の範囲だけ走査 */
         pMin(mn);pMaj(mj);pLab(lb);
-        const pg=[],pp=[],ga=[];
+        
         for(const c of C){
-         const ys=c.Q.map((q,i)=>JY-(q-Q(c.p[i][3]))*pps);let lo=1e9,hi=-1e9;for(const y of ys){if(y<lo)lo=y;if(y>hi)hi=y}
+         if(c._one){const b=Q(c.p[0][3]);if(JY-(c._qa-b)*pps<tp-30||JY-(c._qb-b)*pps>JY+4)continue} const ys=YS,nq=c.Q.length;ys.length=nq;let lo=1e9,hi=-1e9;for(let i=0;i<nq;i++){const y=JY-(c.Q[i]-Q(c.p[i][3]))*pps;ys[i]=y;if(y<lo)lo=y;if(y>hi)hi=y}
          if(hi<tp-30||lo>JY+4)continue;
          const sg=fSegs(c,ys);
          if(c.deco)pg.push([fRibbon(sg,0,1),c.cr?'url(#gGc)':'url(#gGl)',gd]);
@@ -1171,13 +1188,15 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
           pp.push([fEdges(sg,0),'none',1,'rgb(0,10,20)',1.6,.55*sl],[fRibbon(sg,0,1),c0,.85*sl]);
           let pv=0;for(const[f,m]of FBAND){pp.push([fRibbon(sg,0,f)+fRibbon(sg,1-f,1),c1,(1-(1-m)/(1-pv))*sl]);pv=m}
           pp.push([fEdges(sg,.6),'none',1,'rgb(255,255,255)',1.2,.3*sl])}
-         for(const r of c.R){const ym=JY-(r.q-Q(r.h))*pps;if(ym<tp-20||ym>JY+8)continue;const cv=curves(c,ys,r.e);ga.push([r.s,(cubicXAtY(cv[0],ym)+cubicXAtY(cv[1],ym))/2,ym])}
+         for(const r of c.R){const ym=JY-(r.q-Q(r.h))*pps;if(ym<tp-20||ym>JY+8)continue;edgeX(c,ys,r.e,ym);ga.push([r.s,(EX[0]+EX[1])/2,ym])}
         }
-        pPath(pg.concat(pp));
-        const vn=[],va=[];
-        for(let i=N.length-1;i>=0;i--){const n=N[i],y=JY-(n.q-Q(n.h))*pps;if(y<tp-110||y>JY+12)continue;
+        pPath(pg,pp);
+        
+        VIS.length=0;let nl=0,mo=true;for(const[h,a]of FLAY){const qb=Q(h),qlo=qb-12/pps,qhi=qb+(JY-tp+110)/pps;let lo=0,hi=a.length;while(lo<hi){const m=(lo+hi)>>1;if(a[m].q<qlo)lo=m+1;else hi=m}const s0=VIS.length;for(;lo<a.length&&a[lo].q<=qhi;lo++)VIS.push(a[lo]);if(VIS.length>s0){nl++;if(!a._m)mo=false}}
+        if(nl>1||!mo)VIS.sort((u,v)=>v._i-u._i);else VIS.reverse(); /* 画面内のノーツだけを、従来と同じ描画順（添字の降順）に */
+        for(const n of VIS){const y=JY-(n.q-Q(n.h))*pps;if(y<tp-110||y>JY+12)continue;
          if(n.s)vn.push([n.s,n.x+1,y]);for(const a of n.a)va.push([a,n.x+n.w*LW/2,y])}
-        pN(vn);pA(ga.concat(va));
+        pN(vn);pA(ga,va);
        };
        /* ---- ゲーム画面：実機のスクリーンショットから形を測って再現した遠近表示（Canvas）。譜面再生画面と同じデータ・同じ時刻 cur から描く ----
           形（実機の画面収録 1920×1342 から計測）：消失点＝中央・画面上端の5.74%下／判定枠の中心＝上から73.47%／判定線での1マスの幅＝画面幅の6.58%／
@@ -1203,7 +1222,7 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
        const OUT={long:'#2f6f5a',crit:'#9a7a1e',flick:'#a05a7a',tap:'#7a52a0',dmg:'#4a2d73'}; /* ノーツの濃い縁取り色（譜面表示の「外側の影」と同じ） */
        const rnd=(i,j)=>{const x=Math.sin(i*127.1+j*311.7)*43758.5453;return x-Math.floor(x)};
        const hexA=(h,a)=>{const n=parseInt(h.slice(1),16);return'rgba('+(n>>16)+','+(n>>8&255)+','+(n&255)+','+a+')'};
-       const poly=p=>{gx.beginPath();p.forEach((q,i)=>i?gx.lineTo(q[0],q[1]):gx.moveTo(q[0],q[1]));gx.closePath()};
+       const poly=p=>{gx.beginPath();for(let i=0;i<p.length;i++){const q=p[i];i?gx.lineTo(q[0],q[1]):gx.moveTo(q[0],q[1])}gx.closePath()};
        const rpoly=(p,r)=>{const n=p.length;r=Math.max(.5,r);gx.beginPath();gx.moveTo((p[0][0]+p[1][0])/2,(p[0][1]+p[1][1])/2);for(let i=1;i<=n;i++){const a=p[i%n],b=p[(i+1)%n];gx.arcTo(a[0],a[1],(a[0]+b[0])/2,(a[1]+b[1])/2,r)}gx.closePath()}; /* 角丸の多角形 */
        /* フリック矢印：実機の矢印画像(notes_flick_arrow*.png)を測った座標(FK)で描く。大きさ・置き方は譜面表示の arrow() と同じ
           （枠の高さ=1.5マス×((幅+3)/3)^.75、枠の幅=2.25マス×((幅+.5)/3)^.75、枠の下端=ノーツ中心の1/4マス下）。u=その奥行きでの1マスの幅(px)。 */
@@ -1221,21 +1240,30 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
         poly(P);gx.lineWidth=T+2*O;gx.strokeStyle=c[4];gx.stroke(); /* 濃い縁 */
         poly(P);gx.fillStyle=c[0];gx.fill();gx.lineWidth=T;gx.strokeStyle=c[1];gx.stroke(); /* 塗りと淡色リング */
         gx.restore()};
+       const BN=14,BMIX=[],BF=[];for(let j=1;j<BN;j++){BF.push(.5*(BN-j)/BN);BMIX.push(.73*Math.pow((j+.5)/BN,1.7))}
+       const BODY={long:['107,229,188','168,235,200'],crit:['234,226,153','238,233,180']},GUIDE={long:['82,250,162',1.11],crit:['255,188,39',.874]};
+       const GEMS={long:{r0:'#9bf2c6',r1:'#d6fce9',e0:'#a8f0d6',e1:'#ecfff7',h:'10,120,85',u:'150,240,215'},crit:{r0:'#ffe888',r1:'#fff8c8',e0:'#ffc649',e1:'#ffd870',h:'200,140,10',u:'255,238,160'},flick:{r0:'#ffb0d2',r1:'#ffe3f0',e0:'#ff8fbf',e1:'#ffc4de',h:'190,50,110',u:'255,180,215'}};
+       const STC=['255,255,255','150,200,255','150,255,190','255,170,225','255,235,150'];
+       /* 毎フレーム使い回す配列・Map・オブジェクトプール（カーソルはフレーム頭で0に戻す）。GC＝宝石スプライト（縮尺ごと）のキャッシュ */
+       const PJN=[],IT=[],ARW=[],HD=[],BQ=[],LRP=[],SMP=[],RG=[],HOLDS=[],ITEMS=[],BODYQ=[],ARRS=[],SMM=new Map(),GC={long:[],crit:[],flick:[]};
+       let pjI=0,iI=0,aI=0,hI=0,bI=0,lI=0,smI=0,GCD=0;
+       const mkIt=(z,g,lp,k,n)=>{const o=IT[iI++]||(IT[iI-1]={z:0,g:0,lp:0,k:'',n:null});o.z=z;o.g=g;o.lp=lp;o.k=k;o.n=n;return o};
+       const lr=()=>{const a=LRP[lI++]||(LRP[lI-1]=[]);a.length=0;return a};
        const drawGame=()=>{
-        const W=GW,H=GH;if(!W||!H)return;
-        const t=cur,cq=new Map(),Q=h=>{let v=cq.get(h);if(v===undefined){v=lay(h)(t);cq.set(h,v)}return v};
+        const W=GW,H=GH;if(!W||!H)return;pjI=iI=aI=hI=bI=lI=smI=0;if(GCD!==DPR){GCD=DPR;for(const k in GC)GC[k].length=0}
+        const t=cur,cq=(QC.clear(),QC),Q=h=>{let v=cq.get(h);if(v===undefined){v=lay(h)(t);cq.set(h,v)}return v};
         /* ステージは実機（画面収録 1920×1342）と同じ画面比率。横長の画面は左右に余白、縦長の画面は上下に余白を取る */
         const wide=W/H>=GAR,Sw=wide?H*GAR:W,Sh=Sw/GAR,ox=(W-Sw)/2,oy=(H-Sh)/2,yB=oy+Sh,k0=Sw/1136;
         const cx=W/2,yV=oy+.0574*Sh,yJ=oy+.7347*Sh,LU=.0658*Sw,zM=zOf(ap/100),sg=mir?-1:1,top=JY*(1-zM),sB=(yB-yV)/(yJ-yV);
-        const pj=(lp,z)=>{const s=Math.exp(-KAP*z);return[cx+sg*lp*LU*s,yV+(yJ-yV)*s,s]}; /* レーン位置lp(-6〜6)・奥行きz → 画面[x,y,縮尺] */
+        const pj=(lp,z)=>{const s=Math.exp(-KAP*z),a=PJN[pjI++]||(PJN[pjI-1]=[0,0,0]);a[0]=cx+sg*lp*LU*s;a[1]=yV+(yJ-yV)*s;a[2]=s;return a}; /* レーン位置lp(-6〜6)・奥行きz → 画面[x,y,縮尺] */
         const quad=(l0,l1,z0,z1)=>poly([pj(l0,z0),pj(l1,z0),pj(l1,z1),pj(l0,z1)]);
         /* ロングノーツの本体（実機の画面収録を計測。不透明度100%＝この見た目）：中央は濃い色、縁へ向かって白っぽく明るくなる横グラデーション（奥行きで濃さは変わらない）。
            縁の内側に約1.5pxの明線、外側に約1pxの暗線。通常は不透明度0.85で背景がわずかに透ける。ガイドは平らな単色で、奥は透明・判定線で最大（画面の縮尺に比例）。 */
-        const BN=14,BMIX=[],BF=[];for(let j=1;j<BN;j++){BF.push(.5*(BN-j)/BN);BMIX.push(.73*Math.pow((j+.5)/BN,1.7))} /* 縁からの帯：中央0〜縁1 の明るさ配分 ≈ (中心からの距離)^1.7 */
-        const BODY={long:['107,229,188','168,235,200'],crit:['234,226,153','238,233,180']},GUIDE={long:['82,250,162',1.11],crit:['255,188,39',.874]};
-        const pxv=Sw/1920,ringOf=(L,R)=>L.concat(R.slice().reverse());
-        const strokeEdges=(L,R)=>{for(const E of[L,R]){gx.beginPath();E.forEach((q,i)=>i?gx.lineTo(q[0],q[1]):gx.moveTo(q[0],q[1]));gx.stroke()}};
-        const bandPoly=(L,R,f,right)=>{const A=[],B=[];for(let i=0;i<L.length;i++){const p=right?R[i]:L[i],q=right?L[i]:R[i];A.push(p);B.push([p[0]+(q[0]-p[0])*f,p[1]+(q[1]-p[1])*f])}poly(A.concat(B.reverse()))};
+        /* 縁からの帯：中央0〜縁1 の明るさ配分 ≈ (中心からの距離)^1.7 */
+        
+        const pxv=Sw/1920,ringOf=(L,R)=>{const g=RG;let n=0;for(let i=0;i<L.length;i++)g[n++]=L[i];for(let i=R.length-1;i>=0;i--)g[n++]=R[i];g.length=n;return g};
+        const strokeEdges=(L,R)=>{for(let e=0;e<2;e++){const E=e?R:L;gx.beginPath();for(let i=0;i<E.length;i++)i?gx.lineTo(E[i][0],E[i][1]):gx.moveTo(E[i][0],E[i][1]);gx.stroke()}};
+        const bandPoly=(L,R,f,right)=>{const n=L.length;gx.beginPath();for(let i=0;i<n;i++){const p=right?R[i]:L[i];i?gx.lineTo(p[0],p[1]):gx.moveTo(p[0],p[1])}for(let i=n-1;i>=0;i--){const p=right?R[i]:L[i],q=right?L[i]:R[i];gx.lineTo(p[0]+(q[0]-p[0])*f,p[1]+(q[1]-p[1])*f)}gx.closePath()};
         const slideBody=(L,R,cr)=>{
          const[c0,c1]=BODY[cr?'crit':'long'];
          gx.lineWidth=Math.max(1.4,2.6*pxv);gx.strokeStyle='rgba(0,10,20,'+.55*sl+')';strokeEdges(L,R); /* 外側の暗線（内側の半分は本体で隠れる） */
@@ -1297,7 +1325,7 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
           const f=1-a/life,x=c[0]+(r(2)-.5)*sp*LU*.9,y=c[1]-LU*(.15+1.7*r(3))*(1-Math.exp(-a*10)),hh=LU*(.17+.2*r(4)),hw=hh*.26;
           poly([[x,y-hh],[x+hw,y],[x,y+hh*.6],[x-hw,y]]);gx.fillStyle='rgba('+lt+','+.85*f+')';gx.fill()}
         };
-        const STC=['255,255,255','150,200,255','150,255,190','255,170,225','255,235,150'];
+        
         const stars=(i,l0,l1,a)=>{ /* フリックで四方へ飛ぶ多色の星形スパークル */
          const sp=l1-l0,c=pj((l0+l1)/2,0);
          for(let j=0;j<9;j++){const r=q=>rnd(i+23,j*6+q),life=.45+.45*r(1);if(a>=life)continue;
@@ -1324,29 +1352,29 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
         if(bgK!==gKey){bgc.width=gcv.width;bgc.height=gcv.height;gx=bgx;try{gPaintBg()}finally{gx=gx0}bgK=gKey}
         gx.setTransform(1,0,0,1,0,0);gx.globalAlpha=1;gx.globalCompositeOperation='copy';gx.drawImage(bgc,0,0);gReset();gClip();
         /* スライド（経路を奥行き方向にサンプリングして、遠近を付けた帯として塗る） */
-        const holds=[],items=[],bodyQ=[]; /* 本体は判定枠より後（枠の上）に、ガイド→ロングの順で描く */
+        const holds=HOLDS,items=ITEMS,bodyQ=BODYQ;holds.length=items.length=bodyQ.length=0; /* 本体は判定枠より後（枠の上）に、ガイド→ロングの順で描く */
         for(const c of C){if(c._one){const b=Q(c.p[0][3]);if(JY-(c._qa-b)*pps<top-4||JY-(c._qb-b)*pps>JY+4)continue}
-         const ys=c.Q.map((q,i)=>JY-(q-Q(c.p[i][3]))*pps);let lo=1e9,hi=-1e9;for(const y of ys){if(y<lo)lo=y;if(y>hi)hi=y}
+         const ys=YS,nq=c.Q.length;ys.length=nq;let lo=1e9,hi=-1e9;for(let i=0;i<nq;i++){const y=JY-(c.Q[i]-Q(c.p[i][3]))*pps;ys[i]=y;if(y<lo)lo=y;if(y>hi)hi=y}
          if(hi<top-4||lo>JY+4)continue;
-         const n1=ys.length-1,L=[],R=[];
+         const n1=ys.length-1,L=lr(),R=lr();
          for(let i=0;i<n1;i++){
           const up=Math.min(ys[i],JY),dn=Math.max(ys[i+1],top);if(up<=dn+.01)continue;
-          const cu=curves(c,ys,i),K=Math.max(2,Math.min(28,Math.ceil((up-dn)/12)));
-          for(let k=0;k<=K;k++){const y=up-(up-dn)*k/K,z=(JY-y)/JY;L.push(pj(cubicXAtY(cu[0],y)/LW-6,z));R.push(pj(cubicXAtY(cu[1],y)/LW-6,z))}
+          const K=Math.max(2,Math.min(28,Math.ceil((up-dn)/12)));
+          for(let k=0;k<=K;k++){const y=up-(up-dn)*k/K,z=(JY-y)/JY;edgeX(c,ys,i,y);L.push(pj(EX[0]/LW-6,z));R.push(pj(EX[1]/LW-6,z))}
          }
-         if(!c.deco&&ys[0]>=JY&&ys[n1]<=JY){let i=0;while(i<n1-1&&ys[i+1]>JY)i++;const cu=curves(c,ys,i);holds.push([cubicXAtY(cu[0],JY)/LW-6,cubicXAtY(cu[1],JY)/LW-6,c.cr])} /* 保持中：判定線上の経路位置 */
-         if(L.length>1)bodyQ.push([c.deco?1:0,()=>c.deco?guideBody(L,R,c.cr):slideBody(L,R,c.cr)]);
-         for(const r of c.R){const ym=JY-(r.q-Q(r.h))*pps;if(ym<top-2||ym>JY+2)continue;const cu=curves(c,ys,r.e);items.push({z:(JY-ym)/JY,g:1,lp:(cubicXAtY(cu[0],ym)+cubicXAtY(cu[1],ym))/2/LW-6,k:r.k?'crit':'long'})}
+         if(!c.deco&&ys[0]>=JY&&ys[n1]<=JY){let i=0;while(i<n1-1&&ys[i+1]>JY)i++;edgeX(c,ys,i,JY);{const h=HD[hI++]||(HD[hI-1]=[0,0,0]);h[0]=EX[0]/LW-6;h[1]=EX[1]/LW-6;h[2]=c.cr;holds.push(h)}} /* 保持中：判定線上の経路位置 */
+         if(L.length>1){const o=BQ[bI++]||(BQ[bI-1]={c:null,L:null,R:null});o.c=c;o.L=L;o.R=R;bodyQ.push(o)}
+         for(const r of c.R){const ym=JY-(r.q-Q(r.h))*pps;if(ym<top-2||ym>JY+2)continue;edgeX(c,ys,r.e,ym);items.push(mkIt((JY-ym)/JY,1,(EX[0]+EX[1])/2/LW-6,r.k?'crit':'long',null))}
         }
-        const visN=[];for(const[h,a]of NLAY){const qb=Q(h),kq=JY/pps,qlo=qb-.05*kq,qhi=qb+(zM+.05)*kq;let lo=0,hi=a.length;while(lo<hi){const m=(lo+hi)>>1;if(a[m].q<qlo)lo=m+1;else hi=m}for(;lo<a.length&&a[lo].q<=qhi;lo++)visN.push(a[lo])}
-        visN.sort((u,v)=>u._i-v._i); /* 元の順序に戻す（同じzの重なり順を変えないため） */
-        for(const n of visN){const z=(n.q-Q(n.h))*pps/JY;if(z<-.002||z>zM)continue;n.m[0]==='relay'?items.push({z,g:1,lp:n.x/LW-6+n.w/2,k:n.m[1]?'crit':'long'}):items.push({z,n})}
+        const visN=VN;VN.length=0;let nl=0,mo=true;for(const[h,a]of NLAY){const qb=Q(h),kq=JY/pps,qlo=qb-.05*kq,qhi=qb+(zM+.05)*kq;let lo=0,hi=a.length;while(lo<hi){const m=(lo+hi)>>1;if(a[m].q<qlo)lo=m+1;else hi=m}const s0=visN.length;for(;lo<a.length&&a[lo].q<=qhi;lo++)visN.push(a[lo]);if(visN.length>s0){nl++;if(!a._m)mo=false}}
+        if(nl>1||!mo)visN.sort((u,v)=>u._i-v._i); /* 元の順序に戻す（同じzの重なり順を変えないため） */
+        for(const n of visN){const z=(n.q-Q(n.h))*pps/JY;if(z<-.002||z>zM)continue;n.m[0]==='relay'?items.push(mkIt(z,1,n.x/LW-6+n.w/2,n.m[1]?'crit':'long',null)):items.push(mkIt(z,0,0,'',n))}
         /* 判定枠：12マスの暗い枠に#a796ffの縁。ノーツはこの上を通る */
         const fr=[pj(-6,GF),pj(6,GF),pj(6,-GF),pj(-6,-GF)];
         rpoly(fr,5*k0);gx.fillStyle='rgba(6,5,16,.82)';gx.fill();
         gx.strokeStyle='rgba(150,122,255,.7)';gx.lineWidth=Math.max(1,1.3*k0);gx.beginPath();for(let i=1;i<12;i++){const a=pj(i-6,GF),b=pj(i-6,-GF);gx.moveTo(a[0],a[1]);gx.lineTo(b[0],b[1])}gx.stroke();
         rpoly(fr,5*k0);gx.lineWidth=12*k0;gx.strokeStyle='rgba(166,126,255,.22)';gx.stroke();gx.lineWidth=4.2*k0;gx.strokeStyle='#a67eff';gx.stroke();
-        bodyQ.sort((p,q)=>q[0]-p[0]).forEach(q=>q[1]());
+        for(const o of bodyQ)if(o.c.deco)guideBody(o.L,o.R,o.c.cr);for(const o of bodyQ)if(!o.c.deco)slideBody(o.L,o.R,o.c.cr); /* ガイド→ロングの順（ソート不要） */
         gx.globalCompositeOperation='lighter';
         holds.forEach(([a,b,cr],i)=>{const k=cr?'crit':'long';burst(a,b,k,.8,.75*(.85+.15*Math.sin(t*20+i)),.8);glit(i,a,b,k,t)}); /* 保持中：柱・枠の発光・ひし形を出し続け、粒子を舞い上げる */
         gx.globalCompositeOperation='source-over';
@@ -1354,8 +1382,8 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
            厚みは判定枠の内側に収まる程度（奥行きz±1.25%）。フリックの矢印は全ノーツの上に重ねる */
         /* 宝石（実機の画面収録を計測）：八面体。上の四角錐は左面が白・右面が淡色のグラデーション、下の逆さ四角錐はごく淡い。
            幅=0.88マス・上の高さ=0.405マス・手前の頂点=+0.20マス・下の頂点=+0.475マス（その奥行きでの1マス=LU*s）。上の縁のまわりに濃い色の影 */
-        const GEMS={long:{r0:'#9bf2c6',r1:'#d6fce9',e0:'#a8f0d6',e1:'#ecfff7',h:'10,120,85',u:'150,240,215'},crit:{r0:'#ffe888',r1:'#fff8c8',e0:'#ffc649',e1:'#ffd870',h:'200,140,10',u:'255,238,160'},flick:{r0:'#ffb0d2',r1:'#ffe3f0',e0:'#ff8fbf',e1:'#ffc4de',h:'190,50,110',u:'255,180,215'}};
-        const gemAt=(lp,z,k)=>{const[x,y,s]=pj(lp,z),u=LU*s,w=.44*u,t=.405*u,f=.2*u,b=.475*u,c=GEMS[k]||GEMS.long;
+        
+        const gemDraw=(x,y,u,k)=>{const w=.44*u,t=.405*u,f=.2*u,b=.475*u,c=GEMS[k]||GEMS.long;
          for(const[m,a]of[[1.5,.07],[1.34,.1],[1.18,.14]]){poly([[x,y-t*m*.96],[x+w*m,y-.02*u],[x,y+f*.9],[x-w*m,y-.02*u]]);gx.fillStyle='rgba('+c.h+','+a+')';gx.fill()} /* 上の縁の影 */
          poly([[x-w,y],[x,y+f],[x+w,y],[x,y+b]]);gx.fillStyle='rgba('+c.u+',.32)';gx.fill(); /* 下の逆さ四角錐 */
          poly([[x,y-t],[x,y+f],[x-w,y]]);gx.fillStyle='#fff';gx.fill(); /* 左面：白 */
@@ -1363,7 +1391,10 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
          poly([[x,y-t],[x+w,y],[x,y+f]]);gx.fillStyle=g;gx.fill(); /* 右面 */
          gx.lineWidth=Math.max(1,.05*u);gx.strokeStyle=c.e0;gx.beginPath();gx.moveTo(x-w,y);gx.lineTo(x,y+f);gx.stroke();
          gx.strokeStyle=c.e1;gx.beginPath();gx.moveTo(x,y+f);gx.lineTo(x+w,y);gx.stroke()};
-        const arrows=[];
+        const gemAt=(lp,z,k)=>{const p=pj(lp,z),u=LU*p[2],qb=Math.max(0,Math.round(Math.log(Math.max(u,1))/.0583)),row=GC[k]||GC.long;let sp=row[qb];
+         if(!sp){const ub=Math.exp(qb*.0583),R=Math.ceil(.75*ub)+2,cv=document.createElement('canvas'),c2=cv.getContext('2d'),pg=gx;cv.width=cv.height=Math.ceil(2*R*DPR);c2.setTransform(DPR,0,0,DPR,0,0);c2.lineJoin=c2.lineCap='round';gx=c2;try{gemDraw(R,R,ub,k)}finally{gx=pg}row[qb]=sp={cv,R,ub}}
+         const q=u/sp.ub,r=sp.R*q;gx.drawImage(sp.cv,p[0]-r,p[1]-r,2*r,2*r)};
+        const arrows=ARRS;arrows.length=0;
         const note=(n,z)=>{
          const[ty,cr,ar]=n.m,tr=ty==='trace',lp0=n.x/LW-6+.06,lp1=lp0+n.w-.12,dz=tr?.0125:.0165;
          const a=pj(lp0,z-dz),b=pj(lp1,z-dz),c=pj(lp1,z+dz),d=pj(lp0,z+dz),u=LU*Math.exp(-KAP*z),hgt=a[1]-d[1],P=[a,b,c,d];
@@ -1381,15 +1412,15 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
           const t=PT[kk],g=vg(t[0],t[2],d[1],a[1]);g.addColorStop(.5,t[1]);rpoly(P,r);gx.fillStyle=g;gx.fill();gx.lineWidth=Math.max(1,.04*u);gx.strokeStyle='rgba(255,255,255,.45)';gx.stroke();
           gemAt((lp0+lp1)/2,z,cr?'crit':ar!=null?'flick':'long'); /* 薄い棒に白い宝石 */
          }
-         if(ar!=null)arrows.push({z,x:(a[0]+b[0]+c[0]+d[0])/4,y:(a[1]+b[1]+c[1]+d[1])/4,u,w:n.w,ang:sg*ar,k:cr?'crit':'flick'});
+         if(ar!=null){const o=ARW[aI++]||(ARW[aI-1]={});o.z=z;o.x=(a[0]+b[0]+c[0]+d[0])/4;o.y=(a[1]+b[1]+c[1]+d[1])/4;o.u=u;o.w=n.w;o.ang=sg*ar;o.k=cr?'crit':'flick';arrows.push(o)}
         };
         const fade=z=>z<=zM?1:0; /* 実機のノーツは奥の端で最初から不透明（フェードインしない） */
         /* 同時押し線（実機のスクリーンショット 2388×1668 から計測）：同時刻のタップ・フリック・ロングの始点/終点・トレースを、隣り合う2つずつ結ぶ。
            ロングの中継点・ダメージ・ガイドの中継は対象外。線はノーツと同じ遠近で奥行きに寝かせた細い板：ノーツ縦幅の中心を通り、
            左ノーツの右レーン境界〜右ノーツの左レーン境界（ノーツ縁との間は0.06マスのすき間）。太さはノーツ高さの約12%（奥行き±0.00205）、
            色は白（#eaeaec 相当＝不透明度.91）の単色で光彩・影なし。ノーツの下に描く */
-        {const SM=new Map();
-         for(const it of items){const n=it.n;if(!n||!n.m||n.m[0]==='relay'||n.m[0]==='dmg')continue;const key=Math.round(n.b*1e5);let a=SM.get(key);if(!a)SM.set(key,a=[]);a.push(it)}
+        {const SM=SMM;SM.clear();smI=0;
+         for(const it of items){const n=it.n;if(!n||!n.m||n.m[0]==='relay'||n.m[0]==='dmg')continue;const key=Math.round(n.b*1e5);let a=SM.get(key);if(!a){a=SMP[smI++]||(SMP[smI-1]=[]);a.length=0;SM.set(key,a)}a.push(it)}
          gx.globalAlpha=1;gx.fillStyle='rgba(255,255,255,.91)';
          for(const a of SM.values()){if(a.length<2)continue;a.sort((p,q)=>p.n.x-q.n.x);
           for(let i=0;i+1<a.length;i++){const A=a[i],B=a[i+1],l0=A.n.x/LW-6+A.n.w,l1=B.n.x/LW-6;if(l1-l0<.01)continue;
