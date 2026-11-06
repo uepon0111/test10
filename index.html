@@ -102,6 +102,20 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
 .pgt{margin:14px 0 0;min-height:2.9em;font-size:13px;line-height:1.5;color:#c4d2e4}
 @keyframes pgsh{to{transform:translateX(100%)}}@keyframes pgr{0%{box-shadow:0 0 0 0 #5eead480}100%{box-shadow:0 0 0 9px #5eead400}}
 @media(prefers-reduced-motion:reduce){.pgb i,.pgs li,.pgs li span,.pgs li::before{transition:none}.pgb i::after,.pgs li.on span{animation:none}}
+#mp4d{width:min(92vw,520px);max-height:92dvh;padding:18px;border:1px solid var(--ln);border-radius:14px;color:var(--ink);box-shadow:0 18px 48px #1a2f5a55}
+#mp4d::backdrop{background:#10203a66}
+#mp4d h2{margin:0 0 6px;font-size:17px;color:var(--ink)}
+#mp4d fieldset{margin:0 0 14px;padding:0;border:0;min-width:0}#mp4d legend{padding:0;margin-bottom:6px;font-weight:700}
+#mp4d fieldset:disabled{opacity:.55}
+.mpc{display:flex;flex-wrap:wrap;gap:6px}
+.mpc label{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:1px solid var(--ln);border-radius:999px;background:var(--bg2);font-weight:700;cursor:pointer;user-select:none}
+.mpc label:has(input:checked){border-color:var(--acc);background:#e1f6f2;color:#13796d}
+.mpc input{width:16px;height:16px;margin:0;padding:0;accent-color:var(--acc)}
+.mpq{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.mpq button{padding:4px 10px;font-size:12px}
+.mpsel{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}.mpsel label{display:block;margin-bottom:4px;font-weight:700}
+.mpb{height:8px;border-radius:99px;background:var(--ln);overflow:hidden}.mpb i{display:block;width:0;height:100%;background:var(--acc);transition:width .2s}
+.mpa{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+@media(prefers-reduced-motion:reduce){.mpb i{transition:none}}
     </style>
   </head>
   <body>
@@ -139,7 +153,7 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
           <a class="btn g" id="bk" href="#songs">‹ 難易度選択に戻る</a>
           <div class="card" style="margin-top:12px"><div class="info" id="cinfo"></div>
             <div class="cbar">
-              <button id="goR">拡大表示</button><button id="goP">譜面再生</button><button id="dlSvg" class="g">SVGで保存</button><button id="dlPng" class="g">PNGで保存</button>
+              <button id="goR">拡大表示</button><button id="goP">譜面再生</button><button id="dlSvg" class="g">SVGで保存</button><button id="dlPng" class="g">PNGで保存</button><button id="dlMp4" class="g">MP4で保存</button>
             </div></div>
           <div id="chart"></div>
         </div>
@@ -182,6 +196,27 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
       </section>
     </main>
     <div id="st" role="status" hidden></div>
+    <dialog id="mp4d" aria-labelledby="mp4t">
+      <h2 id="mp4t">MP4で保存</h2>
+      <p class="mut" style="margin:0 0 14px">ゲーム画面のノーツの流れを、音声つきのMP4に書き出します。ノーツ速度・ミラー・透明度などは、設定画面の現在の値が使われます。</p>
+      <p id="mpw" class="mut" style="color:#c0392b;font-weight:700" hidden>このブラウザはMP4の書き出しに対応していません。Chrome・Edge・Safariの最新版でお試しください。</p>
+      <fieldset id="mpo">
+        <fieldset><legend>再生速度（複数選べます）</legend>
+          <div class="mpc" id="mpr"></div>
+          <div class="mpq"><button type="button" class="g" data-r="1">1.0のみ</button><button type="button" class="g" data-r="1,.5,.25">1.0・0.5・0.25</button><button type="button" class="g" data-r="1,.75,.5,.25">すべて</button></div>
+        </fieldset>
+        <fieldset><legend>ボーカル（複数選べます）</legend><div class="mpc" id="mpv"><span class="mut">ボーカル情報を取得中…</span></div></fieldset>
+        <div class="mpsel">
+          <div><label for="mpf">フレームレート</label><select id="mpf"><option value="auto">自動（0.5×以下は30fps）</option><option value="60">60fps</option><option value="30">30fps（ファイルが小さい）</option></select></div>
+          <div><label for="mpz">解像度</label><select id="mpz"><option value="480">480p（軽い）</option><option value="720" selected>720p（標準）</option><option value="1080">1080p（高画質・重い）</option></select></div>
+        </div>
+        <div class="fld sw"><label><span>映像の左上に再生速度を表示</span><input id="mpl" type="checkbox" checked></label></div>
+      </fieldset>
+      <div id="mpp" hidden><div class="mpb"><i></i></div></div>
+      <p class="mut" id="mps" role="status" style="min-height:2.9em;margin:8px 0 0"></p>
+      <p class="mut" style="margin:0">複数本のときは1本ずつ順に保存されます。ブラウザに「複数ファイルのダウンロード」を確認されたら許可してください。書き出し中はこのタブを開いたままにしてください。</p>
+      <div class="mpa"><button id="mpc" class="g" type="button">閉じる</button><button id="mpg" type="button" disabled>書き出す</button></div>
+    </dialog>
     <script>
       'use strict';
       const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -1112,7 +1147,7 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
        const pf=D.pf;let spd=pf.spd,rate=pf.rate,sl=pf.sl,gd=pf.gd,mir=pf.mirror,pps=JY/TT(spd),ap=pf.ap,tp=0,rk=pf.rk,cur=-LEAD,playing=false,last=0,need=true,raf=0,drag=false;const inv=()=>{need=true;if(!raf&&!document.hidden)raf=requestAnimationFrame(loop)};
        const KEY='sekaiChartViewer.settings.v1';
        const FS=D.fs||0;let ao=pf.ao,vl=pf.vol,VL=[],vi=0,ctx,gn,src=null,ab=null,B=0,T0=0,AR=1,gen=0,rtm;
-       const save=()=>{try{const v=JSON.parse(localStorage.getItem(KEY))||{},p={...(v.player||{}),spd,rate,sl,gd,mirror:mir,apb:ap,sf,rk,aoff:ao,vol:vl,vw:view};delete p.vt;delete p.ap;v.player=p;localStorage.setItem(KEY,JSON.stringify(v))}catch(e){}try{if(parent&&parent.__setShared)parent.__setShared({slideOpacity:sl,guideOpacity:gd,mirror:mir})}catch(e){}}; /* 透明度・ミラーはアプリ全体の表示設定にも反映 */
+       const save=()=>{if(D.ex)return;try{const v=JSON.parse(localStorage.getItem(KEY))||{},p={...(v.player||{}),spd,rate,sl,gd,mirror:mir,apb:ap,sf,rk,aoff:ao,vol:vl,vw:view};delete p.vt;delete p.ap;v.player=p;localStorage.setItem(KEY,JSON.stringify(v))}catch(e){}try{if(parent&&parent.__setShared)parent.__setShared({slideOpacity:sl,guideOpacity:gd,mirror:mir})}catch(e){}}; /* 透明度・ミラーはアプリ全体の表示設定にも反映 */
        /* ---- 音源：ボーカル取得／速度に合わせた音声変換(WSOLA・音程維持)／再生。譜面時刻は音声クロックに同期 ---- */
        const MD='https://sekai-world.github.io/sekai-master-db-diff/',SC=new Map();
        const getCtx=()=>{if(!ctx){ctx=new(window.AudioContext||window.webkitAudioContext)();gn=ctx.createGain();gn.gain.value=vl;gn.connect(ctx.destination)}return ctx};
@@ -1168,7 +1203,7 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
          const G=new Map(gc.map(c=>[c.id,(c.firstName||'')+(c.givenName||'')])),O=new Map(oc.map(c=>[c.id,c.name]));
          VL=mv.filter(v=>v.musicId===D.mid).sort((a,b)=>a.seq-b.seq).map(v=>({a:v.assetbundleName,t:v.musicVocalType,l:(v.caption||v.musicVocalType)+(v.characters&&v.characters.length?'：'+v.characters.slice().sort((a,b)=>a.seq-b.seq).map(c=>(c.characterType==='game_character'?G:O).get(c.characterId)||'?').join('、'):'')}));
          if(!VL.length)throw new Error('この曲のボーカル情報がありません');
-         sel.length=0;VL.forEach((v,i)=>sel.add(new Option(v.l,i)));vi=defVocal();sel.value=vi;sel.disabled=false;load();
+         sel.length=0;VL.forEach((v,i)=>sel.add(new Option(v.l,i)));vi=defVocal();sel.value=vi;sel.disabled=false;D.ex||load();
         }catch(e){sel.options[0].text='取得失敗';$('astat').textContent='ボーカル情報を取得できません（'+(e&&e.message||'通信/CORS')+'）'}
        };
        const fmt=t=>{t=Math.max(0,t);const m=Math.floor(t/60),s=t-m*60;return m+':'+(s<10?'0':'')+s.toFixed(1)};
@@ -1209,11 +1244,11 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
           開始位置のy＝最奥のy＋ap%×(判定線のy−最奥のy)。画面yは縮尺sに比例（y=yV+(yJ-yV)*s）するので、その位置の縮尺は s=SF+f*(1-SF)、奥行きは z=-ln(s)/KAP。
           ap=0 で z=ZF（最奥）、ap=100 で z=0（判定線）。奥ほど遠近で縮むため、例えば ap=30 の位置は奥行きz上では最奥から約60%進んだ所になる。 */
        const ZF=.978,SF=Math.exp(-KAP*ZF),zOf=f=>-Math.log(SF+f*(1-SF))/KAP;
-       let GW=0,GH=0,DPR=1,jk=null;
-       const fit=()=>{const r=gcv.getBoundingClientRect();DPR=Math.min(2,window.devicePixelRatio||1);GW=r.width;GH=r.height;gcv.width=Math.max(1,Math.round(GW*DPR));gcv.height=Math.max(1,Math.round(GH*DPR));inv()}; /* サイズ指定で描画状態も初期化される */
+       let GW=0,GH=0,DPR=1,jk=null,EXS=null;
+       const fit=()=>{if(EXS){GW=EXS[0];GH=EXS[1];DPR=1;gcv.width=GW;gcv.height=GH;inv();return}const r=gcv.getBoundingClientRect();DPR=Math.min(2,window.devicePixelRatio||1);GW=r.width;GH=r.height;gcv.width=Math.max(1,Math.round(GW*DPR));gcv.height=Math.max(1,Math.round(GH*DPR));inv()}; /* サイズ指定で描画状態も初期化される */
        if(window.ResizeObserver)new ResizeObserver(()=>{if(view==='game')fit()}).observe($('wrap'));
        const HE=N.filter(n=>n.m&&n.m[0]!=='dmg').sort((a,b)=>a.t-b.t); /* ヒットエフェクト用（時刻順） */
-       if(D.jk){const im=new Image();im.referrerPolicy='no-referrer';im.onload=()=>{try{const c=document.createElement('canvas');c.width=c.height=24;c.getContext('2d').drawImage(im,0,0,24,24);jk=c;inv()}catch(e){}};im.src=D.jk} /* ジャケットを縮小→拡大して背景のぼかしに使う */
+       if(D.jk){const im=new Image();im.referrerPolicy='no-referrer';if(D.ex)im.crossOrigin='anonymous'; /* 書き出し時はキャンバスを汚さない（CORSが通らなければジャケットの薄い背景なしで続行） */im.onload=()=>{try{const c=document.createElement('canvas');c.width=c.height=24;c.getContext('2d').drawImage(im,0,0,24,24);jk=c;inv()}catch(e){}};im.src=D.jk} /* ジャケットを縮小→拡大して背景のぼかしに使う */
        /* 色：[上面の明, 上面の暗, 縁, 光彩のRGB] */
        const PAL={tap:['#bba3f6','#f0e8ff','#e2f0ff','#90b4fb','#3de8fa','#7f8cf0','150,110,235'],long:['#7aeed8','#dffcf6','#d8fcea','#8cf5c4','#4ee89a','#4fd9a0','60,230,170'],flick:['#ffc0d6','#ffedf4','#fdecf6','#f4aadd','#f58fd0','#f48fb8','255,110,150'],crit:['#f8c765','#fffbd2','#fffccc','#f8e272','#ffee4d','#fdae3e','255,200,50'],dmg:['#a98bd0','#f1e8fb','#e0d1f3','#8d63c4','#6f43a8','#8d63c4','170,110,230']}; /* ノーツスキン（実機の選択画面）：[枠上,面上,面下,帯上,帯下,端の印,光彩RGB] */
        const PT={long:['#52edc6','#58f0a9','#81faa7'],crit:['#fad584','#fdde85','#fff775'],flick:['#ff95be','#ff92c7','#ff8dcc']}; /* トレースの棒：上/中/下 */
@@ -1516,7 +1551,7 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
        $('vocal').onchange=e=>{vi=+e.target.value;load()}; /* この譜面を開いている間だけの切り替え */
        const setVol=()=>{$('volv').textContent=Math.round(vl*100)+'%'};$('vol').value=Math.round(vl*100);setVol();$('vol').oninput=e=>{vl=e.target.value/100;if(gn)gn.gain.value=vl;setVol();save()};
        const setAo=()=>{$('aov').textContent=(ao>=0?'+':'')+ao.toFixed(2)+'秒'};$('ao').value=ao;setAo();$('ao').oninput=e=>{ao=+e.target.value;setAo();save();if(playing){aStop();aStart()}};
-       initA();setSpd(spd);$('rate').value=rate;$('ratev').textContent=rate.toFixed(2)+'×';$('rk').value=rk;$('sf').checked=!sf;$('ap').value=ap;applyAp();draw();ui();
+       const AP=initA();setSpd(spd);$('rate').value=rate;$('ratev').textContent=rate.toFixed(2)+'×';$('rk').value=rk;$('sf').checked=!sf;$('ap').value=ap;applyAp();draw();ui();
        /* 非表示（タブ／アプリの切替・画面ロック・ページの退避）になったら、再生・音声・描画ループを止める。
           Safariは visibilitychange が届かない遷移があるため pagehide / pageshow も見る。復帰時は止まったままの rAF を捨てて描画を再開し、
           バックグラウンド中に破棄されることがある Canvas の内容（背景・スプライト）を作り直す（再生は自動では再開しない） */
@@ -1525,11 +1560,17 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
        const goShow=()=>{if(isHid())return;if(raf){cancelAnimationFrame(raf);raf=0}bgK='';GCD=0;need=true;inv();if($('astat').textContent===HM)setTimeout(()=>{if($('astat').textContent===HM)$('astat').textContent=''},4000)};
        document.addEventListener('visibilitychange',()=>isHid()?goHide():goShow());addEventListener('pagehide',goHide);addEventListener('pageshow',goShow);
        window.__pl={setView,get view(){return view},seek,draw,ui,tm,atT,lay,setSpd,setPlay,prevBar,nextBar,N,C,LN,dur,get t(){return cur},get playing(){return playing},get pps(){return pps},JY};
+        /* MP4書き出し用の入口（親ページから呼ぶ）。時刻を指定して1コマ描き、音声は再生と同じ速度変換（WSOLA）を使う */
+        window.__ex={ready:()=>AP,get vocals(){return VL.map(v=>({t:v.t,l:v.l}))},get vi(){return vi},
+         info:()=>({dur,lead:LEAD,fs:FS,ao,buf:ab&&ab.buf}),
+         async setup(w,h,r,v){EXS=[w,h];bgK='';rate=r;vi=v;setPps();fit();await load();if(!ab||ab.r!==r)throw new Error($('astat').textContent||'音源を取得できません')},
+         frame(t){cur=t;drawGame();return[bgc,gcv]},
+         dispose(){kill();try{ctx&&ctx.close()}catch(e){}}};
       }
-      const openPlayer=w=>{
+      const openPlayer=(w,ex)=>{
        const S=parseSUS(sus),D=buildPlay(S);
        if(!D.nodes.length&&!D.chains.length)throw new Error('再生できるノーツがありません');
-       D.pf=playPrefs();
+       D.pf=playPrefs();if(ex){D.pf.vw='game';D.ex=1} /* MP4書き出し用（非表示の再生画面）：ゲーム画面で開き、設定は保存しない */
        const{sprites,...data}=D,si=songInfo,tabTitle=esc(songLabel||S.meta.TITLE||'譜面');
        data.mid=si&&si.id!=null?si.id:null;data.jk=si&&si.jk?String(si.jk):null;data.fk={V:FK_V,D:FK_D,C:FK_C,G:FK_G,T:FK_T,O:FK_O}; /* ゲーム画面のフリック矢印も、譜面表示と同じ実機の矢印データで描く */data.fs=si&&+si.fs>0?+si.fs:0;const json=JSON.stringify(data).replace(/</g,'\\u003c').replace(/\u2028/g,'\\u2028').replace(/\u2029/g,'\\u2029');
        const songHTML=`<div class="song">${si?`<img src="${esc(si.jk)}" alt="" referrerpolicy="no-referrer">`:''}<div><b>${esc(si?si.title:(S.meta.TITLE||'譜面'))}</b>${si?`<span class="lv" style="background:${DCOL[si.diff]||'#74829f'}">${esc(si.diff.toUpperCase())}${si.level!=null?` Lv${esc(si.level)}`:''}</span>`:''}</div></div>`;
@@ -1615,6 +1656,120 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
       }
       window.__closeLayer=()=>closeLayer(); /* レイヤー内の「戻る」ボタンから呼ぶ */
       addEventListener('popstate',()=>closeLayer(true));
+      /* ================= MP4で保存 =================
+         非表示の再生画面（iframe）で時刻を1コマずつ進めてゲーム画面を描き、WebCodecs（H.264/AAC）で符号化して
+         mp4-muxer でMP4にまとめる。実時間で録画するわけではないので、再生速度が遅くても実時間よりずっと早く終わる。
+         音声は譜面再生と同じ速度変換（音程維持）・同じタイミング補正を使う。 */
+      const MPR=[1,.75,.5,.25],MPX='https://cdn.jsdelivr.net/npm/mp4-muxer@5.2.2/build/mp4-muxer.mjs',MPA=1920/1342,STOP={};
+      const mpd=$('#mp4d');let mpS=null; /* mpS={fr,api,V,run,stop}：開いている間だけ存在 */
+      const yld=()=>new Promise(r=>{const c=new MessageChannel();c.port1.onmessage=()=>{c.port1.close();r()};c.port2.postMessage(0)}); /* 裏タブでも間引かれない待ち */
+      const sleep=ms=>new Promise(r=>setTimeout(r,ms)),room=e=>new Promise(r=>{e.addEventListener('dequeue',r,{once:true});setTimeout(r,50)});
+      const mpTxt=s=>{$('#mps').textContent=s},mpBar=f=>{$('#mpp i').style.width=Math.round(Math.max(0,Math.min(1,f))*100)+'%'};
+      const mpEta=s=>s<60?`約${Math.ceil(s)}秒`:`約${Math.floor(s/60)}分${Math.ceil(s%60)}秒`;
+      const mpRates=()=>[...$$('#mpr input:checked')].map(i=>+i.value).sort((a,b)=>b-a),mpVocs=()=>[...$$('#mpv input:checked')].map(i=>+i.value);
+      const mpSize=()=>{const h=+$('#mpz').value;return[Math.round(h*MPA/2)*2,h]};
+      const mpFps=r=>$('#mpf').value==='auto'?(r<=.5?30:60):+$('#mpf').value;
+      function mpSum(){
+        if(!mpS||!mpS.api||mpS.run)return;
+        const R=mpRates(),V=mpVocs(),n=R.length*V.length;
+        $('#mpg').disabled=!n;
+        mpTxt(n?`MP4を${n}本書き出します（再生速度 ${R.length}種類 × ボーカル ${V.length}種類）`:'再生速度とボーカルを1つ以上選んでください');
+      }
+      const mpClose=()=>{const S=mpS;mpS=null;if(!S)return;S.stop=true;try{S.api&&S.api.dispose()}catch(e){}if(S.fr)S.fr.remove()};
+      mpd.addEventListener('close',mpClose);
+      mpd.addEventListener('cancel',e=>{if(mpS&&mpS.run){e.preventDefault();mpS.stop=true;mpTxt('中止しています…')}});
+      mpd.addEventListener('change',e=>{if(e.target.closest('#mpr,#mpv'))mpSum()});
+      mpd.addEventListener('click',e=>{const b=e.target.closest('[data-r]');if(!b||(mpS&&mpS.run))return;const s=b.dataset.r.split(',').map(Number);$$('#mpr input').forEach(i=>{i.checked=s.includes(+i.value)});mpSum()});
+      $('#mpc').onclick=()=>{if(mpS&&mpS.run){mpS.stop=true;mpTxt('中止しています…')}else mpd.close()};
+      addEventListener('hashchange',()=>{if(mpd.open)mpd.close()});
+      $('#dlMp4').onclick=async()=>{
+        if(!sus.trim()||!lastR){st('MP4保存にはSUSの解析が必要です（画像表示では使えません）');return}
+        const ok=!!(window.VideoEncoder&&window.AudioEncoder&&window.VideoFrame&&window.AudioData);
+        $('#mpw').hidden=ok;$('#mpr').innerHTML=MPR.map(r=>`<label><input type="checkbox" value="${r}"${r===1?' checked':''}>${r===1?'1.0':r}×</label>`).join('');
+        $('#mpv').innerHTML='<span class="mut">ボーカル情報を取得中…</span>';
+        $('#mpo').disabled=false;$('#mpp').hidden=true;mpBar(0);$('#mpc').textContent='閉じる';$('#mpg').disabled=true;mpTxt('');
+        const S={api:null,V:[],fr:null,run:false,stop:false};mpS=S;mpd.showModal();
+        if(!ok)return;
+        try{
+          const fr=document.createElement('iframe');fr.title='MP4書き出し用（非表示）';fr.setAttribute('aria-hidden','true');fr.tabIndex=-1;
+          fr.style.cssText='position:fixed;left:0;top:0;width:640px;height:480px;border:0;opacity:0;pointer-events:none;z-index:-1';
+          document.body.appendChild(fr);S.fr=fr;
+          openPlayer(fr.contentWindow,1);const api=fr.contentWindow.__ex;
+          mpTxt('ボーカル情報を取得しています…');await api.ready();if(mpS!==S)return;
+          const V=api.vocals;if(!V.length)throw new Error(fr.contentDocument.getElementById('astat').textContent||'この曲のボーカル情報がありません');
+          $('#mpv').innerHTML=V.map((v,i)=>`<label title="${esc(v.l)}"><input type="checkbox" value="${i}"${i===api.vi?' checked':''}>${esc(v.l)}</label>`).join('');
+          S.api=api;S.V=V;mpSum();
+        }catch(e){if(mpS!==S)return;console.error(e);mpTxt('準備に失敗しました: '+(e&&e.message||e))}
+      };
+      $('#mpg').onclick=async()=>{
+        const S=mpS;if(!S||!S.api||S.run)return;
+        const R=mpRates(),V=mpVocs(),jobs=[];if(!R.length||!V.length)return;
+        for(const v of V)for(const r of R)jobs.push([v,r]);
+        S.run=true;S.stop=false;$('#mpo').disabled=true;$('#mpg').disabled=true;$('#mpc').textContent='中止';$('#mpp').hidden=false;mpBar(0);
+        const[W,H]=mpSize(),lab=$('#mpl').checked,types=V.map(i=>S.V[i].t);let done=0;
+        try{
+          for(let j=0;j<jobs.length;j++){
+            const[v,r]=jobs[j],fps=mpFps(r),pre=`(${j+1}/${jobs.length}) ${r===1?'1.0':r}×　`;
+            const blob=await mpRender(S,{v,r,W,H,fps,lab},(f,t)=>{mpBar((j+f)/jobs.length);mpTxt(pre+t)});
+            const vt=S.V[v].t,suf=V.length>1?'_'+fileSafe(vt)+(types.filter(x=>x===vt).length>1?'-'+(v+1):''):'';
+            saveBlob(blob,`${fileSafe(cur.title)}_${curD}_x${r.toFixed(2)}${suf}.mp4`);done++;
+            await sleep(500);
+          }
+          mpBar(1);mpTxt(`完了：MP4を${done}本保存しました`);
+        }catch(e){mpTxt(e===STOP?`中止しました（${done}本を保存済み）`:'書き出しに失敗しました: '+(e&&e.message||e));if(e!==STOP)console.error(e)}
+        finally{S.run=false;if(mpS===S){$('#mpo').disabled=false;$('#mpc').textContent='閉じる';$('#mpg').disabled=false}}
+      };
+      /* 1本分：音声を準備 → 音声を符号化 → 映像を1コマずつ描いて符号化 → MP4のBlobを返す */
+      async function mpRender(S,o,prog){
+        const{Muxer,ArrayBufferTarget}=await import(MPX).catch(()=>{throw new Error('MP4変換ライブラリを読み込めませんでした（通信状況を確認してください）')});
+        const ck=()=>{if(S.stop)throw STOP},api=S.api,R=o.r,fps=o.fps,W=o.W,H=o.H;
+        prog(0,'音声を準備しています…');
+        const pe=S.fr.contentDocument.getElementById('astat'),tm=setInterval(()=>{if(pe&&pe.textContent)prog(0,pe.textContent)},250);
+        try{await api.setup(W,H,R,o.v)}finally{clearInterval(tm)}
+        ck();
+        const{dur,lead,fs,ao,buf}=api.info(),sr=buf.sampleRate,nc=Math.min(2,buf.numberOfChannels),N=Math.ceil((dur+lead)/R*fps),T=N/fps;
+        const vc={codec:Math.ceil(W/16)*Math.ceil(H/16)*fps>245760?'avc1.64002A':'avc1.640028',width:W,height:H,bitrate:Math.round(Math.min(16e6,Math.max(1.5e6,W*H*fps*.1))),framerate:fps};
+        const ac={codec:'mp4a.40.2',sampleRate:sr,numberOfChannels:nc,bitrate:192e3};let acd='aac';
+        if(!(await VideoEncoder.isConfigSupported(vc)).supported)throw new Error('このブラウザではH.264の書き出しに対応していません');
+        if(!(await AudioEncoder.isConfigSupported(ac)).supported){ /* AAC非対応（LinuxのChromeなど）ではOpus音声で代用する（VLC・Chrome・Firefoxなどで再生可。古いプレーヤーでは音が出ないことがある） */
+          ac.codec='opus';acd='opus';if(!(await AudioEncoder.isConfigSupported(ac)).supported)throw new Error('このブラウザでは音声（AAC/Opus）の書き出しに対応していません')}
+        const mx=new Muxer({target:new ArrayBufferTarget(),video:{codec:'avc',width:W,height:H},audio:{codec:acd,numberOfChannels:nc,sampleRate:sr},fastStart:'in-memory'});
+        let err=null;const bad=e=>{err=err||e};
+        const ve=new VideoEncoder({output:(c,m)=>mx.addVideoChunk(c,m),error:bad}),ae=new AudioEncoder({output:(c,m)=>mx.addAudioChunk(c,m),error:bad});
+        try{
+          ve.configure(vc);ae.configure(ac);
+          /* 音声：譜面再生と同じ開始位置（先頭の無音＝delay、変換後の音源の読み出し位置＝off）。曲が終わったあとは無音で映像の長さに揃える */
+          const o0=ao-lead,delay=Math.round(Math.max(0,-o0)/R*sr),off=Math.round((fs+Math.max(0,o0))/R*sr),CH=16384,tot=Math.ceil(T*sr);
+          for(let p=0,q=0;p<tot;p+=CH,q++){
+            ck();if(err)throw err;
+            const n=Math.min(CH,tot-p),d=new Float32Array(n*nc);
+            for(let c=0;c<nc;c++){const x=buf.getChannelData(Math.min(c,buf.numberOfChannels-1));for(let i=0;i<n;i++){const j=p+i-delay;if(j>=0&&off+j<x.length)d[c*n+i]=x[off+j]}}
+            const ad=new AudioData({format:'f32-planar',sampleRate:sr,numberOfFrames:n,numberOfChannels:nc,timestamp:Math.round(p/sr*1e6),data:d});
+            ae.encode(ad);ad.close();
+            while(ae.encodeQueueSize>16){await room(ae);ck();if(err)throw err}
+            if(q%8===7)await yld();
+          }
+          const oc=document.createElement('canvas');oc.width=W;oc.height=H;const g=oc.getContext('2d',{alpha:false});
+          const fnt=`700 ${Math.round(H*.032)}px system-ui,"Hiragino Sans","Noto Sans JP",sans-serif`,txt=`再生速度 ${R.toFixed(2)}×`;
+          const t0=performance.now();let ty=t0;
+          for(let k=0;k<N;k++){
+            ck();if(err)throw err;
+            const[bg,gc]=api.frame(Math.min(dur,-lead+k/fps*R));
+            g.drawImage(bg,0,0,W,H);g.drawImage(gc,0,0,W,H);
+            if(o.lab){g.font=fnt;const tw=g.measureText(txt).width,ph=H*.016,bh=H*.052,bx=H*.02,by=H*.02;g.fillStyle='rgba(11,18,32,.78)';g.beginPath();g.roundRect?g.roundRect(bx,by,tw+ph*2,bh,bh/2):g.rect(bx,by,tw+ph*2,bh);g.fill();g.fillStyle='#fff';g.textBaseline='middle';g.fillText(txt,bx+ph,by+bh/2+1)}
+            const vf=new VideoFrame(oc,{timestamp:Math.round(k*1e6/fps),duration:Math.round(1e6/fps)});
+            ve.encode(vf,{keyFrame:k%(fps*2)===0});vf.close();
+            if(ve.encodeQueueSize>8||performance.now()-ty>40){
+              while(ve.encodeQueueSize>8){await room(ve);ck();if(err)throw err}
+              await yld();ty=performance.now();
+              const f=(k+1)/N;prog(f,`映像を生成中 ${Math.round(f*100)}%（残り${mpEta((ty-t0)/1000/f*(1-f))}）`);
+            }
+          }
+          await ve.flush();await ae.flush();if(err)throw err;
+          mx.finalize();prog(1,'保存しています…');
+          return new Blob([mx.target.buffer],{type:'video/mp4'});
+        }finally{try{ve.close()}catch(e){}try{ae.close()}catch(e){}}
+      }
       $('#goP').onclick=()=>{
        if(!sus.trim()||!lastR){st('譜面再生にはSUSの解析が必要です（画像表示では使えません）');return}
        const w=openLayer();if(!w)return;
