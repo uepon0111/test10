@@ -1109,7 +1109,7 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
         d+='L'+P(sg[n-1],3,fb);for(let i=n-1;i>=0;i--){const s=sg[i];d+='C'+P(s,2,fb)+' '+P(s,1,fb)+' '+P(s,0,fb)}return d+'Z'};
        const fEdges=(sg,o)=>{let d='';for(const e of[0,1]){const P=(s,k)=>fq(s[e][k][0]+(e?-o:o))+','+fq(s[e][k][1]);d+='M'+P(sg[0],0);for(const s of sg)d+='C'+P(s,1)+' '+P(s,2)+' '+P(s,3)}return d};
        /* ---- 状態 ---- */
-       const pf=D.pf;let spd=pf.spd,rate=pf.rate,sl=pf.sl,gd=pf.gd,mir=pf.mirror,pps=JY/TT(spd),ap=pf.ap,tp=0,rk=pf.rk,cur=-LEAD,playing=false,last=0,need=true,raf=0,drag=false;const inv=()=>{need=true;if(!raf)raf=requestAnimationFrame(loop)};
+       const pf=D.pf;let spd=pf.spd,rate=pf.rate,sl=pf.sl,gd=pf.gd,mir=pf.mirror,pps=JY/TT(spd),ap=pf.ap,tp=0,rk=pf.rk,cur=-LEAD,playing=false,last=0,need=true,raf=0,drag=false;const inv=()=>{need=true;if(!raf&&!document.hidden)raf=requestAnimationFrame(loop)};
        const KEY='sekaiChartViewer.settings.v1';
        const FS=D.fs||0;let ao=pf.ao,vl=pf.vol,VL=[],vi=0,ctx,gn,src=null,ab=null,B=0,T0=0,AR=1,gen=0,rtm;
        const save=()=>{try{const v=JSON.parse(localStorage.getItem(KEY))||{},p={...(v.player||{}),spd,rate,sl,gd,mirror:mir,apb:ap,sf,rk,aoff:ao,vol:vl,vw:view};delete p.vt;delete p.ap;v.player=p;localStorage.setItem(KEY,JSON.stringify(v))}catch(e){}try{if(parent&&parent.__setShared)parent.__setShared({slideOpacity:sl,guideOpacity:gd,mirror:mir})}catch(e){}}; /* 透明度・ミラーはアプリ全体の表示設定にも反映 */
@@ -1204,7 +1204,7 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
           奥行き：z=0 が判定線、z=ZF(.978) が最奥（表示開始位置＝レーン奥から0%）。縮尺 s=exp(-KAP*z)（実機の 1.06^(-45*(1-p)) と同じ形）、画面y=yV+(yJ-yV)*s、画面x=中央+レーン位置*LU*s。
           ノーツ速度・ソフラン・ミラー・各透明度は譜面再生画面の設定をそのまま使う。 */
        let view=pf.vw==='game'?'game':'flat';
-       let gx,bgK='';const gcv=$('gview'),gx0=gx=gcv.getContext('2d'),bgc=document.createElement('canvas'),bgx=bgc.getContext('2d'),KAP=45*Math.log(1.06),GF=.0155,GAR=1920/1342,PI=Math.PI,FK=D.fk;
+       let gx,bgK='';const gcv=$('gview'),gx0=gx=gcv.getContext('2d'),bgc=$('gbg'),bgx=bgc.getContext('2d'),KAP=45*Math.log(1.06),GF=.0155,GAR=1920/1342,PI=Math.PI,FK=D.fk;
        /* ノーツ表示開始位置（レーン奥から ap%）→ 奥行きz。ap%は「画面上のレーンの縦方向（投影後のy）」での割合で、3D上の奥行きzの割合ではない。
           開始位置のy＝最奥のy＋ap%×(判定線のy−最奥のy)。画面yは縮尺sに比例（y=yV+(yJ-yV)*s）するので、その位置の縮尺は s=SF+f*(1-SF)、奥行きは z=-ln(s)/KAP。
           ap=0 で z=ZF（最奥）、ap=100 で z=0（判定線）。奥ほど遠近で縮むため、例えば ap=30 の位置は奥行きz上では最奥から約60%進んだ所になる。 */
@@ -1220,13 +1220,13 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
        const GEM={crit:['#ffd24a','#fff1c4'],flick:['#ff8fbf','#ffd9ee'],long:['#4fe0b0','#d5fff0']}; /* 宝石：[縁と光彩, 右の面]（左の面は白） */
        const EF={tap:['110,90,255','170,205,255'],flick:['255,95,160','255,215,235'],long:['50,230,165','200,255,235'],crit:['255,196,60','255,244,180']}; /* ヒットエフェクトの色：[主色, 明るい色] */
        const OUT={long:'#2f6f5a',crit:'#9a7a1e',flick:'#a05a7a',tap:'#7a52a0',dmg:'#4a2d73'}; /* ノーツの濃い縁取り色（譜面表示の「外側の影」と同じ） */
-       const rnd=(i,j)=>{const x=Math.sin(i*127.1+j*311.7)*43758.5453;return x-Math.floor(x)};
+       const RT=[],rnd=(i,j)=>{let t=RT[i];if(!t)t=RT[i]=new Float64Array(192).fill(-1);let v=t[j];if(v<0){const x=Math.sin(i*127.1+j*311.7)*43758.5453;v=t[j]=x-Math.floor(x)}return v}; /* 擬似乱数は (i,j) ごとに1度だけ計算して保持（値は従来と同じ） */
        const hexA=(h,a)=>{const n=parseInt(h.slice(1),16);return'rgba('+(n>>16)+','+(n>>8&255)+','+(n&255)+','+a+')'};
        const poly=p=>{gx.beginPath();for(let i=0;i<p.length;i++){const q=p[i];i?gx.lineTo(q[0],q[1]):gx.moveTo(q[0],q[1])}gx.closePath()};
        const rpoly=(p,r)=>{const n=p.length;r=Math.max(.5,r);gx.beginPath();gx.moveTo((p[0][0]+p[1][0])/2,(p[0][1]+p[1][1])/2);for(let i=1;i<=n;i++){const a=p[i%n],b=p[(i+1)%n];gx.arcTo(a[0],a[1],(a[0]+b[0])/2,(a[1]+b[1])/2,r)}gx.closePath()}; /* 角丸の多角形 */
        /* フリック矢印：実機の矢印画像(notes_flick_arrow*.png)を測った座標(FK)で描く。大きさ・置き方は譜面表示の arrow() と同じ
           （枠の高さ=1.5マス×((幅+3)/3)^.75、枠の幅=2.25マス×((幅+.5)/3)^.75、枠の下端=ノーツ中心の1/4マス下）。u=その奥行きでの1マスの幅(px)。 */
-       const flick=(x,y,u,w,ang,k)=>{
+       const flickRaw=(x,y,u,w,ang,k)=>{
         const wc=Math.max(1,Math.min(6,Math.trunc(w))),diag=Math.abs(ang)>.1,right=ang>0,bias=diag?(right?1:-1)*u/4:0;
         const fh=1.5*u,h=fh*Math.pow((wc+3)/3,.75),iw=fh*1.5*Math.pow((wc+.5)/3,.75);
         const r=(diag?FK.D:FK.V)[wc-1],Wp=r[0],Hp=r[1],sc=Math.min(iw/Wp,h/Hp),c=FK.C[k]||FK.C.flick,G=FK.G[k]||FK.G.flick,T=FK.T,O=FK.O,hf=T/2;
@@ -1240,6 +1240,22 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
         poly(P);gx.lineWidth=T+2*O;gx.strokeStyle=c[4];gx.stroke(); /* 濃い縁 */
         poly(P);gx.fillStyle=c[0];gx.fill();gx.lineWidth=T;gx.strokeStyle=c[1];gx.stroke(); /* 塗りと淡色リング */
         gx.restore()};
+       /* フリック矢印は形が(種類・幅・向き)と拡大率だけで決まる→縮尺ごとに1度だけ描いて drawImage で使い回す（宝石と同じ縮尺バケット）。
+          メモリ上限を超えたら作り直し、大きすぎる矢印は従来どおり直接描く */
+       const AC=new Map();let acPx=0;
+       const flick=(x,y,u,w,ang,k)=>{
+        const wc=Math.max(1,Math.min(6,Math.trunc(w))),diag=Math.abs(ang)>.1,right=ang>0,qb=Math.max(0,Math.round(Math.log(Math.max(u,1))/.0583)),key=k+wc+(diag?right?'R':'L':'V')+qb;
+        let sp=AC.get(key);
+        if(!sp){
+         const ub=Math.exp(qb*.0583),fh=1.5*ub,h=fh*Math.pow((wc+3)/3,.75),iw=fh*1.5*Math.pow((wc+.5)/3,.75),r=(diag?FK.D:FK.V)[wc-1],G=FK.G[k]||FK.G.flick,
+          m=(FK.T/2+FK.O+Math.max(...G.map(e=>e[0])))*Math.min(iw/r[0],h/r[1])+2,bias=diag?(right?1:-1)*ub/4:0,cw=Math.ceil((iw+2*m)*DPR),ch=Math.ceil((h+2*m)*DPR);
+         if(cw*ch>1e6)return flickRaw(x,y,u,w,ang,k);
+         if(acPx>1.2e7){AC.clear();acPx=0}
+         const cv=document.createElement('canvas'),c2=cv.getContext('2d'),pg=gx,ax=iw/2-bias+m,ay=h-ub/4+m;
+         cv.width=cw;cv.height=ch;c2.setTransform(DPR,0,0,DPR,0,0);c2.lineJoin=c2.lineCap='round';gx=c2;try{flickRaw(ax,ay,ub,w,ang,k)}finally{gx=pg}
+         AC.set(key,sp={cv,ax,ay,ub,cw:cw/DPR,ch:ch/DPR});acPx+=cw*ch;
+        }
+        const q=u/sp.ub;gx.drawImage(sp.cv,x-sp.ax*q,y-sp.ay*q,sp.cw*q,sp.ch*q)};
        const BN=14,BMIX=[],BF=[];for(let j=1;j<BN;j++){BF.push(.5*(BN-j)/BN);BMIX.push(.73*Math.pow((j+.5)/BN,1.7))}
        const BODY={long:['107,229,188','168,235,200'],crit:['234,226,153','238,233,180']},GUIDE={long:['82,250,162',1.11],crit:['255,188,39',.874]};
        const GEMS={long:{r0:'#9bf2c6',r1:'#d6fce9',e0:'#a8f0d6',e1:'#ecfff7',h:'10,120,85',u:'150,240,215'},crit:{r0:'#ffe888',r1:'#fff8c8',e0:'#ffc649',e1:'#ffd870',h:'200,140,10',u:'255,238,160'},flick:{r0:'#ffb0d2',r1:'#ffe3f0',e0:'#ff8fbf',e1:'#ffc4de',h:'190,50,110',u:'255,180,215'}};
@@ -1249,8 +1265,15 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
        let pjI=0,iI=0,aI=0,hI=0,bI=0,lI=0,smI=0,GCD=0;
        const mkIt=(z,g,lp,k,n)=>{const o=IT[iI++]||(IT[iI-1]={z:0,g:0,lp:0,k:'',n:null});o.z=z;o.g=g;o.lp=lp;o.k=k;o.n=n;return o};
        const lr=()=>{const a=LRP[lI++]||(LRP[lI-1]=[]);a.length=0;return a};
+       const q4=(a,b,c,d,e,f,g,h)=>{gx.beginPath();gx.moveTo(a,b);gx.lineTo(c,d);gx.lineTo(e,f);gx.lineTo(g,h);gx.closePath()},STP=[[0,-1],[.2,-.2],[1,0],[.2,.2],[0,1],[-.2,.2],[-1,0],[-.2,-.2]],TGS=[[0,0],[.17,.03],[.34,.04],[.51,.055],[.68,.075],[.84,.1],[1,.12]];
+       const star=(x,y,s)=>{gx.beginPath();for(let i=0;i<8;i++){const p=STP[i];i?gx.lineTo(x+p[0]*s,y+p[1]*s):gx.moveTo(x+p[0]*s,y+p[1]*s)}gx.closePath()};
+       /* エフェクトの粒子（星・結晶）は形が固定なので、色ごとに1度だけ描いたスタンプを拡大縮小して使う（濃さは globalAlpha） */
+       const SPS=new Map(),stamp=(key,w,h,paint)=>{const cv=document.createElement('canvas'),c2=cv.getContext('2d'),pg=gx;cv.width=Math.ceil(w*DPR);cv.height=Math.ceil(h*DPR);c2.setTransform(DPR,0,0,DPR,0,0);c2.lineJoin=c2.lineCap='round';gx=c2;try{paint()}finally{gx=pg}SPS.set(key,cv);return cv};
+       const starSp=j=>SPS.get('s'+j)||stamp('s'+j,34,34,()=>{star(17,17,16);gx.fillStyle='rgb('+STC[j]+')';gx.fill()});
+       const crysSp=k=>SPS.get('c'+k)||stamp('c'+k,22,54,()=>{q4(11,1.5,19.32,33.5,11,52.7,2.68,33.5);gx.fillStyle='rgb('+EF[k][1]+')';gx.fill()});
+       const mkEG=()=>({tg:null,tgS:0,p:{},r:{},g:{}});let EG=mkEG(),EW=0,EH=0; /* EG＝ヒットエフェクトのグラデーション置き場（画面サイズが変わったら作り直す。濃さは globalAlpha で掛ける） */
        const drawGame=()=>{
-        const W=GW,H=GH;if(!W||!H)return;pjI=iI=aI=hI=bI=lI=smI=0;if(GCD!==DPR){GCD=DPR;for(const k in GC)GC[k].length=0}
+        const W=GW,H=GH;if(!W||!H)return;pjI=iI=aI=hI=bI=lI=smI=0;if(GCD!==DPR){GCD=DPR;for(const k in GC)GC[k].length=0;AC.clear();acPx=0;SPS.clear()}if(EW!==W||EH!==H){EW=W;EH=H;EG=mkEG()}
         const t=cur,cq=(QC.clear(),QC),Q=h=>{let v=cq.get(h);if(v===undefined){v=lay(h)(t);cq.set(h,v)}return v};
         /* ステージは実機（画面収録 1920×1342）と同じ画面比率。横長の画面は左右に余白、縦長の画面は上下に余白を取る */
         const wide=W/H>=GAR,Sw=wide?H*GAR:W,Sh=Sw/GAR,ox=(W-Sw)/2,oy=(H-Sh)/2,yB=oy+Sh,k0=Sw/1136;
@@ -1283,25 +1306,25 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
         const burst=(l0,l1,k,bm,gl,dm,hi=0,ha=0,ll=0,lu=0)=>{
          const[m,lt]=EF[k],c=pj((l0+l1)/2,0),sp=l1-l0,xl=pj(l0,0)[0],xr=pj(l1,0)[0],hU=.285*Sh,gw=hU/(1.724*Sh);
          if(lu>0){ /* 叩いたレーンの灰白の光（判定線の奥側）：線際で白約12%、奥へ薄れる（実機の計測値） */
-          const zT=.4,tg=gx.createLinearGradient(0,pj(0,zT)[1],0,yJ);
-          [[0,0],[.17,.03],[.34,.04],[.51,.055],[.68,.075],[.84,.1],[1,.12]].forEach(([o,a])=>tg.addColorStop(o,'rgba(255,255,255,'+a*lu+')'));
-          poly([pj(l0,zT),pj(l1,zT),pj(l1,0),pj(l0,0)]);gx.fillStyle=tg;gx.fill();
+          const zT=.4,tg=EG.tg||(EG.tg=gx.createLinearGradient(0,pj(0,zT)[1],0,yJ));
+          if(!EG.tgS){EG.tgS=1;for(const[o,a]of TGS)tg.addColorStop(o,'rgba(255,255,255,'+a+')')}
+          {const p0=pj(l0,zT),p1=pj(l1,zT),p2=pj(l1,0),p3=pj(l0,0);q4(p0[0],p0[1],p1[0],p1[1],p2[0],p2[1],p3[0],p3[1])}gx.fillStyle=tg;gx.globalAlpha=lu;gx.fill();gx.globalAlpha=1;
          }
-         if(ll>0){poly([[xl,yJ],[xr,yJ],[cx+sg*l1*LU*sB,yB],[cx+sg*l0*LU*sB,yB]]);gx.fillStyle='rgba(255,255,255,'+.118*ll+')';gx.fill()} /* 判定線より手前（画面下端まで）は一様な白約12% */
+         if(ll>0){q4(xl,yJ,xr,yJ,cx+sg*l1*LU*sB,yB,cx+sg*l0*LU*sB,yB);gx.fillStyle='rgba(255,255,255,'+.118*ll+')';gx.fill()} /* 判定線より手前（画面下端まで）は一様な白約12% */
          if(bm>0){
-          const tl=cx+(xl-cx)*(1+gw),tr=cx+(xr-cx)*(1+gw),g=gx.createLinearGradient(0,yJ-hU,0,yJ);
-          g.addColorStop(0,'rgba('+m+',0)');g.addColorStop(.45,'rgba('+m+','+.07*bm+')');g.addColorStop(.75,'rgba('+m+','+.17*bm+')');g.addColorStop(1,'rgba('+m+','+.34*bm+')');
-          poly([[xl,yJ],[xr,yJ],[tr,yJ-hU],[tl,yJ-hU]]);gx.fillStyle=g;gx.fill(); /* 色付きの光の柱：判定線に立つ垂直の面（上へ外側に開く・高さは画面の約28%） */
+          const tl=cx+(xl-cx)*(1+gw),tr=cx+(xr-cx)*(1+gw),g=EG.p[k]||(EG.p[k]=gx.createLinearGradient(0,yJ-hU,0,yJ));
+          if(!g._s){g._s=1;g.addColorStop(0,'rgba('+m+',0)');g.addColorStop(.45,'rgba('+m+',.07)');g.addColorStop(.75,'rgba('+m+',.17)');g.addColorStop(1,'rgba('+m+',.34)')}
+          q4(xl,yJ,xr,yJ,tr,yJ-hU,tl,yJ-hU);gx.fillStyle=g;gx.globalAlpha=bm;gx.fill(); /* 色付きの光の柱：判定線に立つ垂直の面（上へ外側に開く・高さは画面の約28%） */
           const bw=Math.max(1.5,.06*LU*(1+.2*sp)),bt=c[0]+(c[0]-cx)*.07;
-          poly([[c[0]-bw,yJ],[c[0]+bw,yJ],[bt+bw*.4,yJ-.2*Sh],[bt-bw*.4,yJ-.2*Sh]]);gx.fillStyle=vg('rgba('+lt+',0)','rgba('+lt+','+.55*bm+')',yJ-.2*Sh,yJ);gx.fill(); /* 中央の細い光線 */
+          q4(c[0]-bw,yJ,c[0]+bw,yJ,bt+bw*.4,yJ-.2*Sh,bt-bw*.4,yJ-.2*Sh);gx.fillStyle=EG.r[k]||(EG.r[k]=vg('rgba('+lt+',0)','rgba('+lt+',.55)',yJ-.2*Sh,yJ));gx.fill();gx.globalAlpha=1; /* 中央の細い光線 */
          }
          if(gl>0){
-          for(let q=Math.round(l0);q<l1-.01;q++){poly([pj(q,GF),pj(q+1,GF),pj(q+1,-GF),pj(q,-GF)]);gx.fillStyle='rgba('+m+','+.22*gl+')';gx.fill();gx.lineWidth=Math.max(1.5,3.2*k0);gx.strokeStyle='rgba('+lt+','+.95*gl+')';gx.stroke()} /* 判定枠のマスが縁取りで光る */
-          const r=LU*(.5+.1*sp),g=gx.createRadialGradient(c[0],c[1],0,c[0],c[1],r);g.addColorStop(0,'rgba('+lt+','+.7*gl+')');g.addColorStop(.4,'rgba('+m+','+.32*gl+')');g.addColorStop(1,'rgba('+m+',0)');gx.fillStyle=g;gx.fillRect(c[0]-r,c[1]-r,2*r,2*r);
+          for(let q=Math.round(l0);q<l1-.01;q++){{const a0=pj(q,GF),a1=pj(q+1,GF),a2=pj(q+1,-GF),a3=pj(q,-GF);q4(a0[0],a0[1],a1[0],a1[1],a2[0],a2[1],a3[0],a3[1])}gx.fillStyle='rgba('+m+','+.22*gl+')';gx.fill();gx.lineWidth=Math.max(1.5,3.2*k0);gx.strokeStyle='rgba('+lt+','+.95*gl+')';gx.stroke()} /* 判定枠のマスが縁取りで光る */
+          const r=LU*(.5+.1*sp),gc=EG.g[k]||(EG.g[k]={}),g=gc[sp]||(gc[sp]=gx.createRadialGradient(0,0,0,0,0,r));if(!g._s){g._s=1;g.addColorStop(0,'rgba('+lt+',.7)');g.addColorStop(.4,'rgba('+m+',.32)');g.addColorStop(1,'rgba('+m+',0)')}gx.save();gx.translate(c[0],c[1]);gx.fillStyle=g;gx.globalAlpha=gl;gx.fillRect(-r,-r,2*r,2*r);gx.restore();
          }
          if(dm>0)for(let j=0;j<2;j++){ /* 床に重なる2枚の四角い輪郭（遠近で平たく見える） */
           const r=q=>rnd(hi+3,j*7+q),th=(j?.5:-.35)+ha*(j?1.3:-1.1)+(r(1)-.5)*.4,s=LU*(.5+.3*j)*(.85+.15*sp),px=c[0]+(r(4)-.5)*sp*LU*.5,py=c[1]-r(5)*.1*LU;
-          poly([[1,1],[-1,1],[-1,-1],[1,-1]].map(([u,v])=>[px+s*(u*Math.cos(th)-v*Math.sin(th)),py+s*(u*Math.sin(th)+v*Math.cos(th))*.34]));
+          {const cs=s*Math.cos(th),sn=s*Math.sin(th);q4(px+cs-sn,py+(sn+cs)*.34,px-cs-sn,py+(cs-sn)*.34,px-cs+sn,py-(sn+cs)*.34,px+cs+sn,py+(sn-cs)*.34)}
           gx.fillStyle='rgba('+m+','+.07*dm+')';gx.fill();gx.lineWidth=Math.max(1,1.6*k0);gx.strokeStyle='rgba('+lt+','+.55*dm+')';gx.stroke()
          }
         };
@@ -1312,7 +1335,7 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
           const r=q=>rnd(i,j*9+q),life=.16+.2*r(1);if(a>=life)continue;
           const f=1-a/life,an=(r(2)<.7?(r(3)<.5?0:PI):-PI*r(3))+(r(4)-.5)*.5,ca=Math.cos(an),sa=Math.sin(an)*.55,sx=c[0]+(r(5)-.5)*sp*LU*.8;
           const d=LU*(.25+1.1*r(6))*e1,Ln=LU*(.25+.55*r(7))*(.4+.6*f),wd=Math.max(.8,.035*LU)*f,mx=sx+ca*(d+Ln*.4),my=c[1]+sa*(d+Ln*.4);
-          poly([[sx+ca*d,c[1]+sa*d],[mx-sa*wd,my+ca*wd],[sx+ca*(d+Ln),c[1]+sa*(d+Ln)],[mx+sa*wd,my-ca*wd]]);gx.fillStyle='rgba(255,255,255,'+.9*f+')';gx.fill()
+          q4(sx+ca*d,c[1]+sa*d,mx-sa*wd,my+ca*wd,sx+ca*(d+Ln),c[1]+sa*(d+Ln),mx+sa*wd,my-ca*wd);gx.fillStyle='rgba(255,255,255,'+.9*f+')';gx.fill()
          }
          for(let j=0;j<10;j++){ /* 小さな粒 */
           const r=q=>rnd(i,j*5+q+60),life=.3+.3*r(1);if(a>=life)continue;
@@ -1323,14 +1346,14 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
          const lt=EF[k][1],sp=l1-l0,c=pj((l0+l1)/2,0);
          for(let j=0;j<8;j++){const r=q=>rnd(i+11,j*7+q),life=.2+.2*r(1);if(a<.015||a>=life)continue;
           const f=1-a/life,x=c[0]+(r(2)-.5)*sp*LU*.9,y=c[1]-LU*(.15+1.7*r(3))*(1-Math.exp(-a*10)),hh=LU*(.17+.2*r(4)),hw=hh*.26;
-          poly([[x,y-hh],[x+hw,y],[x,y+hh*.6],[x-hw,y]]);gx.fillStyle='rgba('+lt+','+.85*f+')';gx.fill()}
+          const kq=hh/32;gx.globalAlpha=.85*f;gx.drawImage(crysSp(k),x-11*kq,y-33.5*kq,22*kq,54*kq)}gx.globalAlpha=1;
         };
         
         const stars=(i,l0,l1,a)=>{ /* フリックで四方へ飛ぶ多色の星形スパークル */
          const sp=l1-l0,c=pj((l0+l1)/2,0);
          for(let j=0;j<9;j++){const r=q=>rnd(i+23,j*6+q),life=.45+.45*r(1);if(a>=life)continue;
           const f=1-a/life,an=-PI*(.04+.92*r(2)),d=LU*(.6+3.4*r(3))*(1-Math.exp(-a*5)),x=c[0]+Math.cos(an)*d+(r(4)-.5)*sp*LU*.6,y=c[1]+Math.sin(an)*d*.8,s=LU*(.07+.1*r(5))*(.55+.45*Math.sin(a*45+j*2)**2);
-          poly([[x,y-s],[x+s*.2,y-s*.2],[x+s,y],[x+s*.2,y+s*.2],[x,y+s],[x-s*.2,y+s*.2],[x-s,y],[x-s*.2,y-s*.2]]);gx.fillStyle='rgba('+STC[j%5]+','+Math.min(1,1.6*f)+')';gx.fill()}
+          const kq=s/16;gx.globalAlpha=Math.min(1,1.6*f);gx.drawImage(starSp(j%5),x-17*kq,y-17*kq,34*kq,34*kq)}gx.globalAlpha=1;
         };
         const glit=(i,l0,l1,k,t)=>{const lt=EF[k][1];for(let j=0;j<14;j++){const r=q=>rnd(i+7,j*5+q),p=((t*1.6+r(1))%1+1)%1,s=Math.max(1.2,LU*(.04+.05*r(3))),x=pj(l0+(l1-l0)*r(2),0)[0],y=yJ-p*.21*Sh;gx.fillStyle='rgba('+lt+','+.85*Math.sin(PI*p)+')';gx.fillRect(x-s/2,y-s/2,s,s)}}; /* 保持中に光の柱の中を舞い上がる粒 */
         const gReset=()=>{gx.setTransform(DPR,0,0,DPR,0,0);gx.globalAlpha=1;gx.globalCompositeOperation='source-over';gx.lineJoin='round';gx.lineCap='round'};const gClip=()=>{gx.save();rpoly([[ox,oy],[ox+Sw,oy],[ox+Sw,yB],[ox,yB]],14*k0);gx.clip()};
@@ -1347,10 +1370,15 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
         const yL0=oy+.0999*Sh,yL1=oy+.1475*Sh,sL=(yL0-yV)/(yJ-yV),lg=a=>{const g=gx.createLinearGradient(0,yL0,0,yB);g.addColorStop(0,'rgba(255,255,255,0)');g.addColorStop((yL1-yL0)/(yB-yL0),'rgba(255,255,255,'+a+')');g.addColorStop(1,'rgba(255,255,255,'+a+')');return g};
         poly([[cx+6*LU*sL,yL0],[cx+6*LU*sB,yB],[cx-6*LU*sB,yB],[cx-6*LU*sL,yL0]]);gx.fillStyle=vg('rgba(6,4,28,0)','rgba(6,4,28,.22)',yL0,yL1);gx.fill();
         for(const[a,w,ls]of[[.19,1,[-4,-2,0,2,4]],[.5,1.5,[-6,6]]]){gx.strokeStyle=lg(a);gx.lineWidth=Math.max(1,w*k0);gx.beginPath();for(const lp of ls){gx.moveTo(cx+sg*lp*LU*sL,yL0);gx.lineTo(cx+sg*lp*LU*sB,yB)}gx.stroke()}
+                /* 判定枠：12マスの暗い枠に#a796ffの縁。ノーツはこの上を通る */
+        const fr=[pj(-6,GF),pj(6,GF),pj(6,-GF),pj(-6,-GF)];
+        rpoly(fr,5*k0);gx.fillStyle='rgba(6,5,16,.82)';gx.fill();
+        gx.strokeStyle='rgba(150,122,255,.7)';gx.lineWidth=Math.max(1,1.3*k0);gx.beginPath();for(let i=1;i<12;i++){const a=pj(i-6,GF),b=pj(i-6,-GF);gx.moveTo(a[0],a[1]);gx.lineTo(b[0],b[1])}gx.stroke();
+        rpoly(fr,5*k0);gx.lineWidth=12*k0;gx.strokeStyle='rgba(166,126,255,.22)';gx.stroke();gx.lineWidth=4.2*k0;gx.strokeStyle='#a67eff';gx.stroke();
         gx.restore()};
         const gKey=W+','+H+','+DPR+','+sg+','+(jk?1:0);
         if(bgK!==gKey){bgc.width=gcv.width;bgc.height=gcv.height;gx=bgx;try{gPaintBg()}finally{gx=gx0}bgK=gKey}
-        gx.setTransform(1,0,0,1,0,0);gx.globalAlpha=1;gx.globalCompositeOperation='copy';gx.drawImage(bgc,0,0);gReset();gClip();
+        gx.setTransform(1,0,0,1,0,0);gx.globalAlpha=1;gx.globalCompositeOperation='source-over';gx.clearRect(0,0,gcv.width,gcv.height);gReset();gClip(); /* 背景は背面の別レイヤー(#gbg)。こちらはノーツとエフェクトだけを毎フレーム描き直す */
         /* スライド（経路を奥行き方向にサンプリングして、遠近を付けた帯として塗る） */
         const holds=HOLDS,items=ITEMS,bodyQ=BODYQ;holds.length=items.length=bodyQ.length=0; /* 本体は判定枠より後（枠の上）に、ガイド→ロングの順で描く */
         for(const c of C){if(c._one){const b=Q(c.p[0][3]);if(JY-(c._qa-b)*pps<top-4||JY-(c._qb-b)*pps>JY+4)continue}
@@ -1369,11 +1397,6 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
         const visN=VN;VN.length=0;let nl=0,mo=true;for(const[h,a]of NLAY){const qb=Q(h),kq=JY/pps,qlo=qb-.05*kq,qhi=qb+(zM+.05)*kq;let lo=0,hi=a.length;while(lo<hi){const m=(lo+hi)>>1;if(a[m].q<qlo)lo=m+1;else hi=m}const s0=visN.length;for(;lo<a.length&&a[lo].q<=qhi;lo++)visN.push(a[lo]);if(visN.length>s0){nl++;if(!a._m)mo=false}}
         if(nl>1||!mo)visN.sort((u,v)=>u._i-v._i); /* 元の順序に戻す（同じzの重なり順を変えないため） */
         for(const n of visN){const z=(n.q-Q(n.h))*pps/JY;if(z<-.002||z>zM)continue;n.m[0]==='relay'?items.push(mkIt(z,1,n.x/LW-6+n.w/2,n.m[1]?'crit':'long',null)):items.push(mkIt(z,0,0,'',n))}
-        /* 判定枠：12マスの暗い枠に#a796ffの縁。ノーツはこの上を通る */
-        const fr=[pj(-6,GF),pj(6,GF),pj(6,-GF),pj(-6,-GF)];
-        rpoly(fr,5*k0);gx.fillStyle='rgba(6,5,16,.82)';gx.fill();
-        gx.strokeStyle='rgba(150,122,255,.7)';gx.lineWidth=Math.max(1,1.3*k0);gx.beginPath();for(let i=1;i<12;i++){const a=pj(i-6,GF),b=pj(i-6,-GF);gx.moveTo(a[0],a[1]);gx.lineTo(b[0],b[1])}gx.stroke();
-        rpoly(fr,5*k0);gx.lineWidth=12*k0;gx.strokeStyle='rgba(166,126,255,.22)';gx.stroke();gx.lineWidth=4.2*k0;gx.strokeStyle='#a67eff';gx.stroke();
         for(const o of bodyQ)if(o.c.deco)guideBody(o.L,o.R,o.c.cr);for(const o of bodyQ)if(!o.c.deco)slideBody(o.L,o.R,o.c.cr); /* ガイド→ロングの順（ソート不要） */
         gx.globalCompositeOperation='lighter';
         holds.forEach(([a,b,cr],i)=>{const k=cr?'crit':'long';burst(a,b,k,.8,.75*(.85+.15*Math.sin(t*20+i)),.8);glit(i,a,b,k,t)}); /* 保持中：柱・枠の発光・ひし形を出し続け、粒子を舞い上げる */
@@ -1443,7 +1466,7 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
        };
        /* 表示の切替（譜面再生画面 ⇔ ゲーム画面）。描画に失敗したときは譜面再生画面へ戻して再生を止めない */
        const draw=()=>{if(view==='game'){try{drawGame();return}catch(e){console.error(e);setView('flat');$('astat').textContent='ゲーム画面の描画に失敗したため、譜面画面に戻しました'}}drawFlat()};
-       const setView=v=>{view=v==='game'?'game':'flat';const g=view==='game',b=$('vw');gcv.style.display=g?'block':'none';$('stage').style.display=g?'none':'block';b.title=g?'譜面画面に切り替え':'ゲーム画面に切り替え';b.setAttribute('aria-label',g?'表示切り替え（譜面画面へ）':'表示切り替え（ゲーム画面へ）');b.setAttribute('aria-pressed',g);if(g)fit();inv();save()};
+       const setView=v=>{view=v==='game'?'game':'flat';const g=view==='game',b=$('vw');gcv.style.display=bgc.style.display=g?'block':'none';$('stage').style.display=g?'none':'block';b.title=g?'譜面画面に切り替え':'ゲーム画面に切り替え';b.setAttribute('aria-label',g?'表示切り替え（譜面画面へ）':'表示切り替え（ゲーム画面へ）');b.setAttribute('aria-pressed',g);if(g)fit();inv();save()};
        $('vw').onclick=()=>setView(view==='game'?'flat':'game');setView(view);
        const ui=()=>{
         const a=atT(cur);setT($('hB'),'小節 '+Math.floor(a.bar+1e-9));setT($('hBpm'),'BPM '+(+a.bpm.toFixed(2)));setT($('hHs'),'速度 ×'+(+lay(mainH)(cur,1).toFixed(2)));
@@ -1456,7 +1479,7 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
        function loop(ts){raf=0;
         if(playing){cur=src&&ctx.state==='running'?Math.min(dur,aT()):cur+Math.min(.1,Math.max(0,(ts-last)/1000))*rate;last=ts;need=true;if(cur>=dur){cur=dur;setPlay(false)}}
         if(need){need=false;draw();ui()}
-        if(playing&&!raf)raf=requestAnimationFrame(loop);
+        if(playing&&!raf&&!document.hidden)raf=requestAnimationFrame(loop);
        }
        /* ---- 操作 ---- */
        const seekEl=$('seek');seekEl.min=Math.round(-LEAD*100);seekEl.max=Math.round(dur*100);seekEl.step=1;$('tend').textContent=fmt(dur);
@@ -1494,6 +1517,13 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
        const setVol=()=>{$('volv').textContent=Math.round(vl*100)+'%'};$('vol').value=Math.round(vl*100);setVol();$('vol').oninput=e=>{vl=e.target.value/100;if(gn)gn.gain.value=vl;setVol();save()};
        const setAo=()=>{$('aov').textContent=(ao>=0?'+':'')+ao.toFixed(2)+'秒'};$('ao').value=ao;setAo();$('ao').oninput=e=>{ao=+e.target.value;setAo();save();if(playing){aStop();aStart()}};
        initA();setSpd(spd);$('rate').value=rate;$('ratev').textContent=rate.toFixed(2)+'×';$('rk').value=rk;$('sf').checked=!sf;$('ap').value=ap;applyAp();draw();ui();
+       /* 非表示（タブ／アプリの切替・画面ロック・ページの退避）になったら、再生・音声・描画ループを止める。
+          Safariは visibilitychange が届かない遷移があるため pagehide / pageshow も見る。復帰時は止まったままの rAF を捨てて描画を再開し、
+          バックグラウンド中に破棄されることがある Canvas の内容（背景・スプライト）を作り直す（再生は自動では再開しない） */
+       const HM='非表示になったため一時停止しました',isHid=()=>document.hidden||document.visibilityState==='hidden';
+       const goHide=()=>{if(raf){cancelAnimationFrame(raf);raf=0}if(playing){setPlay(false);$('astat').textContent=HM}try{if(ctx&&ctx.state==='running')ctx.suspend().catch(()=>{})}catch(e){}};
+       const goShow=()=>{if(isHid())return;if(raf){cancelAnimationFrame(raf);raf=0}bgK='';GCD=0;need=true;inv();if($('astat').textContent===HM)setTimeout(()=>{if($('astat').textContent===HM)$('astat').textContent=''},4000)};
+       document.addEventListener('visibilitychange',()=>isHid()?goHide():goShow());addEventListener('pagehide',goHide);addEventListener('pageshow',goShow);
        window.__pl={setView,get view(){return view},seek,draw,ui,tm,atT,lay,setSpd,setPlay,prevBar,nextBar,N,C,LN,dur,get t(){return cur},get playing(){return playing},get pps(){return pps},JY};
       }
       const openPlayer=w=>{
@@ -1515,7 +1545,7 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
         .cap{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:11px;line-height:1.35;color:#c4d2e4}.cap b{color:#8ef0e2;font-variant-numeric:tabular-nums;white-space:nowrap}
         .control input[type=range]{display:block;width:100%;height:30px;accent-color:#58d7c4}
         .chk{display:flex;align-items:center;gap:8px;height:30px;padding:0 10px;border:1px solid #344b66;border-radius:6px;background:#0f1a2b;font-size:13px;color:#e5edf7;cursor:pointer;user-select:none}.chk:has(input:checked){border-color:#58d7c4}.chk input{width:16px;height:16px;margin:0;accent-color:#58d7c4}
-        #wrap{flex:1;min-height:0;position:relative;background:#111827}#stage{display:block;width:100%;height:100%}#gview{display:none;width:100%;height:100%}
+        #wrap{flex:1;min-height:0;position:relative;background:#111827}#stage{display:block;width:100%;height:100%}#gbg,#gview{display:none;position:absolute;left:0;top:0;width:100%;height:100%}
         .hud{position:absolute;left:10px;top:8px;display:flex;flex-wrap:wrap;gap:6px;pointer-events:none}.hud span{background:#0b1220cc;border:1px solid #344b66;border-radius:8px;padding:2px 10px;font-weight:700;font-variant-numeric:tabular-nums}
         footer{flex:none;display:flex;flex-direction:column;gap:8px;padding:8px 12px 10px;background:#18263a;border-top:1px solid #344b66}
         .tl{display:flex;align-items:center;gap:10px}.tl input{flex:1;min-width:0;accent-color:#58d7c4}.tl span{min-width:4.4em;text-align:center;font-variant-numeric:tabular-nums;font-weight:700}
@@ -1536,7 +1566,7 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
         <div class="control"><label class="cap" for="slO">スライドノーツ透明度 <b id="slv"></b></label><input id="slO" type="range" min="0" max="100"></div>
         <div class="control"><label class="cap" for="gdO">ガイドノーツ透明度 <b id="gdv"></b></label><input id="gdO" type="range" min="0" max="100"></div>
        </section>
-       <main id="wrap"><svg id="stage" role="img" aria-label="ノーツが流れる譜面再生画面" preserveAspectRatio="xMidYMid meet"><defs>${sprites}</defs></svg><canvas id="gview" role="img" aria-label="実際のゲーム画面のようなノーツが流れる再生画面"></canvas>
+       <main id="wrap"><svg id="stage" role="img" aria-label="ノーツが流れる譜面再生画面" preserveAspectRatio="xMidYMid meet"><defs>${sprites}</defs></svg><canvas id="gbg" aria-hidden="true"></canvas><canvas id="gview" role="img" aria-label="実際のゲーム画面のようなノーツが流れる再生画面"></canvas>
         <div class="hud"><span id="hB">小節 0</span><span id="hBpm">BPM</span><span id="hHs">速度 ×1</span></div></main>
        <footer>
         <div class="tl"><span id="tcur">0:00.0</span><input id="seek" type="range" aria-label="再生位置"><span id="tend"></span></div>
