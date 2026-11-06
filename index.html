@@ -114,6 +114,11 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
 .mpq{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.mpq button{padding:4px 10px;font-size:12px}
 .mpsel{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}.mpsel label{display:block;margin-bottom:4px;font-weight:700}
 .mpb{height:8px;border-radius:99px;background:var(--ln);overflow:hidden}.mpb i{display:block;width:0;height:100%;background:var(--acc);transition:width .2s}
+.sto{display:grid;grid-template-columns:1fr auto;gap:2px 12px;margin:0 0 8px}.sto dt{color:var(--mut)}.sto dd{margin:0;text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+.sbar{height:8px;border-radius:99px;background:var(--ln);overflow:hidden;margin:6px 0}.sbar i{display:block;height:100%;width:0;background:var(--acc)}
+.mfl{list-style:none;margin:0 0 12px;padding:0;display:grid;gap:6px}.mfl li{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:8px 10px;border:1px solid var(--ln);border-radius:10px;background:var(--bg2)}.mfl .n{flex:1 1 220px;min-width:0;overflow-wrap:anywhere;font-weight:700}.mfl button{padding:4px 10px;font-size:12px}
+button.dn{background:#c0392b}
+#mpvd{width:min(92vw,720px);padding:12px;border:1px solid var(--ln);border-radius:14px;color:var(--ink)}#mpvd::backdrop{background:#10203a99}#mpvd video{display:block;width:100%;max-height:70dvh;background:#000;border-radius:8px}
 .mpa{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
 @media(prefers-reduced-motion:reduce){.mpb i{transition:none}}
     </style>
@@ -193,13 +198,26 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
           <p class="mut">変更は自動で保存され、次に開く譜面再生から反映されます（再生画面の「表示設定」と共通）。</p>
           <p class="mut">スライド／ガイドノーツの透明度とミラーは、上の「表示の設定」で変更します。</p>
           <p class="mut">再生画面でボーカルを切り替えても、その譜面を開いている間だけの変更です（デフォルトボーカルは変わりません）。</p></div>
+        <div class="card"><h2>保存データと容量</h2>
+          <dl class="sto"><dt>このページの使用容量（概算）</dt><dd id="stoT">計算中…</dd><dt>　保存したMP4（<span id="stoN">0</span>本）</dt><dd id="stoM">–</dd><dt>　設定</dt><dd id="stoS">–</dd><dt>　その他（キャッシュなど）</dt><dd id="stoO">–</dd></dl>
+          <div class="sbar" aria-hidden="true"><i id="stoB"></i></div>
+          <p class="mut" id="stoQ" style="margin:0 0 6px"></p>
+          <p class="mut" style="margin:0">合計はブラウザの推定値です。同じアドレス（ドメイン）で保存された他のデータも含まれる場合があります。</p>
+          <h3>ページ内に保存したMP4</h3>
+          <ul class="mfl" id="mfl"></ul>
+          <h3>キャッシュの削除</h3>
+          <div class="fld sw"><label><span>表示・再生の設定も初期化する</span><input id="wpS" type="checkbox"></label></div>
+          <button id="wipe" class="dn" type="button">ページ内のキャッシュを完全に削除</button> <button id="stoR" class="g" type="button">容量を再計算</button>
+          <p class="mut">削除するもの：ページ内に保存したMP4、IndexedDB、Cache Storage、Service Worker、一時ファイル（OPFS）、セッション情報。完了後にページを再読み込みします。ブラウザ自身のHTTPキャッシュ（画像・音源の一時ファイル）はページから消せないため、必要ならブラウザの「閲覧データの削除」で消してください。</p></div>
       </section>
     </main>
     <div id="st" role="status" hidden></div>
+    <dialog id="mpvd" aria-labelledby="mpvt"><h2 id="mpvt" style="margin:0 0 8px;font-size:14px;overflow-wrap:anywhere"></h2><video id="mpvv" controls playsinline></video><div style="text-align:right;margin-top:10px"><button id="mpvx" class="g" type="button">閉じる</button></div></dialog>
     <dialog id="mp4d" aria-labelledby="mp4t">
       <h2 id="mp4t">MP4で保存</h2>
       <p class="mut" style="margin:0 0 14px">ゲーム画面のノーツの流れを、音声つきのMP4に書き出します。ノーツ速度・ミラー・透明度などは、設定画面の現在の値が使われます。</p>
       <p id="mpw" class="mut" style="color:#c0392b;font-weight:700" hidden>このブラウザはMP4の書き出しに対応していません。Chrome・Edge・Safariの最新版でお試しください。</p>
+      <p id="mpa" class="mut" style="color:#b9770e;font-weight:700;margin:0 0 10px" hidden>このブラウザはAAC音声の書き出しに対応していないため、Opus音声のMP4になります。Windows標準プレーヤーやiPhoneなどでは音が出ないことがあります（VLCなどで再生できます）。</p>
       <fieldset id="mpo">
         <fieldset><legend>再生速度（複数選べます）</legend>
           <div class="mpc" id="mpr"></div>
@@ -211,6 +229,7 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
           <div><label for="mpz">解像度</label><select id="mpz"><option value="480">480p（軽い）</option><option value="720" selected>720p（標準）</option><option value="1080">1080p（高画質・重い）</option></select></div>
         </div>
         <div class="fld sw"><label><span>映像の左上に再生速度を表示</span><input id="mpl" type="checkbox" checked></label></div>
+        <fieldset><legend>保存先</legend><div class="mpc" id="mpt"><label><input type="radio" name="mpt" value="file" checked>ファイルに書き出す</label><label><input type="radio" name="mpt" value="page">ページ内に保存する</label></div><p class="mut" id="mptn" style="margin:6px 0 0"></p></fieldset>
       </fieldset>
       <div id="mpp" hidden><div class="mpb"><i></i></div></div>
       <p class="mut" id="mps" role="status" style="min-height:2.9em;margin:8px 0 0"></p>
@@ -1687,8 +1706,8 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
         const ok=!!(window.VideoEncoder&&window.AudioEncoder&&window.VideoFrame&&window.AudioData);
         $('#mpw').hidden=ok;$('#mpr').innerHTML=MPR.map(r=>`<label><input type="checkbox" value="${r}"${r===1?' checked':''}>${r===1?'1.0':r}×</label>`).join('');
         $('#mpv').innerHTML='<span class="mut">ボーカル情報を取得中…</span>';
-        $('#mpo').disabled=false;$('#mpp').hidden=true;mpBar(0);$('#mpc').textContent='閉じる';$('#mpg').disabled=true;mpTxt('');
-        const S={api:null,V:[],fr:null,run:false,stop:false};mpS=S;mpd.showModal();
+        $('#mpo').disabled=false;$('#mpp').hidden=true;$('#mpa').hidden=true;mpBar(0);$('#mpc').textContent='閉じる';$('#mpg').disabled=true;mpTxt('');{const d=loadPrefs().mp4dest==='page'?'page':'file';$$('#mpt input').forEach(i=>{i.checked=i.value===d})}mptNote();
+        const S={api:null,V:[],fr:null,run:false,stop:false};mpS=S;mpd.showModal();if(ok)AudioEncoder.isConfigSupported({codec:'mp4a.40.2',sampleRate:48000,numberOfChannels:2,bitrate:192e3}).then(r=>{if(!r.supported&&mpS===S)$('#mpa').hidden=false}).catch(()=>{});
         if(!ok)return;
         try{
           const fr=document.createElement('iframe');fr.title='MP4書き出し用（非表示）';fr.setAttribute('aria-hidden','true');fr.tabIndex=-1;
@@ -1706,20 +1725,24 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
         const R=mpRates(),V=mpVocs(),jobs=[];if(!R.length||!V.length)return;
         for(const v of V)for(const r of R)jobs.push([v,r]);
         S.run=true;S.stop=false;$('#mpo').disabled=true;$('#mpg').disabled=true;$('#mpc').textContent='中止';$('#mpp').hidden=false;mpBar(0);
-        const[W,H]=mpSize(),lab=$('#mpl').checked,types=V.map(i=>S.V[i].t);let done=0;
+        const[W,H]=mpSize(),lab=$('#mpl').checked,types=V.map(i=>S.V[i].t),dest=($('#mpt input:checked')||{}).value==='page'?'page':'file';let done=0,pg=0,fb='';savePrefs({mp4dest:dest});
         try{
           for(let j=0;j<jobs.length;j++){
             const[v,r]=jobs[j],fps=mpFps(r),pre=`(${j+1}/${jobs.length}) ${r===1?'1.0':r}×　`;
             const blob=await mpRender(S,{v,r,W,H,fps,lab},(f,t)=>{mpBar((j+f)/jobs.length);mpTxt(pre+t)});
             const vt=S.V[v].t,suf=V.length>1?'_'+fileSafe(vt)+(types.filter(x=>x===vt).length>1?'-'+(v+1):''):'';
-            saveBlob(blob,`${fileSafe(cur.title)}_${curD}_x${r.toFixed(2)}${suf}.mp4`);done++;
+            const nm=`${fileSafe(cur.title)}_${curD}_x${r.toFixed(2)}${suf}.mp4`;
+            if(dest==='page'){try{await dbAdd({name:nm,vocal:S.V[v].l,rate:r,size:blob.size,at:Date.now(),blob});pg++}catch(e){saveBlob(blob,nm);fb=e&&e.name==='QuotaExceededError'?'容量不足':(e&&e.message||'保存に失敗')}} /* ページ内に保存できなければファイルに書き出し、作った動画を失わない */
+            else saveBlob(blob,nm);
+            done++;
             await sleep(500);
           }
-          mpBar(1);mpTxt(`完了：MP4を${done}本保存しました`);
+          mpBar(1);mpTxt(`完了：MP4を${done}本${dest==='page'?`（ページ内に${pg}本${fb?`、ファイルに${done-pg}本`:''}）`:''}保存しました`+(fb?`。ページ内に保存できなかった分はファイルに書き出しました（${fb}）`:'')+(pg?'。再生・ダウンロード・削除は設定画面の「保存データと容量」から':'')+(S.codec==='opus'?'。この環境ではAACが使えないためOpus音声です（音が出ない場合はVLCなどで再生してください）':''));
         }catch(e){mpTxt(e===STOP?`中止しました（${done}本を保存済み）`:'書き出しに失敗しました: '+(e&&e.message||e));if(e!==STOP)console.error(e)}
         finally{S.run=false;if(mpS===S){$('#mpo').disabled=false;$('#mpc').textContent='閉じる';$('#mpg').disabled=false}}
       };
       /* 1本分：音声を準備 → 音声を符号化 → 映像を1コマずつ描いて符号化 → MP4のBlobを返す */
+      const mpResample=async(b,sr)=>{const oc=new OfflineAudioContext(b.numberOfChannels,Math.ceil(b.length*sr/b.sampleRate),sr),n=oc.createBufferSource();n.buffer=b;n.connect(oc.destination);n.start();return oc.startRendering()}; /* Opusは48kHzのみ確実に使えるため */
       async function mpRender(S,o,prog){
         const{Muxer,ArrayBufferTarget}=await import(MPX).catch(()=>{throw new Error('MP4変換ライブラリを読み込めませんでした（通信状況を確認してください）')});
         const ck=()=>{if(S.stop)throw STOP},api=S.api,R=o.r,fps=o.fps,W=o.W,H=o.H;
@@ -1727,15 +1750,16 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
         const pe=S.fr.contentDocument.getElementById('astat'),tm=setInterval(()=>{if(pe&&pe.textContent)prog(0,pe.textContent)},250);
         try{await api.setup(W,H,R,o.v)}finally{clearInterval(tm)}
         ck();
-        const{dur,lead,fs,ao,buf}=api.info(),sr=buf.sampleRate,nc=Math.min(2,buf.numberOfChannels),N=Math.ceil((dur+lead)/R*fps),T=N/fps;
+        const inf=api.info(),{dur,lead,fs,ao}=inf;let buf=inf.buf,sr=buf.sampleRate;const nc=Math.min(2,buf.numberOfChannels),N=Math.ceil((dur+lead)/R*fps),T=N/fps;
+        {const x=buf.getChannelData(0);let pk=0;for(let i=0;i<x.length;i+=61)pk=Math.max(pk,Math.abs(x[i]));if(pk<1e-4)throw new Error('取得した音源が無音でした（ボーカルの音声を読み込めていません）')}
         const vc={codec:Math.ceil(W/16)*Math.ceil(H/16)*fps>245760?'avc1.64002A':'avc1.640028',width:W,height:H,bitrate:Math.round(Math.min(16e6,Math.max(1.5e6,W*H*fps*.1))),framerate:fps};
         const ac={codec:'mp4a.40.2',sampleRate:sr,numberOfChannels:nc,bitrate:192e3};let acd='aac';
         if(!(await VideoEncoder.isConfigSupported(vc)).supported)throw new Error('このブラウザではH.264の書き出しに対応していません');
         if(!(await AudioEncoder.isConfigSupported(ac)).supported){ /* AAC非対応（LinuxのChromeなど）ではOpus音声で代用する（VLC・Chrome・Firefoxなどで再生可。古いプレーヤーでは音が出ないことがある） */
-          ac.codec='opus';acd='opus';if(!(await AudioEncoder.isConfigSupported(ac)).supported)throw new Error('このブラウザでは音声（AAC/Opus）の書き出しに対応していません')}
-        const mx=new Muxer({target:new ArrayBufferTarget(),video:{codec:'avc',width:W,height:H},audio:{codec:acd,numberOfChannels:nc,sampleRate:sr},fastStart:'in-memory'});
-        let err=null;const bad=e=>{err=err||e};
-        const ve=new VideoEncoder({output:(c,m)=>mx.addVideoChunk(c,m),error:bad}),ae=new AudioEncoder({output:(c,m)=>mx.addAudioChunk(c,m),error:bad});
+          ac.codec='opus';acd='opus';if(sr!==48000){buf=await mpResample(buf,48000);sr=48000;ac.sampleRate=sr}if(!(await AudioEncoder.isConfigSupported(ac)).supported)throw new Error('このブラウザでは音声（AAC/Opus）の書き出しに対応していません')}
+        S.codec=acd;const mx=new Muxer({target:new ArrayBufferTarget(),video:{codec:'avc',width:W,height:H},audio:{codec:acd,numberOfChannels:nc,sampleRate:sr},fastStart:'in-memory'});
+        let err=null,na=0;const bad=e=>{err=err||e};
+        const ve=new VideoEncoder({output:(c,m)=>mx.addVideoChunk(c,m),error:bad}),ae=new AudioEncoder({output:(c,m)=>{na++;mx.addAudioChunk(c,m)},error:bad});
         try{
           ve.configure(vc);ae.configure(ac);
           /* 音声：譜面再生と同じ開始位置（先頭の無音＝delay、変換後の音源の読み出し位置＝off）。曲が終わったあとは無音で映像の長さに揃える */
@@ -1765,11 +1789,63 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
               const f=(k+1)/N;prog(f,`映像を生成中 ${Math.round(f*100)}%（残り${mpEta((ty-t0)/1000/f*(1-f))}）`);
             }
           }
-          await ve.flush();await ae.flush();if(err)throw err;
+          await ve.flush();await ae.flush();if(err)throw err;if(!na)throw new Error('音声を符号化できませんでした（音声なしのMP4は保存しません）');
           mx.finalize();prog(1,'保存しています…');
           return new Blob([mx.target.buffer],{type:'video/mp4'});
         }finally{try{ve.close()}catch(e){}try{ae.close()}catch(e){}}
       }
+      /* ================= ページ内の保存データ（IndexedDB）・使用容量・完全削除 ================= */
+      const DBN='sekaiChartViewer.files',DBS='mp4';
+      const dbo=()=>new Promise((ok,ng)=>{if(!window.indexedDB)return ng(new Error('このブラウザはページ内保存に対応していません'));const q=indexedDB.open(DBN,1);q.onupgradeneeded=()=>q.result.createObjectStore(DBS,{keyPath:'id',autoIncrement:true});q.onsuccess=()=>ok(q.result);q.onerror=()=>ng(q.error||new Error('保存先を開けません'))});
+      const dbx=async(mode,fn)=>{const d=await dbo();try{return await new Promise((ok,ng)=>{const t=d.transaction(DBS,mode);let r;try{r=fn(t.objectStore(DBS))}catch(e){return ng(e)}t.oncomplete=()=>ok(r&&r.result);t.onabort=t.onerror=()=>ng(t.error||new Error('保存に失敗しました'))})}finally{d.close()}};
+      const dbAdd=v=>dbx('readwrite',s=>s.add(v)),dbAll=()=>dbx('readonly',s=>s.getAll()),dbGet=id=>dbx('readonly',s=>s.get(id)),dbDel=id=>dbx('readwrite',s=>s.delete(id));
+      const fmtB=n=>n<1024?n+' B':n<1048576?(n/1024).toFixed(1)+' KB':n<1073741824?(n/1048576).toFixed(1)+' MB':(n/1073741824).toFixed(2)+' GB';
+      const lsBytes=()=>{let n=0;try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);n+=(k.length+(localStorage.getItem(k)||'').length)*2}}catch(e){}return n};
+      async function stoRefresh(){
+        let files=[];try{files=await dbAll()}catch(e){}
+        const mp=files.reduce((a,f)=>a+(f.size||0),0),ls=lsBytes();let us=null,qu=null;
+        try{const e=await navigator.storage.estimate();us=e.usage;qu=e.quota}catch(e){}
+        const tot=Math.max(us==null?0:us,mp+ls);
+        $('#stoN').textContent=files.length;$('#stoM').textContent=fmtB(mp);$('#stoS').textContent=fmtB(ls);$('#stoT').textContent=fmtB(tot);$('#stoO').textContent=us==null?'–':fmtB(Math.max(0,tot-mp-ls));
+        $('#stoB').style.width=qu?Math.min(100,tot/qu*100).toFixed(2)+'%':'0';
+        $('#stoQ').textContent=qu?`ブラウザが割り当てる上限（約${fmtB(qu)}）のうち ${(tot/qu*100).toFixed(2)}% を使用中です。`:'このブラウザでは合計の使用容量を取得できないため、MP4と設定の分だけを表示しています。';
+        $('#mfl').innerHTML=files.length?files.sort((a,b)=>b.at-a.at).map(f=>`<li><span class="n">${esc(f.name)}</span><span class="mut">${fmtB(f.size||0)}・${new Date(f.at).toLocaleString('ja-JP')}</span><button type="button" data-a="play" data-id="${f.id}">再生</button><button type="button" class="g" data-a="dl" data-id="${f.id}">ダウンロード</button><button type="button" class="g" data-a="del" data-id="${f.id}">削除</button></li>`).join(''):'<li class="mut">ページ内に保存したMP4はありません（「MP4で保存」の保存先で選べます）</li>';
+      }
+      function mptNote(){const p=($('#mpt input:checked')||{}).value==='page';$('#mptn').textContent=p?'ブラウザ内（IndexedDB）に保存します。保存したMP4は設定画面で再生・ダウンロード・削除でき、容量もそこで確認できます。':'ダウンロードとしてファイルに書き出します。'}
+      $('#mpt').addEventListener('change',mptNote);
+      const mpvd=$('#mpvd'),mpvv=$('#mpvv');let mpvu=null;
+      mpvd.addEventListener('close',()=>{mpvv.pause();mpvv.removeAttribute('src');mpvv.load();if(mpvu){URL.revokeObjectURL(mpvu);mpvu=null}});
+      $('#mpvx').onclick=()=>mpvd.close();
+      $('#mfl').onclick=async e=>{
+        const b=e.target.closest('button[data-a]');if(!b)return;const id=+b.dataset.id,a=b.dataset.a;
+        try{
+          if(a==='del'){if(!confirm('このMP4をページ内から削除します。よろしいですか？'))return;await dbDel(id)}
+          else{const f=await dbGet(id);if(!f)throw new Error('見つかりません');
+            if(a==='dl')saveBlob(f.blob,f.name);
+            else{mpvu=URL.createObjectURL(f.blob);mpvv.src=mpvu;$('#mpvt').textContent=f.name;mpvd.showModal()}}
+        }catch(er){st('操作に失敗しました: '+(er&&er.message||er))}
+        stoRefresh();
+      };
+      async function wipeAll(wp){
+        let blocked=false;const T=async f=>{try{await f()}catch(e){console.warn(e)}};
+        const delDB=n=>new Promise(r=>{try{const q=indexedDB.deleteDatabase(n);q.onsuccess=q.onerror=()=>r();q.onblocked=()=>{blocked=true;r()}}catch(e){r()}});
+        await T(async()=>{const l=indexedDB.databases?await indexedDB.databases():[{name:DBN}];for(const d of l)if(d.name)await delDB(d.name)});
+        await T(async()=>{for(const k of await caches.keys())await caches.delete(k)});
+        await T(async()=>{for(const g of await navigator.serviceWorker.getRegistrations())await g.unregister()});
+        await T(async()=>{const d=await navigator.storage.getDirectory();for await(const[n]of d.entries())await d.removeEntry(n,{recursive:true})});
+        try{sessionStorage.clear()}catch(e){}
+        try{if(wp)localStorage.removeItem(PREF_KEY)}catch(e){}
+        return{blocked};
+      }
+      $('#stoR').onclick=stoRefresh;
+      $('#wipe').onclick=async()=>{
+        if(mpS&&mpS.run)return st('MP4の書き出し中は削除できません');
+        const wp=$('#wpS').checked;
+        if(!confirm(`このページがブラウザに保存したデータ（ページ内に保存したMP4・キャッシュ・一時データ）をすべて削除します。元に戻せません。\n${wp?'表示・再生の設定も初期化されます。':'表示・再生の設定は残ります。'}\n\nよろしいですか？`))return;
+        $('#wipe').disabled=true;const r=await wipeAll(wp);
+        st(r.blocked?'削除しました。他のタブでこのページを開いている場合は閉じてください。再読み込みします…':'削除しました。再読み込みします…');
+        setTimeout(()=>location.reload(),900);
+      };
       $('#goP').onclick=()=>{
        if(!sus.trim()||!lastR){st('譜面再生にはSUSの解析が必要です（画像表示では使えません）');return}
        const w=openLayer();if(!w)return;
@@ -1918,7 +1994,7 @@ input,select{width:100%;padding:8px 10px;border:1px solid var(--ln);border-radiu
         $$('.pg').forEach(e=>e.hidden=e.id!=='p-'+p);
         $$('#nav a').forEach(a=>a.dataset.p===p?a.setAttribute('aria-current','page'):a.removeAttribute('aria-current'));
         $('#ttl').textContent=TITLES[p];document.title=TITLES[p]+' | プロセカ 譜面ビューア';
-        if(p==='settings'){sync();drawPv()}
+        if(p==='settings'){sync();drawPv();stoRefresh()}
         if(p==='songs'){
           const s=songs.find(x=>x.id==id),dd=s&&diffs[s.id]&&diffs[s.id][d]?d:null,stg=s?(dd?'chart':'diff'):'list';
           ['list','diff','chart'].forEach(n=>$('#s-'+n).hidden=n!==stg);
