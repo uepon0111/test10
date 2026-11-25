@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ja"><head><meta charset="utf-8"><title>smoke harness</title>
+<style>body{margin:0}iframe{border:0}#idx{width:10px;height:10px;position:absolute;left:-9999px}#pl{width:1280px;height:900px}</style>
+</head><body>
+<iframe id="idx" src="../index.html"></iframe>
+<iframe id="pl" src="../player.html?demo"></iframe>
+<div id="status">booting</div>
+<script>
+  var idx = document.getElementById('idx');
+  // player.html demo mode calls parent.__parseSUS / __buildPlay
+  window.__parseSUS = function (s) { return idx.contentWindow.__parseSUS(s); };
+  window.__buildPlay = function (S) { return idx.contentWindow.__buildPlay(S); };
+  window.__cget = function () { return Promise.resolve(null); };
+  window.__jget = function () { return Promise.reject(new Error('no net in harness')); };
+  window.__setShared = function () {};
+  window.__closeLayer = function () {};
+  setInterval(function () {
+    try {
+      var pl = document.getElementById('pl').contentWindow;
+      var p = pl.__pl;
+      document.getElementById('status').textContent = p
+        ? 'pl: t=' + p.t.toFixed(2) + ' playing=' + p.playing + ' dur=' + p.dur.toFixed(2) + ' pps=' + p.pps.toFixed(1) + ' view=' + p.view
+        : 'pl: no __pl yet';
+    } catch (e) { document.getElementById('status').textContent = 'err ' + e.message; }
+  }, 500);
+</script>
+</body></html>
