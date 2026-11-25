@@ -1,1 +1,0 @@
-/home/hatch/workspace/your_files/proseka-viewer-v2/wasm/proseka-core/target/wasm32-unknown-unknown/release/proseka_core.wasm: /home/hatch/workspace/your_files/proseka-viewer-v2/wasm/proseka-core/src/lib.rs
